@@ -3,8 +3,9 @@ package sogong.restaurant.domain;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import sogong.restaurant.repository.MenuIngredientRepository;
+import sogong.restaurant.repository.MenuRepository;
 
-import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class MenuIngredientRepositoryTest {
     @Autowired
@@ -24,7 +25,7 @@ class MenuIngredientRepositoryTest {
 
         menuRepository.save(menu);
 
-        Menu insertMenu = menuRepository.findMenuByMenuName("된장찌개");
+        Menu insertMenu = menuRepository.findMenuByMenuName("된장찌개").get();
 
         MenuIngredient menuIngredient = new MenuIngredient();
         menuIngredient.setMenu(insertMenu);
