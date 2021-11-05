@@ -11,6 +11,7 @@ import sogong.restaurant.domain.Menu;
 import sogong.restaurant.domain.MenuIngredient;
 import sogong.restaurant.domain.MenuIngredientRepository;
 import sogong.restaurant.domain.MenuRepository;
+import sogong.restaurant.VO.menuVO;
 
 import java.util.List;
 
@@ -34,25 +35,41 @@ public class MenuController {
     }
 
     @PostMapping("/add")
-    public String addMenu(Menu menu, @RequestBody MenuIngredient[] menuIngredientLists){
+    public String addMenu(@RequestBody menuVO mvo){
 
         /*
-    [
-        {
-            "menuName": "김치찌개",
-            "price":15000,
-            "menuCategory":"식사"
-        },
-        {
+    {
+
+        "menuName": "김치찌개232",
+        "price":15000,
+        "menuCategory":"식사",
+        "menuIngredientLists":[{
             "ingredientName":"김치",
             "count":3
         },
         {
             "ingredientName":"두부",
             "count":7
-        }
-    ]
+        }]
+    }
     */
+        //System.out.println("menu = " + menu.getMenuName());
+
+        Menu menu = new Menu();
+
+        System.out.println("mvo.getMenuName() = " + mvo.getMenuName());
+
+        menu.setMenuName(mvo.getMenuName());
+        menu.setMenuCategory(mvo.getMenuCategory());
+        menu.setPrice(mvo.getPrice());
+        menuRepository.save(menu);
+
+        for(MenuIngredient menuIngredient:mvo.getMenuIngredientLists()){
+            menuIngredient.setMenu(menu);
+            menuIngredientRepository.save(menuIngredient);
+            System.out.println("menuIngredient = " + menuIngredient.getIngredientName());
+        }
+
         return "OK";
     }
 
