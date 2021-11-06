@@ -19,9 +19,8 @@ public class Stock {
     private Long id;
 
     private String stockName;
-    private Long branchId;
     private int quantity;
+    private Long branchId;
 
-    // 가게에 대한 key
-    // private Long BranchId;
+
 }

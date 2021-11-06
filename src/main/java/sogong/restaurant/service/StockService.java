@@ -22,6 +22,7 @@ public class StockService {
     @Transactional
     public Long saveStock(Stock stock) {       return stockRepository.save(stock).getId();}
 
+    @Transactional
     public Long addStock(Stock stock){
         validateDuplicateStock(stock);
         stockRepository.save(stock);

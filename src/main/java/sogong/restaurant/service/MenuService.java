@@ -23,6 +23,7 @@ public class MenuService {
         return menuRepository.save(menu).getId();
     }
 
+    @Transactional
     public Long addMenu(Menu menu) {
         validateDuplicateMenu(menu); //중복 메뉴 검증
         menuRepository.save(menu);

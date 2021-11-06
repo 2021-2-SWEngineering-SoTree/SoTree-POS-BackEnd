@@ -19,10 +19,6 @@ public class MenuIngredientService {
     }
 
     @Transactional
-    public Long saveMenuIngredient(MenuIngredient menuIngredient) {
-        return menuIngredientRepository.save(menuIngredient).getId();
-    }
-
     public Long addMenuIngredient(MenuIngredient menuIngredient) {
         menuIngredientRepository.save(menuIngredient);
         return menuIngredient.getId();

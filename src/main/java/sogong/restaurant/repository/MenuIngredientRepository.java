@@ -10,6 +10,5 @@ import java.util.Optional;
 @Repository
 public interface MenuIngredientRepository extends JpaRepository<MenuIngredient,Long> {
 
-    public List<MenuIngredient> findAll();
-    public Optional<MenuIngredient> findMenuIngredientByIngredientName(String ingredientName);
+     List<MenuIngredient> findAll();
 }
