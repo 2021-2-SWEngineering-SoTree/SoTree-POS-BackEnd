@@ -14,8 +14,7 @@ import sogong.restaurant.repository.MenuRepository;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
@@ -75,7 +74,7 @@ public class MenuServiceIntegrationTest {
         //Then
         Menu findMenu = menuRepository.findById(saveId).get();
 
-        assertEquals(menu.getId(), findMenu.getId());
+        assertThat(menu).isEqualTo(findMenu);
     }
 
     @Test

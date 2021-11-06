@@ -16,6 +16,7 @@ class UserTest {
     public void afterEach(){
         userRepository.deleteAll();
     }
+
     @Test
     void makeTestUser(){
         User user = new User();

@@ -5,7 +5,11 @@ import org.springframework.stereotype.Service;
 import sogong.restaurant.domain.User;
 import sogong.restaurant.repository.UserRepository;
 
+import javax.transaction.Transactional;
+import java.util.NoSuchElementException;
+
 @Service
+@Transactional
 public class LoginService {
     private UserRepository userRepository;
 
@@ -16,8 +20,8 @@ public class LoginService {
 
     // null이면 실패
     public User login(String id, String pw){
-        User user = userRepository.findByLoginId(id);
-        if(user==null) return null;
+        User user = userRepository.findByLoginId(id)
+                .orElseThrow(() -> new NoSuchElementException());
 
         if(!user.getPassword().equals(pw)) return null;
         return user;
