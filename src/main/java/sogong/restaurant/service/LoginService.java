@@ -3,7 +3,7 @@ package sogong.restaurant.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sogong.restaurant.domain.User;
-import sogong.restaurant.domain.UserRepository;
+import sogong.restaurant.repository.UserRepository;
 
 @Service
 public class LoginService {

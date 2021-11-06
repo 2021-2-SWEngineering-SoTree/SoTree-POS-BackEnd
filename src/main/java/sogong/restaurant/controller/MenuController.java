@@ -2,37 +2,28 @@ package sogong.restaurant.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sogong.restaurant.domain.Menu;
 import sogong.restaurant.domain.MenuIngredient;
-import sogong.restaurant.domain.MenuIngredientRepository;
-import sogong.restaurant.domain.MenuRepository;
+import sogong.restaurant.repository.MenuIngredientRepository;
 import sogong.restaurant.VO.menuVO;
-
-import java.util.List;
+import sogong.restaurant.service.MenuIngredientService;
+import sogong.restaurant.service.MenuService;
 
 @RestController
 @Slf4j
 @RequestMapping("/menu")
 public class MenuController {
 
-    private MenuRepository menuRepository;
-    private MenuIngredientRepository menuIngredientRepository;
+    private final MenuService menuService;
+    private MenuIngredientService menuIngredientService;
 
     @Autowired
-    public MenuController(MenuRepository menuRepository, MenuIngredientRepository menuIngredientRepository){
-        this.menuIngredientRepository = menuIngredientRepository;
-        this.menuRepository = menuRepository;
+    public MenuController(MenuService menuService, MenuIngredientService menuIngredientService){
+        this.menuService = menuService;
+        this.menuIngredientService = menuIngredientService;
     }
 
-    @PostMapping("/getAll")
-    public List<Menu> getAllMenu(){
-        return menuRepository.findAll();
-    }
 
     @PostMapping("/add")
     public String addMenu(@RequestBody menuVO mvo){
@@ -55,6 +46,7 @@ public class MenuController {
     */
         //System.out.println("menu = " + menu.getMenuName());
 
+        // Menu Refactoring
         Menu menu = new Menu();
 
         System.out.println("mvo.getMenuName() = " + mvo.getMenuName());
@@ -62,11 +54,12 @@ public class MenuController {
         menu.setMenuName(mvo.getMenuName());
         menu.setMenuCategory(mvo.getMenuCategory());
         menu.setPrice(mvo.getPrice());
-        menuRepository.save(menu);
+        menuService.addMenu(menu);
+
 
         for(MenuIngredient menuIngredient:mvo.getMenuIngredientLists()){
             menuIngredient.setMenu(menu);
-            menuIngredientRepository.save(menuIngredient);
+            menuIngredientService.addMenuIngredient(menuIngredient);
             System.out.println("menuIngredient = " + menuIngredient.getIngredientName());
         }
 
@@ -74,5 +67,27 @@ public class MenuController {
     }
 
 
+    @PutMapping("/{id}")
+    public String updateMenu(@RequestBody menuVO mvo){
+        Menu menu = menuService.getOneMenu(mvo.getMenuName()).get();
+
+        menu.setMenuName(mvo.getMenuName());
+        menu.setMenuCategory(mvo.getMenuCategory());
+        menu.setPrice(mvo.getPrice());
+
+        menuService.saveMenu(menu);
+        return "redirect:/";
+    }
+
+    @DeleteMapping("/{id}")
+    public String delete(@RequestBody menuVO mvo) {
+        // MenuIngredient 먼저 삭제
+        for(MenuIngredient menuIngredient:mvo.getMenuIngredientLists()){
+            menuIngredientService.deleteMenuIngredient(menuIngredient.getId());
+        }
+        Menu menu = menuService.getOneMenu(mvo.getMenuName()).get();
+        menuService.deleteMenu(menu.getId());
+        return "redirect:/";
+    }
 
 }

@@ -1,15 +1,21 @@
 package sogong.restaurant.domain;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import sogong.restaurant.repository.MenuRepository;
 
-import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class MenuRepositoryTest {
 
     @Autowired
     private MenuRepository menuRepository;
+
+    @AfterEach
+    public void afterEach(){
+        menuRepository.deleteAll();
+    }
 
     @Test
     void menuSaveTest(){

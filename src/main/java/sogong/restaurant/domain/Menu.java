@@ -22,4 +22,6 @@ public class Menu {
     private int price;
     private String menuCategory;
 
+    // 가게에 대한 key
+    // private Long BranchId;
 }
