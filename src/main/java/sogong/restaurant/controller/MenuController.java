@@ -25,7 +25,7 @@ public class MenuController {
     }
 
 
-    @PostMapping("/menu/add")
+    @PostMapping("/add")
     public String addMenu(@RequestBody menuVO mvo){
 
         /*
@@ -67,7 +67,7 @@ public class MenuController {
     }
 
 
-    @PutMapping("/menu/{id}")
+    @PutMapping("/{id}")
     public String updateMenu(@RequestBody menuVO mvo){
         Menu menu = menuService.getOneMenu(mvo.getMenuName()).get();
 
@@ -79,8 +79,9 @@ public class MenuController {
         return "redirect:/";
     }
 
-    @DeleteMapping("/menu/{id}")
+    @DeleteMapping("/{id}")
     public String delete(@RequestBody menuVO mvo) {
+        // MenuIngredient 먼저 삭제
         for(MenuIngredient menuIngredient:mvo.getMenuIngredientLists()){
             menuIngredientService.deleteMenuIngredient(menuIngredient.getId());
         }

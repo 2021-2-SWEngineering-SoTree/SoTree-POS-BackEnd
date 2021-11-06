@@ -1,5 +1,6 @@
 package sogong.restaurant.domain;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,6 +14,11 @@ class MenuIngredientRepositoryTest {
     @Autowired
     private MenuIngredientRepository menuIngredientRepository;
 
+    @AfterEach
+    public void afterEach(){
+        menuIngredientRepository.deleteAll();
+        menuRepository.deleteAll();
+    }
 
     @Test
     void menuIngredientCreateTest(){

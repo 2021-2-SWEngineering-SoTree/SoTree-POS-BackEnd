@@ -8,6 +8,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+@Transactional
 public class MenuIngredientService {
 
     private MenuIngredientRepository menuIngredientRepository;
@@ -23,17 +24,10 @@ public class MenuIngredientService {
     }
 
     public Long addMenuIngredient(MenuIngredient menuIngredient) {
-        validateDuplicateMenu(menuIngredient); //중복 재료 검증
         menuIngredientRepository.save(menuIngredient);
         return menuIngredient.getId();
     }
 
-    private void validateDuplicateMenu(MenuIngredient menuIngredient) {
-        menuIngredientRepository.findMenuIngredientByIngredientName(menuIngredient.getIngredientName())
-                .ifPresent(m -> {
-                    throw new IllegalStateException("이미 존재하는 메뉴입니다.");
-                });
-    }
 
 //    public List<MenuIngredient> getAllMenuIngredient(){
 //        return menuIngredientRepository.findAll();
