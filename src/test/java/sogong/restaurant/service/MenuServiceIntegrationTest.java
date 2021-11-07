@@ -180,4 +180,22 @@ public class MenuServiceIntegrationTest {
         menuIngredientRepository.save(menuIngredient);
 
     }
+
+    @Test
+    void getAllMenuTest(){
+
+        Menu menu = new Menu();
+
+        menu.setMenuName("된장찌개");
+        menu.setPrice(12000);
+        menu.setMenuCategory("식사");
+
+        menuService.saveMenu(menu);
+
+        List<Menu> menuList = menuService.getAllMenu();
+
+        assertThat(1).isEqualTo(menuList.size());
+
+    }
+
 }
