@@ -1,26 +1,32 @@
 package sogong.restaurant.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import sogong.restaurant.domain.User;
+import sogong.restaurant.repository.UserRepository;
 import sogong.restaurant.service.LoginService;
+import sogong.restaurant.util.JwtTokenProvider;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestController
 @Slf4j
+@RequiredArgsConstructor
 public class LoginController {
 
     private LoginService loginService;
-
-    @Autowired
-    public LoginController(LoginService loginService){
-        this.loginService = loginService;
-    }
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final UserRepository userRepository;
 
     @RequestMapping("/login")
     public String login(@RequestBody HashMap<String, String>map){
@@ -37,19 +43,44 @@ public class LoginController {
         String pw = map.get("pw");
 
         //토큰을 리턴한다??
-        String ret = "";
-        User user = loginService.login(id, pw);
-        //System.out.println("user : "+user.getUserName());
 
-        if(user==null) return "아이디 또는 비밀번호가 일치하지 않습니다.";
 
-        return "OK";
+        User user = userRepository.findByLoginId(id)
+                .orElseThrow(() -> new NoSuchElementException());
+
+        if(!passwordEncoder.matches(pw,user.getPassword())) {
+            return null;
+        }
+            else {
+            String token = jwtTokenProvider.createToken(user.getLoginId(), user.getRoles());
+            //System.out.println("token = " + token);
+            return token;
+
+        }
     }
 
     @RequestMapping("/addUser")
-    public User addUser(@RequestBody User user){
-        return loginService.addUser(user);
+    public Long addUser(@RequestBody Map<String, String> user){
+
+
+        User user1 = User.builder()
+                .loginId(user.get("loginId"))
+                .birthDay(user.get("birthDay")).userName(user.get("userName"))
+                .email(user.get("email")).phoneNumber(user.get("phoneNumber"))
+                .password(passwordEncoder.encode(user.get("password")))
+                .roles(Collections.singletonList("ROLE_USER")).build();
+
+        System.out.println("user1.getUsername() = " + user1.getUsername());
+
+
+        return userRepository.save(user1).getId();
     }
 
+    @RequestMapping("/userIdPresent")
+    public boolean validName(@RequestBody String loginId){
+        if(userRepository.findByLoginId(loginId).isPresent()) return false;
+        else return true;
+
+    }
 
 }

@@ -10,6 +10,9 @@ import sogong.restaurant.VO.menuVO;
 import sogong.restaurant.service.MenuIngredientService;
 import sogong.restaurant.service.MenuService;
 
+import java.util.List;
+import java.util.Optional;
+
 @RestController
 @Slf4j
 @RequestMapping("/menu")
@@ -88,6 +91,26 @@ public class MenuController {
         Menu menu = menuService.getOneMenu(mvo.getMenuName()).get();
         menuService.deleteMenu(menu.getId());
         return "redirect:/";
+    }
+
+    @PostMapping("/getAll")
+    public List<Menu> getAllMenu(){
+        return menuService.getAllMenu();
+    }
+
+    @PostMapping("/isPresent")
+    public boolean validName(@RequestBody String menuName){
+
+        System.out.println("menuName = " + menuName);
+
+        Optional<Menu> menu = menuService.getOneMenu(menuName);
+
+        //이름이 이미 존재하면 false 값을 리턴한다.
+        if(menu.isEmpty()) return true;
+        else {
+            System.out.println("menu = " + menu.get().getMenuName());
+            return false;
+        }
     }
 
 }
