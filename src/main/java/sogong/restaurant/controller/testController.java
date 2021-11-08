@@ -20,7 +20,7 @@ public class testController {
     @PostMapping("/test")
     public String testAPI(HttpServletRequest request){
         log.info("IN THE TEST API");
-        return "hello sogong" + ResponseEntity.ok(request.getRequestURI());
+        return "hello sogong "+ ResponseEntity.ok(request.getRequestURI());
     }
 
 }
