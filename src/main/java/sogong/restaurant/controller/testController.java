@@ -17,7 +17,7 @@ public class testController {
     public testController() {
     }
 
-    @PostMapping("/test")
+    @PostMapping("/connectionTest")
     public String testAPI(HttpServletRequest request){
         log.info("IN THE TEST API");
         return "hello sogong "+ ResponseEntity.ok(request.getRequestURI());
