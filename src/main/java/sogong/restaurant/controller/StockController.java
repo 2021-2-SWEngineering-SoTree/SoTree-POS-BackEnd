@@ -4,11 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import sogong.restaurant.domain.Menu;
 import sogong.restaurant.domain.Stock;
 import sogong.restaurant.domain.StockDetail;
 import sogong.restaurant.service.StockDetailService;
 import sogong.restaurant.service.StockService;
 import sogong.restaurant.VO.StockVO;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -42,6 +45,11 @@ public class StockController {
         }
 
         return "OK";
+    }
+
+    @PostMapping("/getAll")
+    public List<Stock> getAllStock(){
+        return stockService.getAllStock();
     }
 
 
