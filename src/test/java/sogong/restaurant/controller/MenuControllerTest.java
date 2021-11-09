@@ -63,7 +63,7 @@ class MenuControllerTest {
         menu.setManager(managerRepository.findByStoreName("테스트가게").get());
 
         menuRepository.save(menu);
-
+        //asdfa
 
 
     }

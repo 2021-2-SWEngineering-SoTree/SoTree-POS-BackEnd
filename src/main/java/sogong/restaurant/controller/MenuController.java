@@ -12,9 +12,7 @@ import sogong.restaurant.VO.menuVO;
 import sogong.restaurant.service.MenuIngredientService;
 import sogong.restaurant.service.MenuService;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @Slf4j
@@ -142,10 +140,37 @@ public class MenuController {
     }
 
     @PostMapping("/getByName")
-    public Menu getByName(@RequestBody String menuName){
+    public List<Map<String,String>> getByName(@RequestBody String menuName){
 
         Optional<Menu>menu = menuService.getOneMenu(menuName);
-        return menu.get();
+
+        System.out.println("menu.get().getMenuName() = " + menu.get().getMenuName());
+
+
+
+        List<MenuIngredient> menuIngredients = menuIngredientService.getMenuIngredientByMenu(menu.get());
+
+        List<Map<String,String>> r = new ArrayList<>();
+
+        Map<String,String> params = new HashMap<>();
+        params.put("menuName",menu.get().getMenuName());
+        params.put("price",String.valueOf(menu.get().getPrice()));
+        params.put("menuCategory",menu.get().getMenuCategory());
+
+        r.add(params);
+
+        for(int i=0;i<menuIngredients.size();i++){
+            Map<String,String> param=new HashMap<>();
+            param.put("id",String.valueOf(menuIngredients.get(i).getId()));
+            param.put("ingredientName",menuIngredients.get(i).getIngredientName());
+            param.put("count",String.valueOf(menuIngredients.get(i).getCount()));
+
+            r.add(param);
+        }
+
+        //menuVO ret = new menuVO(menu.get().getMenuName(),menu.get().getPrice(),menu.get().getMenuCategory(),menuIngredients,menu.get().getManager().getId());
+
+        return r;
     }
 
 }

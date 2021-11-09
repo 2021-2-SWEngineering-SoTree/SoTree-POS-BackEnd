@@ -1,6 +1,7 @@
 package sogong.restaurant.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import sogong.restaurant.domain.Menu;
 import sogong.restaurant.domain.MenuIngredient;
 import sogong.restaurant.repository.MenuIngredientRepository;
 
@@ -35,5 +36,7 @@ public class MenuIngredientService {
     public void deleteMenuIngredient(Long id) {
         menuIngredientRepository.deleteById(id);
     }
+
+    public List<MenuIngredient> getMenuIngredientByMenu(Menu menu){return menuIngredientRepository.findMenuIngredientsByMenu(menu);}
 
 }
