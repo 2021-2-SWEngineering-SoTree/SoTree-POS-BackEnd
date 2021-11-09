@@ -71,4 +71,9 @@ public class StockController {
         return "redirect:/";
     }
 
+    @PostMapping("/getAll")
+    public List<Stock> getAllStock(){
+        return stockService.getAllStock();
+    }
+
 }

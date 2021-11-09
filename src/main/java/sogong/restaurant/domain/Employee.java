@@ -24,4 +24,8 @@ public class Employee {
     @JoinColumn(name="UserId")
     private User user;
 
+    @OneToOne
+    @JoinColumn(name="BranchId")
+    private Manager manager;
+
 }

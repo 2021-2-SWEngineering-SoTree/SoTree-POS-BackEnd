@@ -141,4 +141,11 @@ public class MenuController {
         }
     }
 
+    @PostMapping("/getByName")
+    public Menu getByName(@RequestBody String menuName){
+
+        Optional<Menu>menu = menuService.getOneMenu(menuName);
+        return menu.get();
+    }
+
 }
