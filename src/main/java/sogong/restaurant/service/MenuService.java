@@ -1,6 +1,7 @@
 package sogong.restaurant.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.Menu;
 import sogong.restaurant.repository.MenuRepository;
 
@@ -37,8 +38,8 @@ public class MenuService {
                 });
     }
 
-    public List<Menu> getAllMenu(){
-        return menuRepository.findAll();
+    public List<Menu> getAllMenu(Manager manager){
+        return menuRepository.findAllByManager(manager);
     }
 
     public Optional<Menu> getOneMenu(String menuName) { return menuRepository.findMenuByMenuName(menuName); }

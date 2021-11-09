@@ -10,13 +10,15 @@ public class menuVO {
     private String menuName;
     private int price;
     private String menuCategory;
+    private Long managerId;
 
     @Builder
-    public menuVO(String menuName, int price, String menuCategory, List<MenuIngredient> menuIngredientLists) {
+    public menuVO(String menuName, int price, String menuCategory, List<MenuIngredient> menuIngredientLists, Long managerId) {
         this.menuName = menuName;
         this.price = price;
         this.menuCategory = menuCategory;
         this.menuIngredientLists = menuIngredientLists;
+        this.managerId = managerId;
     }
 
     List<MenuIngredient> menuIngredientLists;
@@ -32,6 +34,8 @@ public class menuVO {
     public int getPrice(){
         return price;
     }
+
+    public Long getManagerId(){return managerId;}
 
     public List<MenuIngredient> getMenuIngredientLists() {
         return menuIngredientLists;

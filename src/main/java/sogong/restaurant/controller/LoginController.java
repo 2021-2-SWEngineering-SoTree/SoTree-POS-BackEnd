@@ -4,11 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import sogong.restaurant.domain.Employee;
+import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.User;
+import sogong.restaurant.repository.EmployeeRepository;
+import sogong.restaurant.repository.ManagerRepository;
 import sogong.restaurant.repository.UserRepository;
 import sogong.restaurant.service.LoginService;
 import sogong.restaurant.util.JwtTokenProvider;
@@ -27,6 +28,8 @@ public class LoginController {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final ManagerRepository managerRepository;
+    private final EmployeeRepository employeeRepository;
 
     @RequestMapping("/login")
     public String login(@RequestBody HashMap<String, String>map){
@@ -42,9 +45,6 @@ public class LoginController {
         String id = map.get("id");
         String pw = map.get("pw");
 
-        //토큰을 리턴한다??
-
-
         User user = userRepository.findByLoginId(id)
                 .orElseThrow(() -> new NoSuchElementException());
 
@@ -59,9 +59,52 @@ public class LoginController {
         }
     }
 
+    @PostMapping("/addManager")
+    public Long addManager(@RequestBody Map<String, String> manager){
+
+        /*
+        {
+    "loginId":"admin",
+    "birthDay":"2017-12-21 11:30",
+    "userName":"박서진",
+    "email":"mina881@naver.com",
+    "phoneNumber":"010-1234-1234",
+    "password":"1234",
+    "storeName":"강식당",
+    "branchPhoneNumber":"02-123-1234"
+}
+         */
+
+        User user1 = User.builder()
+                .loginId(manager.get("loginId"))
+                .birthDay(manager.get("birthDay")).userName(manager.get("userName"))
+                .email(manager.get("email")).phoneNumber(manager.get("phoneNumber"))
+                .password(passwordEncoder.encode(manager.get("password")))
+                .roles(Collections.singletonList("ROLE_ADMIN")).build();
+
+        userRepository.save(user1);
+
+        Manager manager1 = new Manager();
+        manager1.setUser(user1);
+        manager1.setStoreName(manager.get("storeName"));
+        manager1.setBranchPhoneNumber(manager.get("branchPhoneNumber"));
+
+        return managerRepository.save(manager1).getId();
+    }
+
     @RequestMapping("/addUser")
     public Long addUser(@RequestBody Map<String, String> user){
 
+        /*
+        {
+    "loginId":"werad15",
+    "birthDay":"2017-12-21 11:30",
+    "userName":"박서진",
+    "email":"mina881@naver.com",
+    "phoneNumber":"010-1234-1234",
+    "password":"1234"
+}
+         */
 
         User user1 = User.builder()
                 .loginId(user.get("loginId"))
@@ -72,8 +115,15 @@ public class LoginController {
 
         System.out.println("user1.getUsername() = " + user1.getUsername());
 
+        Long retId = userRepository.save(user1).getId();
 
-        return userRepository.save(user1).getId();
+        Employee employee = new Employee();
+        employee.setUser(user1);
+        employee.setCommuteState(false);
+
+        employeeRepository.save(employee);
+
+        return retId;
     }
 
     @RequestMapping("/userIdPresent")

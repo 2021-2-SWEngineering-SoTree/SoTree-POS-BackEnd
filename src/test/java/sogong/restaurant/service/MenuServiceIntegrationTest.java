@@ -1,15 +1,20 @@
 package sogong.restaurant.service;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import sogong.restaurant.VO.menuVO;
+import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.Menu;
 import sogong.restaurant.domain.MenuIngredient;
+import sogong.restaurant.domain.User;
+import sogong.restaurant.repository.ManagerRepository;
 import sogong.restaurant.repository.MenuIngredientRepository;
 import sogong.restaurant.repository.MenuRepository;
+import sogong.restaurant.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +31,32 @@ public class MenuServiceIntegrationTest {
     @Autowired private MenuIngredientRepository menuIngredientRepository;
     @Autowired private MenuIngredientService menuIngredientService;
 
+    @Autowired private UserRepository userRepository;
+    @Autowired private ManagerRepository managerRepository;
+
+    @BeforeEach
+    public void makeManager(){
+
+        User user = new User();
+        user.setUserName("박서진");
+        user.setEmail("mina881@naver.com");
+        user.setBirthDay("1998-01-03 13:30");
+        user.setPassword("1234");
+        user.setLoginId("testAdmin");
+        user.setPhoneNumber("010-9283-9712");
+        userRepository.save(user);
+        Manager manager = new Manager();
+        manager.setUser(user);
+        manager.setStoreName("테스트가게");
+        manager.setBranchPhoneNumber("02-123-1234");
+        managerRepository.save(manager);
+    }
+
     @AfterEach
     public void afterEach(){
         menuIngredientRepository.deleteAll();
         menuRepository.deleteAll();
+        managerRepository.deleteAll(); userRepository.deleteAll();
     }
 
     @Test
@@ -84,11 +111,13 @@ public class MenuServiceIntegrationTest {
         menu.setMenuName("테스트메뉴");
         menu.setPrice(10000);
         menu.setMenuCategory("테스트 카테고리");
+        menu.setManager(managerRepository.findByStoreName("테스트가게").get());
 
         Menu menu2 = new Menu();
         menu2.setMenuName("테스트메뉴");
         menu2.setPrice(10000);
         menu2.setMenuCategory("테스트 카테고리");
+        menu.setManager(managerRepository.findByStoreName("테스트가게").get());
 
         //When
         menuService.addMenu(menu);
@@ -167,6 +196,7 @@ public class MenuServiceIntegrationTest {
         menu.setMenuName("된장찌개");
         menu.setPrice(12000);
         menu.setMenuCategory("식사");
+        menu.setManager(managerRepository.findByStoreName("테스트가게").get());
 
         menuRepository.save(menu);
 
@@ -189,10 +219,11 @@ public class MenuServiceIntegrationTest {
         menu.setMenuName("된장찌개");
         menu.setPrice(12000);
         menu.setMenuCategory("식사");
+        menu.setManager(managerRepository.findByStoreName("테스트가게").get());
 
         menuService.saveMenu(menu);
 
-        List<Menu> menuList = menuService.getAllMenu();
+        List<Menu> menuList = menuService.getAllMenu(managerRepository.findByStoreName("테스트가게").get());
 
         assertThat(1).isEqualTo(menuList.size());
 
