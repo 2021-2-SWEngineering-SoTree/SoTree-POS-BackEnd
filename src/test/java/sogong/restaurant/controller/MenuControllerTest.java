@@ -54,6 +54,21 @@ class MenuControllerTest {
 
 
     @Test
+    void testgetMenu(){
+        Menu menu = new Menu();
+
+        menu.setMenuName("테스트메뉴");
+        menu.setPrice(10000);
+        menu.setMenuCategory("테스트 카테고리");
+        menu.setManager(managerRepository.findByStoreName("테스트가게").get());
+
+        menuRepository.save(menu);
+
+
+
+    }
+
+    @Test
     void testisPresent(){
 
 

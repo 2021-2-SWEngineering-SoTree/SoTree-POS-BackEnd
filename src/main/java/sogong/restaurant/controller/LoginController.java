@@ -14,10 +14,7 @@ import sogong.restaurant.repository.UserRepository;
 import sogong.restaurant.service.LoginService;
 import sogong.restaurant.util.JwtTokenProvider;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @RestController
 @Slf4j
@@ -102,7 +99,8 @@ public class LoginController {
     "userName":"박서진",
     "email":"mina881@naver.com",
     "phoneNumber":"010-1234-1234",
-    "password":"1234"
+    "password":"1234",
+    "managerId":"1"
 }
          */
 
@@ -117,7 +115,11 @@ public class LoginController {
 
         Long retId = userRepository.save(user1).getId();
 
+        Long managerId = Long.parseLong(user.get("managerId"));
+        Optional<Manager> manager = managerRepository.findById(managerId);
+
         Employee employee = new Employee();
+        employee.setManager(manager.get());
         employee.setUser(user1);
         employee.setCommuteState(false);
 
