@@ -12,18 +12,17 @@ import javax.persistence.*;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Menu {
+public class Manager {
     @Id
-    @Column(name = "MenuId")
+    @Column(name = "BranchId")
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
-    private String menuName;
-    private int price;
-    private String menuCategory;
+    private String branchPhoneNumber;
+    private String storeName;
 
-    // 가게에 대한 key
-    @ManyToOne
-    @JoinColumn(name="BranchId")
-    private Manager manager;
+    @OneToOne
+    @JoinColumn(name="UserId")
+    private User user;
+
 }

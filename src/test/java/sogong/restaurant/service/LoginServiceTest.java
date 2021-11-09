@@ -5,7 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
+import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.User;
+import sogong.restaurant.repository.EmployeeRepository;
+import sogong.restaurant.repository.ManagerRepository;
 import sogong.restaurant.repository.UserRepository;
 
 import java.util.Collections;
@@ -18,9 +21,13 @@ class LoginServiceTest {
 
     @Autowired private LoginService loginService;
     @Autowired private UserRepository userRepository;
+    @Autowired private EmployeeRepository employeeRepository;
+    @Autowired private ManagerRepository managerRepository;
 
     @AfterEach
     public void afterEach(){
+        managerRepository.deleteAll();
+        employeeRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -78,6 +85,11 @@ class LoginServiceTest {
         user.setRoles(Collections.singletonList("ROLE_USER"));
 
         userRepository.save(user);
+
+        Manager manager = new Manager();
+        manager.setBranchPhoneNumber("02-123-1234");
+        manager.setStoreName("테스트가게");
+        managerRepository.save(manager);
 
         UserDetails users = loginService.loadUserByUsername("test");
 
