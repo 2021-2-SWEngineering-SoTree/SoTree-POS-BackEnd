@@ -157,7 +157,7 @@ public class MenuController {
         params.put("price",String.valueOf(menu.get().getPrice()));
         params.put("menuCategory",menu.get().getMenuCategory());
 
-        r.add(params);
+       //r.add(params); id, ingredientName, count만 사용. 
 
         for(int i=0;i<menuIngredients.size();i++){
             Map<String,String> param=new HashMap<>();
