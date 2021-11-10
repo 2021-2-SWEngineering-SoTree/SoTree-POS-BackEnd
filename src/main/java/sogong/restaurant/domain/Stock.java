@@ -20,7 +20,11 @@ public class Stock {
 
     private String stockName;
     private int quantity;
-    private Long branchId;
+
+    // 가게에 대한 key
+    @ManyToOne
+    @JoinColumn(name="BranchId")
+    private Manager manager;
 
 
 }

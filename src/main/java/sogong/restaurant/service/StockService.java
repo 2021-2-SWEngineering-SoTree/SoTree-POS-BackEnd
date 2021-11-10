@@ -1,6 +1,7 @@
 package sogong.restaurant.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.Menu;
 import sogong.restaurant.domain.Stock;
 import sogong.restaurant.repository.StockRepository;
@@ -37,9 +38,8 @@ public class StockService {
         });
     }
 
-    public List<Stock> getAllStock(){
-        return stockRepository.findAll();
-    }
+    public List<Stock> getAllStock(Manager manager){
+        return stockRepository.findAllByManager(manager); }
 
     public Optional<Stock> getOneStock(String stockName) {
         return stockRepository.findStockByStockName(stockName);

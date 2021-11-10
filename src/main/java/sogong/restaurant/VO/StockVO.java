@@ -7,15 +7,15 @@ import java.util.List;
 
 public class StockVO {
     private String stockName;
-    private Long branchId;
     private int quantity;
+    private Long managerId;
 
     @Builder
-    public StockVO(String stockName, Long branchId, int quantity, List<StockDetail> stockDetailList) {
+    public StockVO(String stockName, int quantity, List<StockDetail> stockDetailList, Long managerId) {
         this.stockName = stockName;
-        this.branchId = branchId;
         this.quantity = quantity;
         this.stockDetailList = stockDetailList;
+        this.managerId = managerId;
     }
 
     List<StockDetail> stockDetailList;
@@ -24,13 +24,11 @@ public class StockVO {
         return stockName;
     }
 
-    public Long getBranchId() {
-        return branchId;
-    }
-
     public int getQuantity() {
         return quantity;
     }
+
+    public Long getManagerId(){return managerId;}
 
     public List<StockDetail> getStockDetailList() {
         return stockDetailList;
