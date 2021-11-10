@@ -11,7 +11,7 @@
 
 ## Get Started 
 
-###백엔드 폴더 내의 build.gradle에 가서 ![image](https://user-images.githubusercontent.com/67853497/141049196-a0d1d325-55ef-4c75-ad40-1fc784a7be07.png) 버튼 누르면 관련 dependency들이 자동으로 다운됩니다.
+### 백엔드 폴더 내의 build.gradle에 가서 ![image](https://user-images.githubusercontent.com/67853497/141049196-a0d1d325-55ef-4c75-ad40-1fc784a7be07.png) 버튼 누르면 관련 dependency들이 자동으로 다운됩니다.
 
 
 ### Requirements 
