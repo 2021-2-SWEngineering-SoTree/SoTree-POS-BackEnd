@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface MenuRepository extends JpaRepository<Menu,Long> {
     public Optional<Menu> findMenuByMenuName(String MenuName);
     public List<Menu> findAllByManager(Manager manager);
+    public List<Menu> findAllById(Long id);
 }

@@ -44,10 +44,12 @@ public class JwtTokenProvider {
         claims.put("roles", roles); // 정보는 key / value 쌍으로 저장된다.
         System.out.println("userPk = " + userPk);
         User user= (User)userDetailsService.loadUserByUsername(userPk);
-        claims.put("userName",user.getUsername());
 
         if(roles.stream().anyMatch(a-> a.equals("ROLE_ADMIN"))){
             Manager manager = managerRepository.findByUser(user).get();
+            claims.put("userName",user.getUsername());
+            claims.put("storeName",manager.getStoreName());
+            claims.put("storePhoneNumber",manager.getBranchPhoneNumber());
         }
 
         //claims.put("storeName",user.get)

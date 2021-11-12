@@ -5,12 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import sogong.restaurant.domain.Employee;
-import sogong.restaurant.domain.Manager;
-import sogong.restaurant.domain.User;
-import sogong.restaurant.repository.EmployeeRepository;
-import sogong.restaurant.repository.ManagerRepository;
-import sogong.restaurant.repository.UserRepository;
+import sogong.restaurant.domain.*;
+import sogong.restaurant.repository.*;
 import sogong.restaurant.service.LoginService;
 import sogong.restaurant.util.JwtTokenProvider;
 
@@ -27,6 +23,8 @@ public class LoginController {
     private final UserRepository userRepository;
     private final ManagerRepository managerRepository;
     private final EmployeeRepository employeeRepository;
+    private final StockRepository stockRepository;
+    private final MenuRepository menuRepository;
 
     @RequestMapping("/login")
     public String login(@RequestBody HashMap<String, String>map){
@@ -145,6 +143,19 @@ public class LoginController {
         }
 
         return ret;
+    }
+
+    @RequestMapping("/requireCreate")
+    public boolean requireCreate(@RequestBody Long managerId){
+        Optional<Manager> manager = managerRepository.findById(managerId);
+        if(!manager.isPresent()) throw new NoSuchElementException();
+
+        List<Menu> menus = menuRepository.findAllById(managerId);
+        List<Stock> stocks = stockRepository.findAllById(managerId);
+
+        if(menus.isEmpty() || stocks.isEmpty()) return true;
+        else return false;
+
     }
 
 }
