@@ -10,7 +10,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
+import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.User;
+import sogong.restaurant.repository.ManagerRepository;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +30,7 @@ public class JwtTokenProvider {
     private long tokenValidTime = 30 * 60 * 1000L;
 
     private final UserDetailsService userDetailsService;
+    private final ManagerRepository managerRepository;
 
     // 객체 초기화, secretKey를 Base64로 인코딩한다.
     @PostConstruct
@@ -42,6 +45,11 @@ public class JwtTokenProvider {
         System.out.println("userPk = " + userPk);
         User user= (User)userDetailsService.loadUserByUsername(userPk);
         claims.put("userName",user.getUsername());
+
+        if(roles.stream().anyMatch(a-> a.equals("ROLE_ADMIN"))){
+            Manager manager = managerRepository.findByUser(user).get();
+        }
+
         //claims.put("storeName",user.get)
         //claims.put("loginId",loginId);
         Date now = new Date();

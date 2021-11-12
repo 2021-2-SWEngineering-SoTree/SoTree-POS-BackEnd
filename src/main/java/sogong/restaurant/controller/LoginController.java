@@ -145,4 +145,16 @@ public class LoginController {
 
     }
 
+    @RequestMapping("/getAllPersonName")
+    public List<String> findAllPersonName(){
+        //요청 파라미터 없음
+        List<User> all = userRepository.findAll();
+        List<String> ret=new ArrayList<>();
+        for(int i=0;i<all.size();i++){
+            ret.add(all.get(i).getPersonName());
+        }
+
+        return ret;
+    }
+
 }
