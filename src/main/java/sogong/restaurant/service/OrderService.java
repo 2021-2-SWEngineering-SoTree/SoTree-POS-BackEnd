@@ -24,7 +24,7 @@ public class OrderService {
     ManagerRepository managerRepository;
 
     @Autowired
-    public OrderService(OrderDetailRepository orderDetailRepository, TableOrderRepository tableOrderRepository, TakeoutOrderRepository takeoutOrderRepository, ManagerRepository managerRepository) {
+    public OrderService(sogong.restaurant.repository.OrderDetailRepository orderDetailRepository, sogong.restaurant.repository.TableOrderRepository tableOrderRepository, sogong.restaurant.repository.TakeoutOrderRepository takeoutOrderRepository, ManagerRepository managerRepository) {
         this.orderDetailRepository = orderDetailRepository;
         this.tableOrderRepository = tableOrderRepository;
         this.takeoutOrderRepository = takeoutOrderRepository;

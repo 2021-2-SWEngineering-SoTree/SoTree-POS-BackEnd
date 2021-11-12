@@ -37,6 +37,11 @@ public class LoginService implements UserDetailsService {
         else return true;
     }
 
+    /*
+    public UserDetails findByUserId(Long userId){
+        Optional<User> user = userRepository.findById(userId);
+    }
+    */
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
