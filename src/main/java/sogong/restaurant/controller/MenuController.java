@@ -90,7 +90,15 @@ public class MenuController {
 
     @PutMapping("/{id}")
     public String updateMenu(@RequestBody menuVO mvo){
-        Menu menu = menuService.getOneMenu(mvo.getMenuName()).get();
+        Optional<Manager> manager = managerRepository.findById(mvo.getManagerId());
+        if(!manager.isPresent()) return "null manager";
+
+        Optional<Menu> menuo = menuService.getOneMenu(mvo.getMenuName(),manager.get());
+
+        if(menuo.isEmpty()) return "null menu";
+
+
+        Menu menu = menuo.get();
 
         menu.setMenuName(mvo.getMenuName());
         menu.setMenuCategory(mvo.getMenuCategory());
@@ -106,7 +114,17 @@ public class MenuController {
         for(MenuIngredient menuIngredient:mvo.getMenuIngredientLists()){
             menuIngredientService.deleteMenuIngredient(menuIngredient.getId());
         }
-        Menu menu = menuService.getOneMenu(mvo.getMenuName()).get();
+
+
+        Optional<Manager> manager = managerRepository.findById(mvo.getManagerId());
+        if(!manager.isPresent()) return "null manager";
+
+        Optional<Menu> menuo = menuService.getOneMenu(mvo.getMenuName(),manager.get());
+
+        if(menuo.isEmpty()) return "null menu";
+
+
+        Menu menu = menuo.get();
         menuService.deleteMenu(menu.getId());
         return "redirect:/";
     }
@@ -129,7 +147,10 @@ public class MenuController {
 
         System.out.println("menuName = " + menuName);
 
-        Optional<Menu> menu = menuService.getOneMenu(menuName);
+        Optional<Manager> manager = managerRepository.findById(managerId);
+        if(manager.isEmpty()) return false;
+
+        Optional<Menu> menu = menuService.getOneMenu(menuName, manager.get());
 
         //이름이 이미 존재하면 false 값을 리턴한다.
         if(menu.isEmpty()) return true;
@@ -140,9 +161,14 @@ public class MenuController {
     }
 
     @PostMapping("/getByName")
-    public List<Map<String,String>> getByName(@RequestBody String menuName){
+    public List<Map<String,String>> getByName(@RequestBody Map<String,String> params){
 
-        Optional<Menu>menu = menuService.getOneMenu(menuName);
+        String menuName = params.get("menuName");
+        Long managerId = Long.parseLong(params.get("managerId"));
+        Optional<Manager> manager = managerRepository.findById(managerId);
+        if(manager.isEmpty()) return null;
+
+        Optional<Menu>menu = menuService.getOneMenu(menuName,manager.get());
 
         System.out.println("menu.get().getMenuName() = " + menu.get().getMenuName());
 
@@ -152,10 +178,10 @@ public class MenuController {
 
         List<Map<String,String>> r = new ArrayList<>();
 
-        Map<String,String> params = new HashMap<>();
-        params.put("menuName",menu.get().getMenuName());
-        params.put("price",String.valueOf(menu.get().getPrice()));
-        params.put("menuCategory",menu.get().getMenuCategory());
+        Map<String,String> paramss = new HashMap<>();
+        paramss.put("menuName",menu.get().getMenuName());
+        paramss.put("price",String.valueOf(menu.get().getPrice()));
+        paramss.put("menuCategory",menu.get().getMenuCategory());
 
        //r.add(params); id, ingredientName, count만 사용. 
 
