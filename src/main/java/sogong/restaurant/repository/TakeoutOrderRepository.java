@@ -4,15 +4,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.MenuOrder;
-import sogong.restaurant.domain.TableOrder;
+import sogong.restaurant.domain.TakeoutOrder;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface TableOrderRepository extends JpaRepository<TableOrder,Long> {
+public interface TakeoutOrderRepository extends JpaRepository<TakeoutOrder,Long> {
 
-    Optional<TableOrder> findBySeatNumber(int seatNumber);
-    List<TableOrder> findTableOrdersByManager(Manager manager);
+    Optional<TakeoutOrder> findTakeoutOrderByTakeoutTicketNumber(int takeoutTicketNumber);
+    List<TakeoutOrder> findTakeoutOrdersByManager(Manager manager);
 
 }

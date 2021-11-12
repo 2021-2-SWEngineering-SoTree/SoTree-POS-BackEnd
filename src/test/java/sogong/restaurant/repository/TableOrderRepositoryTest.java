@@ -11,7 +11,6 @@ class TableOrderRepositoryTest {
     @Autowired private UserRepository userRepository;
     @Autowired private ManagerRepository managerRepository;
     @Autowired private EmployeeRepository employeeRepository;
-    @Autowired private OrderRepository orderRepository;
     @Autowired private TableOrderRepository tableOrderRepository;
     @Autowired private MenuRepository menuRepository;
     @Autowired private MenuIngredientRepository menuIngredientRepository;
@@ -78,14 +77,15 @@ class TableOrderRepositoryTest {
         User user = userRepository.findByLoginId("testEmployee").get();
         Employee employee = employeeRepository.findEmployeeByUser(user).get();
 
-        MenuOrder order = new MenuOrder();
+        TableOrder order = new TableOrder();
         order.setManager(manager);
         order.setEmployee(employee);
-        order.setOrderDate("2021-11-11");
+        //order.setOrderDate("2021-11-11");
         order.setStartTime("2021-11-11 12:20");
         order.setEndTime("2021-11-11 14:20");
         order.setTotalPrice(24000);
-        orderRepository.save(order);
+        order.setSeatNumber(1);
+        tableOrderRepository.save(order);
 
         OrderDetail orderDetail = new OrderDetail();
         orderDetail.setMenuOrder(order);
@@ -96,7 +96,7 @@ class TableOrderRepositoryTest {
 
         TableOrder tableOrder = new TableOrder();
         tableOrder.setSeatNumber(1);
-        tableOrder.setMenuOrder(order);
+        //tableOrder.setMenuOrder(order);
         tableOrderRepository.save(tableOrder);
 
     }

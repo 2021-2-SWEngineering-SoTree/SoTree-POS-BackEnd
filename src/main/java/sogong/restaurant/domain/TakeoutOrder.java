@@ -10,14 +10,13 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@DiscriminatorValue(value = MenuOrder.OrderType.Values.TABLE_ORDER)
-public class TableOrder extends MenuOrder{
-
+@DiscriminatorValue(MenuOrder.OrderType.Values.TAKEOUT_ORDER)
+public class TakeoutOrder extends MenuOrder{
 //    @Id
-//    @Column(name = "TableOrderId")
+//    @Column(name = "TakeoutOrderId")
 //    @GeneratedValue(strategy= GenerationType.IDENTITY)
-//    private Long id;
-    private int seatNumber;
+    //private Long id;
+    private int takeoutTicketNumber;
 
 
 }
