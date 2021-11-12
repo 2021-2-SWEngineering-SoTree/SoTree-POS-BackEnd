@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
+import sogong.restaurant.domain.User;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -38,6 +39,10 @@ public class JwtTokenProvider {
     public String createToken(String userPk, List<String> roles) {
         Claims claims = Jwts.claims().setSubject(userPk); // JWT payload 에 저장되는 정보단위
         claims.put("roles", roles); // 정보는 key / value 쌍으로 저장된다.
+        System.out.println("userPk = " + userPk);
+        User user= (User)userDetailsService.loadUserByUsername(userPk);
+        claims.put("userName",user.getUsername());
+        //claims.put("storeName",user.get)
         //claims.put("loginId",loginId);
         Date now = new Date();
         return Jwts.builder()

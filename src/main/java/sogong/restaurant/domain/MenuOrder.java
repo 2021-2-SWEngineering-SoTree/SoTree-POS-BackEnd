@@ -20,7 +20,7 @@ public abstract class MenuOrder {
         TAKEOUT_ORDER("TAKEOUT_ORDER");
         private String value;
 
-        OrderType(String val) {
+         OrderType(String val) {
             if (!this.name().equals(val))
                 throw new IllegalArgumentException("Incorrect use of GroupType");
         }
