@@ -42,7 +42,7 @@ public class MenuService {
         return menuRepository.findAllByManager(manager);
     }
 
-    public Optional<Menu> getOneMenu(String menuName) { return menuRepository.findMenuByMenuName(menuName); }
+    public Optional<Menu> getOneMenu(String menuName, Manager manager) { return menuRepository.findMenuByMenuNameAndManager(menuName,manager); }
 
     @Transactional
     public void deleteMenu(Long id) {
