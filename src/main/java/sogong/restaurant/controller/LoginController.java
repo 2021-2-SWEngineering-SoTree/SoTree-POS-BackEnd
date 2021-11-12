@@ -87,6 +87,17 @@ public class LoginController {
         return managerRepository.save(manager1).getId();
     }
 
+    @RequestMapping("/findBranchName")
+    public Long findBranchName(@RequestBody String storeName){
+        Long ret = -1l;
+        System.out.println(storeName);
+        Optional<Manager> manager= managerRepository.findByStoreName(storeName);
+        if(manager.isPresent()){
+            ret = manager.get().getId();
+        }
+        return ret;
+    }
+
     @RequestMapping("/addUser")
     public Long addUser(@RequestBody Map<String, String> user){
 
