@@ -90,6 +90,7 @@ public class LoginController {
     @RequestMapping("/findBranchName")
     public Long findBranchName(@RequestBody String storeName){
         Long ret = -1l;
+        System.out.println(storeName);
         Optional<Manager> manager= managerRepository.findByStoreName(storeName);
         if(manager.isPresent()){
             ret = manager.get().getId();
