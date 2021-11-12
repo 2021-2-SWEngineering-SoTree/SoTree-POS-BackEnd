@@ -47,7 +47,7 @@ public class JwtTokenProvider {
 
         if(roles.stream().anyMatch(a-> a.equals("ROLE_ADMIN"))){
             Manager manager = managerRepository.findByUser(user).get();
-            claims.put("userName",user.getUsername());
+            claims.put("userName",user.getPersonName());
             claims.put("storeName",manager.getStoreName());
             claims.put("storePhoneNumber",manager.getBranchPhoneNumber());
         }
