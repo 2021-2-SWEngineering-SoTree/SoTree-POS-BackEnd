@@ -1,10 +1,17 @@
 package sogong.restaurant.VO;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import sogong.restaurant.domain.MenuIngredient;
 
 import java.util.List;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class menuVO {
 
     private String menuName;
@@ -12,32 +19,6 @@ public class menuVO {
     private String menuCategory;
     private Long managerId;
 
-    @Builder
-    public menuVO(String menuName, int price, String menuCategory, List<MenuIngredient> menuIngredientLists, Long managerId) {
-        this.menuName = menuName;
-        this.price = price;
-        this.menuCategory = menuCategory;
-        this.menuIngredientLists = menuIngredientLists;
-        this.managerId = managerId;
-    }
-
     List<MenuIngredient> menuIngredientLists;
 
-    public String getMenuName(){
-        return menuName;
-    }
-
-    public String getMenuCategory(){
-        return menuCategory;
-    }
-
-    public int getPrice(){
-        return price;
-    }
-
-    public Long getManagerId(){return managerId;}
-
-    public List<MenuIngredient> getMenuIngredientLists() {
-        return menuIngredientLists;
-    }
 }
