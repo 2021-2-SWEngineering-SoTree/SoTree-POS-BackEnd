@@ -7,8 +7,12 @@ import sogong.restaurant.domain.Stock;
 import java.util.List;
 import java.util.Optional;
 
-public interface StockRepository extends JpaRepository<Stock,Long> {
+public interface StockRepository extends JpaRepository<Stock, Long> {
     Optional<Stock> findStockByStockName(String StockName);
+
+    Optional<Stock> findStockByStockNameAndManager(String StockName, Manager manager);
+
     List<Stock> findAllByManager(Manager manager);
+
     List<Stock> findAllById(Long id);
 }

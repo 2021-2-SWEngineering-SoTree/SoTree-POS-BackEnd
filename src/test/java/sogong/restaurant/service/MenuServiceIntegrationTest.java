@@ -19,23 +19,29 @@ import sogong.restaurant.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
 public class MenuServiceIntegrationTest {
 
-    @Autowired private MenuRepository menuRepository;
-    @Autowired private MenuService menuService;
-    @Autowired private MenuIngredientRepository menuIngredientRepository;
-    @Autowired private MenuIngredientService menuIngredientService;
+    @Autowired
+    private MenuRepository menuRepository;
+    @Autowired
+    private MenuService menuService;
+    @Autowired
+    private MenuIngredientRepository menuIngredientRepository;
+    @Autowired
+    private MenuIngredientService menuIngredientService;
 
-    @Autowired private UserRepository userRepository;
-    @Autowired private ManagerRepository managerRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ManagerRepository managerRepository;
 
     @BeforeEach
-    public void makeManager(){
+    public void makeManager() {
 
         User user = new User();
         user.setUserName("박서진");
@@ -53,10 +59,11 @@ public class MenuServiceIntegrationTest {
     }
 
     @AfterEach
-    public void afterEach(){
+    public void afterEach() {
         menuIngredientRepository.deleteAll();
         menuRepository.deleteAll();
-        managerRepository.deleteAll(); userRepository.deleteAll();
+        managerRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
@@ -96,7 +103,7 @@ public class MenuServiceIntegrationTest {
         menu.setMenuCategory("테스트 카테고리");
 
         //When
-        Long saveId = menuService.addMenu(menu);
+        Long saveId = menuService.saveMenu(menu);
 
         //Then
         Menu findMenu = menuRepository.findById(saveId).get();
@@ -120,9 +127,9 @@ public class MenuServiceIntegrationTest {
         menu.setManager(managerRepository.findByStoreName("테스트가게").get());
 
         //When
-        menuService.addMenu(menu);
+        menuService.saveMenu(menu);
         IllegalStateException e = assertThrows(IllegalStateException.class,
-                () -> menuService.addMenu(menu2));  //예외가 발생해야 한다.
+                () -> menuService.saveMenu(menu2));  //예외가 발생해야 한다.
         assertThat(e.getMessage()).isEqualTo("이미 존재하는 메뉴입니다.");
     }
 
@@ -133,7 +140,7 @@ public class MenuServiceIntegrationTest {
         menu.setMenuName("테스트메뉴");
         menu.setPrice(10000);
         menu.setMenuCategory("테스트 카테고리");
-        menuService.addMenu(menu);
+        menuService.saveMenu(menu);
 
         //When
         menu.setMenuName("update 테스트");
@@ -155,15 +162,15 @@ public class MenuServiceIntegrationTest {
         mi2.setIngredientName("두부");
         mi2.setCount(7);
 
-        List<MenuIngredient> listMI= new ArrayList<>();
+        List<MenuIngredient> listMI = new ArrayList<>();
         listMI.add(mi1);
         listMI.add(mi2);
 
         menuVO menuvo = menuVO.builder()
-                        .menuName("테스트메뉴2")
-                                .price(10000)
-                                        .menuCategory("테스트 카테고리")
-                                                .menuIngredientLists(listMI).build();
+                .menuName("테스트메뉴2")
+                .price(10000)
+                .menuCategory("테스트 카테고리")
+                .menuIngredientLists(listMI).build();
 
 
         Menu menu = new Menu();
@@ -171,10 +178,10 @@ public class MenuServiceIntegrationTest {
         menu.setMenuCategory(menuvo.getMenuCategory());
         menu.setPrice(menuvo.getPrice());
 
-        Long saveId = menuService.addMenu(menu);
+        Long saveId = menuService.saveMenu(menu);
         System.out.println(saveId);
 
-        for(MenuIngredient menuIngredient:menuvo.getMenuIngredientLists()){
+        for (MenuIngredient menuIngredient : menuvo.getMenuIngredientLists()) {
             menuIngredient.setMenu(menu);
             menuIngredientService.addMenuIngredient(menuIngredient);
             System.out.println("menuIngredient = " + menuIngredient.getIngredientName());
@@ -189,9 +196,9 @@ public class MenuServiceIntegrationTest {
     }
 
     @Test
-    void createMenuIngredientTest(){
+    void createMenuIngredientTest() {
 
-        Menu menu= new Menu();
+        Menu menu = new Menu();
 
         menu.setMenuName("된장찌개");
         menu.setPrice(12000);
@@ -212,7 +219,7 @@ public class MenuServiceIntegrationTest {
     }
 
     @Test
-    void getAllMenuTest(){
+    void getAllMenuTest() {
 
         Menu menu = new Menu();
 

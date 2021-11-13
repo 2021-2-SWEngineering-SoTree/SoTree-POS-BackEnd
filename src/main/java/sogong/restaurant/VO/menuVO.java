@@ -1,6 +1,6 @@
 package sogong.restaurant.VO;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,7 +10,6 @@ import java.util.List;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 public class menuVO {
 
@@ -20,5 +19,15 @@ public class menuVO {
     private Long managerId;
 
     List<MenuIngredient> menuIngredientLists;
+
+    @Builder
+    public menuVO(String menuName, int price, String menuCategory, List<MenuIngredient> menuIngredientLists, Long managerId) {
+        this.menuName = menuName;
+        this.price = price;
+        this.menuCategory = menuCategory;
+        this.menuIngredientLists = menuIngredientLists;
+        this.managerId = managerId;
+    }
+
 
 }
