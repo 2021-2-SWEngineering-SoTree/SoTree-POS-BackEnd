@@ -2,7 +2,6 @@ package sogong.restaurant.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import sogong.restaurant.domain.Manager;
-import sogong.restaurant.domain.Menu;
 import sogong.restaurant.domain.Stock;
 import sogong.restaurant.repository.StockRepository;
 
@@ -13,7 +12,7 @@ import java.util.Optional;
 @Transactional
 public class StockService {
 
-    private StockRepository stockRepository;
+    private final StockRepository stockRepository;
 
     @Autowired
     public StockService(StockRepository stockRepository) {
@@ -21,25 +20,22 @@ public class StockService {
     }
 
     @Transactional
-    public Long saveStock(Stock stock) {       return stockRepository.save(stock).getId();}
-
-    @Transactional
-    public Long addStock(Stock stock){
+    public Long saveStock(Stock stock) {
         validateDuplicateStock(stock);
-        stockRepository.save(stock);
-        return stock.getId();
-    }
-    
-    // 이름 중복되는 재고 방지
-    private void validateDuplicateStock(Stock stock){
-        stockRepository.findStockByStockName(stock.getStockName())
-                .ifPresent(s -> {
-            throw new IllegalStateException("이미 존재하는 재고입니다.");
-        });
+        return stockRepository.save(stock).getId();
     }
 
-    public List<Stock> getAllStock(Manager manager){
-        return stockRepository.findAllByManager(manager); }
+    // 같은 지점에서 재고 이름 중복 방지
+    private void validateDuplicateStock(Stock stock) {
+        stockRepository.findStockByStockNameAndManager(stock.getStockName(), stock.getManager())
+                .ifPresent(s -> {
+                    throw new IllegalStateException("이미 존재하는 재고입니다.");
+                });
+    }
+
+    public List<Stock> getAllStock(Manager manager) {
+        return stockRepository.findAllByManager(manager);
+    }
 
     public Optional<Stock> getOneStock(String stockName) {
         return stockRepository.findStockByStockName(stockName);

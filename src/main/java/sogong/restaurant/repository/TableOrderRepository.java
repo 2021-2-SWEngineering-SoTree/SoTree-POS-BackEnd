@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface TableOrderRepository extends JpaRepository<TableOrder,Long> {
 
-    Optional<TableOrder> findBySeatNumber(int seatNumber);
-    List<TableOrder> findTableOrdersByManager(Manager manager);
+    Optional<TableOrder> findTableOrderBySeatNumber(int seatNumber);
+    List<TableOrder> findAllByManager(Manager manager);
 
 }

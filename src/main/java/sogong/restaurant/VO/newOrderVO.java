@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import sogong.restaurant.domain.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -18,12 +18,14 @@ public class newOrderVO {
     private String startTime; // "yyyy-MM-dd HH:mm"
     private String endTime;   // "yyyy-MM-dd HH:mm"
 
-    private MenuOrder.OrderType orderType;
+    private String orderType;
 
     private int seatNumber;           // TableOrder
+    private Boolean isSeated;
+
     private int takeoutTicketNumber;  // TakeoutOrder
 
-    private List<OrderDetail> orderDetails;
+    private List<Map<String, Integer>> orderDetails;
 
     private Long employeeId;
     private Long managerId;
