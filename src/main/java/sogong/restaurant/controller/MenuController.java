@@ -142,8 +142,10 @@ public class MenuController {
 
         System.out.println("managerId = " + managerId);
 
-        Optional<Manager> manager = managerRepository.findById(Long.parseLong(managerId));
-        return menuService.getAllMenu(manager.get());
+        Manager manager = managerRepository.findById(Long.parseLong(managerId))
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
+
+        return menuService.getAllMenu(manager);
     }
 
 //    @PostMapping("/isPresent")
