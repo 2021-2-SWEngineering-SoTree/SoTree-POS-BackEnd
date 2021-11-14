@@ -51,7 +51,6 @@ public class StockController {
                 .orElseThrow(() ->
                         new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
 
-
         for (StockDetail stockDetail : stockvo.getStockDetailList()) {
             stockDetail.setStock(stock);
             stockDetail.setEmployee(employee);
