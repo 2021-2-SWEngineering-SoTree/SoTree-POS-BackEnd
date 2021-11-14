@@ -9,9 +9,7 @@ import sogong.restaurant.domain.TakeoutOrder;
 import sogong.restaurant.repository.*;
 
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 
 @Transactional
@@ -31,25 +29,28 @@ public class OrderService {
     @Autowired
     MenuRepository menuRepository;
 
-    public orderVO getTableOrderByBranchIdAndSeatNumber(Long BranchId, int seatNumber) {
+    public Optional<orderVO> getTableOrderByBranchIdAndSeatNumber(Long BranchId, int seatNumber) {
 
         //나중에 현재 식사하고 있는 주문에 대한 정보 받아오는 것 로직 추가해야함.
         // --> validDuplicateTableOrder
-
-        List<TableOrder> tableOrderList = tableOrderRepository.findAllByManager(managerRepository.findById(BranchId).get());
+        Optional<orderVO> ret = Optional.empty();
+        List<TableOrder> tableOrderList = tableOrderRepository
+                .findAllByManager(managerRepository.findById(BranchId)
+                        .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다.")));
 
         // list 중 파라미터의 seatnumber와 동일한 좌석 번호를 가진 order 찾기
         // 없으면 error
-        TableOrder tableOrder = tableOrderList.stream()
+        Optional<TableOrder> tableOrder = tableOrderList.stream()
                 .filter(s -> s.getSeatNumber() == seatNumber)
-                .findAny().orElseThrow(() -> new NoSuchElementException());
+                .filter(s -> s.getIsSeated() == Boolean.TRUE)
+                .findAny();
 
-        // orderDe
-        List<OrderDetail> orderDetails = orderDetailRepository.findAllByMenuOrder(tableOrder)
-                .orElseThrow(() -> new NoSuchElementException());
-
-        orderVO ret = new orderVO(tableOrder, orderDetails);
-
+        if (tableOrder.isPresent()) {
+            // orderDetails
+            List<OrderDetail> orderDetails = orderDetailRepository.findAllByMenuOrder(tableOrder.get()).
+                    orElseGet(ArrayList::new);
+            ret = Optional.of(new orderVO(tableOrder.get(), orderDetails));
+        }
         return ret;
     }
 
