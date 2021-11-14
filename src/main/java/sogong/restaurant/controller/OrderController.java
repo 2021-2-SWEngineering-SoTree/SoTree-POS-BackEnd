@@ -12,10 +12,7 @@ import sogong.restaurant.repository.ManagerRepository;
 import sogong.restaurant.service.OrderDetailService;
 import sogong.restaurant.service.OrderService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import static sogong.restaurant.domain.MenuOrder.OrderType;
 
@@ -77,6 +74,7 @@ public class OrderController {
 
         order.setOrderType(MenuOrder.OrderType.TABLE_ORDER);
         order.setSeatNumber(oVO.getSeatNumber());
+        order.setIsSeated(oVO.getIsSeated());
 
         // branchId로 find manager
         order.setTotalPrice(oVO.getTotalPrice());
@@ -137,11 +135,25 @@ public class OrderController {
     public List<orderVO> getAllTableOrder(@PathVariable(value = "branchId") Long branchId, @PathVariable(value = "totalTable") int totalTable) {
         List<orderVO> orderVOList = new ArrayList<>();
 
+        if(totalTable<1) throw new IllegalStateException("전체 좌석의 번호는 1보다 커야합니다.");
+
         for (int seatNumber = 1; seatNumber <= totalTable; seatNumber++) {
             orderService.getTableOrderByBranchIdAndSeatNumber(branchId, seatNumber)
+
                     .ifPresent(orderVOList::add);
         }
         return orderVOList;
     }
+
+    @PostMapping("/getOneTableInfo/{branchId}/{seatNumber}")
+    public orderVO getOneTableOrder(@PathVariable(value = "branchId") Long branchId, @PathVariable(value = "seatNumber") int seatNumber){
+
+        Optional<orderVO> oVO;
+        oVO = orderService.getTableOrderByBranchIdAndSeatNumber(branchId,seatNumber);
+        //if(oVO.isEmpty()) throw new NoSuchElementException("현재 좌석에 주문이 없습니다.");
+
+        return oVO.get();
+    }
+
 }
 

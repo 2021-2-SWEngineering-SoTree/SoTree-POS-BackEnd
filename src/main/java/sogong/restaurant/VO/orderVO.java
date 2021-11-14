@@ -9,6 +9,7 @@ import sogong.restaurant.domain.OrderDetail;
 import sogong.restaurant.domain.TableOrder;
 
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -16,6 +17,9 @@ import java.util.List;
 @NoArgsConstructor
 public class orderVO {
 
-    private TableOrder tableOrder;
-    private List<OrderDetail> orderDetails;
+    private Long orderId;
+    private int seatNumber;
+    private int totalPrice;
+    private Map<String,Long> orderDetails;
+
 }
