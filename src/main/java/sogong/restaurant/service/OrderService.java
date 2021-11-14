@@ -34,9 +34,12 @@ public class OrderService {
         //나중에 현재 식사하고 있는 주문에 대한 정보 받아오는 것 로직 추가해야함.
         // --> validDuplicateTableOrder
         Optional<orderVO> ret = Optional.empty();
+        Map<String,Long> zipOrderDetail = new HashMap<>();
+
         List<TableOrder> tableOrderList = tableOrderRepository
                 .findAllByManager(managerRepository.findById(BranchId)
                         .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다.")));
+
 
         // list 중 파라미터의 seatnumber와 동일한 좌석 번호를 가진 order 찾기
         // 없으면 error
@@ -49,7 +52,12 @@ public class OrderService {
             // orderDetails
             List<OrderDetail> orderDetails = orderDetailRepository.findAllByMenuOrder(tableOrder.get()).
                     orElseGet(ArrayList::new);
-            ret = Optional.of(new orderVO(tableOrder.get(), orderDetails));
+
+            for(OrderDetail s : orderDetails){
+                zipOrderDetail.put(s.getMenu().getMenuName(), Long.valueOf(s.getQuantity()));
+            }
+
+            ret = Optional.of(new orderVO(tableOrder.get().getId(),seatNumber,tableOrder.get().getTotalPrice(),zipOrderDetail));
         }
         return ret;
     }
@@ -78,11 +86,14 @@ public class OrderService {
 
     // 현 시각에 가게 및 좌석이 동일한 주문 있는지 확인
     private void validateDuplicateTableOrder(TableOrder tableOrder) {
+        System.out.println("tableOrder = " + tableOrder.getIsSeated());
         tableOrderRepository.findAllByManager(tableOrder.getManager())
                 .stream() // 한 가게의 모든 TableOrder 중
                 .filter(s -> s.getSeatNumber() == tableOrder.getSeatNumber())// 매장 좌석 동일한거 찾기
                 .findAny()
                 .ifPresent(m -> {
+                    System.out.println("m.getSeatNumber() = " + m.getSeatNumber());
+                    System.out.println("m.getIsSeated() = " + m.getIsSeated().booleanValue());
                     if (m.getIsSeated()) {
                         throw new IllegalStateException("해당 좌석에 다른 주문이 존재합니다.");
                     }
