@@ -36,19 +36,20 @@ public class StockController {
     public String addStock(@RequestBody StockVO stockvo){
 
         Stock stock = new Stock();
-        
+
         Optional<Manager> manager = managerRepository.findById(stockvo.getManagerId());
 
         if(manager.isEmpty()){
             System.out.println("blank manager");
             return "null manager";
         }
-        
+
         stock.setStockName(stockvo.getStockName());
         stock.setQuantity(stockvo.getQuantity());
         stock.setManager(manager.get());
+        System.out.println("add전");
         stockService.addStock(stock);
-
+        System.out.println("add후");
 
         for(StockDetail stockDetail:stockvo.getStockDetailList()){
             stockDetail.setStock(stock);
@@ -57,7 +58,7 @@ public class StockController {
 
         return "OK";
     }
-    
+
     @PutMapping("/{id}")
     public String updateStock(@RequestBody StockVO stockvo){
         Stock stock = stockService.getOneStock(stockvo.getStockName()).get();
