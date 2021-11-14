@@ -1,5 +1,6 @@
 package sogong.restaurant.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,6 +8,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Setter
@@ -25,13 +28,14 @@ public class Menu {
 
     // 가게에 대한 key
     @ManyToOne
-    @JsonManagedReference // 순환참조 방지
+    //@JsonManagedReference // 순환참조 방지
     @JoinColumn(name = "BranchId")
     private Manager manager;
 
     // orderdetailList -> Menu 단방향
-//    @OneToMany(mappedBy = "menu")
-//    private List<OrderDetail> orderDetailList = new ArrayList<>();
+    //@OneToMany(mappedBy = "menu")
+    //@JsonBackReference
+    //private List<OrderDetail> orderDetailList = new ArrayList<>();
 
 
 }

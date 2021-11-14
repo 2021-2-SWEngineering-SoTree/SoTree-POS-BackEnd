@@ -62,6 +62,7 @@ public class MenuController {
             System.out.println("blank!");
             return "null input";
         }
+        System.out.println("menu" + mvo.getManagerId());
 
         Optional<Manager> manager = managerRepository.findById(mvo.getManagerId());
 
@@ -75,7 +76,6 @@ public class MenuController {
         menu.setPrice(mvo.getPrice());
         menu.setManager(manager.get());
         menuService.saveMenu(menu);
-
 
         for (MenuIngredient menuIngredient : mvo.getMenuIngredientLists()) {
             menuIngredient.setMenu(menu);
