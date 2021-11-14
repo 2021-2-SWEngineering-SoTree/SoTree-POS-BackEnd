@@ -14,8 +14,12 @@ import sogong.restaurant.repository.ManagerRepository;
 import sogong.restaurant.service.OrderDetailService;
 import sogong.restaurant.service.OrderService;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static sogong.restaurant.domain.MenuOrder.OrderType;
+
 
 @RestController
 @Slf4j
@@ -49,63 +53,39 @@ public class OrderController {
         Long BranchId = Long.parseLong(param.get("BranchId"));
         int seatNumber = Integer.parseInt(param.get("seatNumber"));
 
-        return orderService.getTableOrderByBranchIdAndSeatNumber(BranchId,seatNumber);
+        return orderService.getTableOrderByBranchIdAndSeatNumber(BranchId, seatNumber);
     }
 
-    /*
-        포장 주문의 경우
-        {
-            totalPrice : "10000",
-            startTime : "2021-11-11 12:00",
-            endTime : "2021-11-11 13:00",
-            orderType : "TABLE_ORDER",
-            seatNumber : 2,
-            orderDetails : [],
-            employeeId : 5,
-            managerId: 3
-        }
-
-        매장 주문의 경우
-        {
-            totalPrice : "10000",
-            startTime : "2021-11-11 12:00",
-            endTime : "2021-11-11 13:00",
-            orderType : "TAKEOUT_ORDER",
-            seatNumber : 2,
-            orderDetails : [],
-            employeeId : 5,
-            managerId: 3
-        }
-
-     */
-    @PostMapping("/add/tableOrder")
-    public String addTableOrder(@RequestBody newOrderVO oVO){
-
-
-        MenuOrder.OrderType orderType = oVO.getOrderType();
+    @PostMapping("/addTableOrder")
+    public String addTableOrder(@RequestBody newOrderVO oVO) {
 
         // Manager(branchId) & 주문 받은 직원
         Optional<Manager> manager = managerRepository.findById(oVO.getManagerId());
         Optional<Employee> employee = employeeRepository.findById(oVO.getEmployeeId());
 
-        // 예외 처리 
-        if(oVO.getOrderDetails().isEmpty()){
+        // 예외 처리
+        switch (OrderType.valueOf(oVO.getOrderType())) {
+            case TABLE_ORDER:
+                break;
+            default:
+                System.out.println(oVO.getOrderType());
+                return "Wrong Order Type";
+        }
+
+        if (oVO.getOrderDetails().isEmpty()) {
             System.out.println("Wrong Order!");
             return "null Order Details";
         }
 
-        if((orderType.getValue() !="TABLE_ORDER")){
-            System.out.println("Wrong Type");
-            return "Wrong Order Type";
-        }
-        
-        if(manager.isEmpty()){
+        if (manager.isEmpty()) {
             System.out.println("blank manager");
             return "null manager";
         }
 
-
         TableOrder order = new TableOrder();
+
+        List<Map<String, Integer>> orderDetails = oVO.getOrderDetails();
+
         order.setOrderType(MenuOrder.OrderType.TABLE_ORDER);
         order.setSeatNumber(oVO.getSeatNumber());
 
@@ -117,46 +97,44 @@ public class OrderController {
         order.setEmployee(employee.get());
         order.setManager(manager.get());
 
+        orderService.addTableOrder(order, orderDetails);
 
-        for(OrderDetail orderDetail:oVO.getOrderDetails()){
-            orderDetail.setMenuOrder(order);
-            orderDetailService.addOrderDetail(orderDetail);
-            System.out.println("orderDetail");
-            System.out.println("Menu Name ="+ orderDetail.getMenu().getMenuName());
-        }
-        return "OK";
+        return Long.toString(order.getId());
     }
 
-    @PostMapping("/add/takeoutOrder")
-    public String addTakeoutOrder(@RequestBody newOrderVO oVO){
+    @PostMapping("/addTakeoutOrder")
+    public String addTakeoutOrder(@RequestBody newOrderVO oVO) {
 
-
-        MenuOrder.OrderType orderType = oVO.getOrderType();
+        MenuOrder.OrderType orderType = MenuOrder.OrderType.valueOf(oVO.getOrderType());
 
         // Manager(branchId) & 주문 받은 직원
         Optional<Manager> manager = managerRepository.findById(oVO.getManagerId());
         Optional<Employee> employee = employeeRepository.findById(oVO.getEmployeeId());
 
         // 예외 처리
-        if(oVO.getOrderDetails().isEmpty()){
+        switch (OrderType.valueOf(oVO.getOrderType())) {
+            case TAKEOUT_ORDER:
+                break;
+            default:
+                System.out.println(oVO.getOrderType());
+                return "Wrong Order Type";
+        }
+
+        if (oVO.getOrderDetails().isEmpty()) {
             System.out.println("Wrong Order!");
             return "null Order Details";
         }
 
-        if((orderType.getValue() !="TAKEOUT_ORDER")){
-            System.out.println("Wrong Type");
-            return "Wrong Order Type";
-        }
-
-        if(manager.isEmpty()){
+        if (manager.isEmpty()) {
             System.out.println("blank manager");
             return "null manager";
         }
 
-
         TakeoutOrder order = new TakeoutOrder();
         order.setOrderType(MenuOrder.OrderType.TAKEOUT_ORDER);
         order.setTakeoutTicketNumber(oVO.getTakeoutTicketNumber());
+
+        List<Map<String, Integer>> orderDetails = oVO.getOrderDetails();
 
         // branchId로 find manager
         order.setTotalPrice(oVO.getTotalPrice());
@@ -167,12 +145,8 @@ public class OrderController {
         order.setManager(manager.get());
 
 
-        for(OrderDetail orderDetail:oVO.getOrderDetails()){
-            orderDetail.setMenuOrder(order);
-            orderDetailService.addOrderDetail(orderDetail);
-            System.out.println("orderDetail");
-            System.out.println("Menu Name ="+ orderDetail.getMenu().getMenuName());
-        }
+        orderService.addTakeoutOrder(order, orderDetails);
+
         return "OK";
     }
 }

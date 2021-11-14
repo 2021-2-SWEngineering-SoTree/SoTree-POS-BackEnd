@@ -5,11 +5,14 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Setter
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "orderType", discriminatorType = DiscriminatorType.STRING)
 public abstract class MenuOrder {
@@ -63,14 +66,8 @@ public abstract class MenuOrder {
     @JoinColumn(name="BranchId")
     private Manager manager;
 
-    public MenuOrder(Long id, int totalPrice, String startTime, String endTime, OrderType orderType, Employee employee, Manager manager) {
-        this.id = id;
-        this.totalPrice = totalPrice;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.orderType = orderType;
-        this.employee = employee;
-        this.manager = manager;
-    }
+    @OneToMany(mappedBy = "menuOrder")
+    private List<OrderDetail> orderDetailList = new ArrayList<>();
+
 }
 

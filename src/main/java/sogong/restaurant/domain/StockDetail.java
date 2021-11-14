@@ -28,4 +28,9 @@ public class StockDetail {
     @JoinColumn(name="StockId")
     private Stock stock;
 
+    //User user;
+    @ManyToOne
+    @JoinColumn(name="EmployeeId")
+    private Employee employee;
+
 }
