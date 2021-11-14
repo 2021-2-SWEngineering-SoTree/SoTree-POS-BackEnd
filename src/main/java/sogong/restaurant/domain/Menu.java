@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Setter
@@ -31,8 +29,9 @@ public class Menu {
     @JoinColumn(name = "BranchId")
     private Manager manager;
 
-    @OneToMany(mappedBy = "menu")
-    private List<OrderDetail> orderDetailList = new ArrayList<>();
+    // orderdetailList -> Menu 단방향
+//    @OneToMany(mappedBy = "menu")
+//    private List<OrderDetail> orderDetailList = new ArrayList<>();
 
 
 }
