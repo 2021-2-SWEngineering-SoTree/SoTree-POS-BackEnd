@@ -2,7 +2,6 @@ package sogong.restaurant.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sogong.restaurant.VO.orderVO;
 import sogong.restaurant.domain.OrderDetail;
 import sogong.restaurant.domain.TableOrder;
 import sogong.restaurant.domain.TakeoutOrder;
@@ -29,12 +28,12 @@ public class OrderService {
     @Autowired
     MenuRepository menuRepository;
 
-    public Optional<orderVO> getTableOrderByBranchIdAndSeatNumber(Long BranchId, int seatNumber) {
+    public List<OrderDetail> getTableOrderByBranchIdAndSeatNumber(Long BranchId, int seatNumber) {
 
         //나중에 현재 식사하고 있는 주문에 대한 정보 받아오는 것 로직 추가해야함.
         // --> validDuplicateTableOrder
-        Optional<orderVO> ret = Optional.empty();
-        Map<String,Long> zipOrderDetail = new HashMap<>();
+        List<OrderDetail> ret = new ArrayList<>();
+        // Map<String,Long> zipOrderDetail = new HashMap<>();
 
         List<TableOrder> tableOrderList = tableOrderRepository
                 .findAllByManager(managerRepository.findById(BranchId)
@@ -50,14 +49,14 @@ public class OrderService {
 
         if (tableOrder.isPresent()) {
             // orderDetails
-            List<OrderDetail> orderDetails = orderDetailRepository.findAllByMenuOrder(tableOrder.get()).
+            ret = orderDetailRepository.findAllByMenuOrder(tableOrder.get()).
                     orElseGet(ArrayList::new);
 
-            for(OrderDetail s : orderDetails){
-                zipOrderDetail.put(s.getMenu().getMenuName(), Long.valueOf(s.getQuantity()));
-            }
-
-            ret = Optional.of(new orderVO(tableOrder.get().getId(),seatNumber,tableOrder.get().getTotalPrice(),zipOrderDetail));
+//            for (OrderDetail s : orderDetails) {
+//                zipOrderDetail.put(s.getMenu().getMenuName(), Long.valueOf(s.getQuantity()));
+//            }
+//
+//            ret = Optional.of(new orderVO(tableOrder.get().getId(), seatNumber, tableOrder.get().getTotalPrice(), zipOrderDetail));
         }
         return ret;
     }
