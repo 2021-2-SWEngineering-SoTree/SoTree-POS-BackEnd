@@ -10,6 +10,7 @@ import sogong.restaurant.repository.*;
 
 import javax.transaction.Transactional;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Transactional
@@ -34,12 +35,11 @@ public class OrderService {
         //나중에 현재 식사하고 있는 주문에 대한 정보 받아오는 것 로직 추가해야함.
         // --> validDuplicateTableOrder
         Optional<orderVO> ret = Optional.empty();
-        Map<String,Long> zipOrderDetail = new HashMap<>();
 
         List<TableOrder> tableOrderList = tableOrderRepository
                 .findAllByManager(managerRepository.findById(BranchId)
                         .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다.")));
-
+        System.out.println(tableOrderList);
 
         // list 중 파라미터의 seatnumber와 동일한 좌석 번호를 가진 order 찾기
         // 없으면 error
@@ -49,16 +49,37 @@ public class OrderService {
                 .findAny();
 
         if (tableOrder.isPresent()) {
-            // orderDetails
-            List<OrderDetail> orderDetails = orderDetailRepository.findAllByMenuOrder(tableOrder.get()).
-                    orElseGet(ArrayList::new);
+            List<OrderDetailSummary> orderDetailSummary = orderDetailRepository.findAllByMenuOrder(tableOrder.get());
 
-            for(OrderDetail s : orderDetails){
-                zipOrderDetail.put(s.getMenu().getMenuName(), Long.valueOf(s.getQuantity()));
-            }
-
-            ret = Optional.of(new orderVO(tableOrder.get().getId(),seatNumber,tableOrder.get().getTotalPrice(),zipOrderDetail));
+            ret = Optional.of(new orderVO(tableOrder.get().getId(), seatNumber, -1,
+                    tableOrder.get().getTotalPrice(), orderDetailSummary));
         }
+        return ret;
+    }
+
+    public List<orderVO> getTakeoutOrderByBranchIdAndSeatNumber(Long BranchId) {
+
+        //나중에 현재 식사하고 있는 주문에 대한 정보 받아오는 것 로직 추가해야함.
+        // --> validDuplicateTableOrder
+        List<orderVO> ret = new ArrayList<>();
+
+        List<TakeoutOrder> takeoutOrderList = takeoutOrderRepository
+                .findAllByManager(managerRepository.findById(BranchId)
+                        .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다.")));
+
+        // list 중 파라미터의 seatnumber와 동일한 좌석 번호를 가진 order 찾기
+        // 없으면 error
+        List<TakeoutOrder> takeoutOrders = takeoutOrderList.stream()
+                .filter(s -> s.getIsSeated() == Boolean.TRUE)
+                .collect(Collectors.toList());
+
+        for (TakeoutOrder takeoutOrder : takeoutOrders) {
+            List<OrderDetailSummary> orderDetailSummary = orderDetailRepository.findAllByMenuOrder(takeoutOrder);
+
+            ret.add(new orderVO(takeoutOrder.getId(), -1,
+                    takeoutOrder.getTakeoutTicketNumber(), takeoutOrder.getTotalPrice(), orderDetailSummary));
+        }
+
         return ret;
     }
 

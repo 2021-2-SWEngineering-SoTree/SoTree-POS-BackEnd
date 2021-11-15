@@ -23,9 +23,10 @@ public abstract class MenuOrder {
         TAKEOUT_ORDER("TAKEOUT_ORDER");
         private String value;
 
-         OrderType(String val) {
-            if (!this.name().equals(val))
+        OrderType(String val) {
+            if (!name().equals(val)) {
                 throw new IllegalArgumentException("Incorrect use of GroupType");
+            }
         }
 
         public static class Values {
@@ -33,23 +34,26 @@ public abstract class MenuOrder {
             public static final String TAKEOUT_ORDER = "TAKEOUT_ORDER";
         }
 
-        public String getValue(){ return value; }
+        public String getValue() {
+            return value;
+        }
     }
 
     @Id
     @Column(name = "OrderId")
-    @GeneratedValue(strategy= GenerationType.TABLE)
+    @GeneratedValue(strategy = GenerationType.TABLE)
     private Long id;
 
     private int totalPrice;
+    private Boolean isSeated;
 
-    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm", timezone="Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     private String startTime;
 
-    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm", timezone="Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     private String endTime;
 
-    @Column(name="orderType", insertable = false, updatable = false)
+    @Column(name = "orderType", insertable = false, updatable = false)
     @Enumerated(EnumType.STRING)
     private OrderType orderType; //  TABLE_ORDER,TAKEOUT_ORDER
 
@@ -58,12 +62,12 @@ public abstract class MenuOrder {
 
     //User user;
     @ManyToOne
-    @JoinColumn(name="EmployeeId")
+    @JoinColumn(name = "EmployeeId")
     private Employee employee;
 
     //branch
     @ManyToOne
-    @JoinColumn(name="BranchId")
+    @JoinColumn(name = "BranchId")
     private Manager manager;
 
     @OneToMany(mappedBy = "menuOrder")

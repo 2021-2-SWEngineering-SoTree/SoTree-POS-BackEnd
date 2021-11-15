@@ -12,7 +12,10 @@ import sogong.restaurant.repository.ManagerRepository;
 import sogong.restaurant.service.OrderDetailService;
 import sogong.restaurant.service.OrderService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
 import static sogong.restaurant.domain.MenuOrder.OrderType;
 
@@ -31,22 +34,22 @@ public class OrderController {
     @Autowired
     private final EmployeeRepository employeeRepository;
 
-    @PostMapping("/currentSeatOrder")
-    public orderVO validName(@RequestBody Map<String, String> param) {
-        //현재 좌석의 주문을 어떻게 구분할지? 이전의 좌석이랑?
-
-        /*
-        {
-            "BranchId" : "1",
-            "seatNumber" : "1"
-        }
-         */
-
-        Long BranchId = Long.parseLong(param.get("BranchId"));
-        int seatNumber = Integer.parseInt(param.get("seatNumber"));
-
-        return orderService.getTableOrderByBranchIdAndSeatNumber(BranchId, seatNumber).orElse(null);
-    }
+    // @PostMapping("/currentSeatOrder")
+//    public orderVO validName(@RequestBody Map<String, String> param) {
+//        //현재 좌석의 주문을 어떻게 구분할지? 이전의 좌석이랑?
+//
+//        /*
+//        {
+//            "BranchId" : "1",
+//            "seatNumber" : "1"
+//        }
+//         */
+//
+//        Long BranchId = Long.parseLong(param.get("BranchId"));
+//        int seatNumber = Integer.parseInt(param.get("seatNumber"));
+//
+//        return orderService.getTableOrderByBranchIdAndSeatNumber(BranchId, seatNumber).orElse(null);
+//    }
 
     @PostMapping("/addTableOrder")
     public String addTableOrder(@RequestBody newOrderVO oVO) {
@@ -74,7 +77,8 @@ public class OrderController {
 
         order.setOrderType(MenuOrder.OrderType.TABLE_ORDER);
         order.setSeatNumber(oVO.getSeatNumber());
-        order.setIsSeated(oVO.getIsSeated());
+        //order.setIsSeated(oVO.getIsSeated());
+        order.setIsSeated(Boolean.TRUE);
 
         // branchId로 find manager
         order.setTotalPrice(oVO.getTotalPrice());
@@ -124,36 +128,52 @@ public class OrderController {
         order.setEndTime(oVO.getEndTime());
         order.setEmployee(employee);
         order.setManager(manager);
-
+        order.setIsSeated(Boolean.TRUE);
 
         orderService.addTakeoutOrder(order, orderDetails);
 
         return "OK";
     }
 
-    @PostMapping("/getTableNumber/{branchId}/{totalTable}")
+    @PostMapping("/getTableOrder/{branchId}/{totalTable}")
     public List<orderVO> getAllTableOrder(@PathVariable(value = "branchId") Long branchId, @PathVariable(value = "totalTable") int totalTable) {
-        List<orderVO> orderVOList = new ArrayList<>();
+        List<orderVO> orderDetailList = new ArrayList<>();
 
-        if(totalTable<1) throw new IllegalStateException("전체 좌석의 번호는 1보다 커야합니다.");
-
-        for (int seatNumber = 1; seatNumber <= totalTable; seatNumber++) {
-            orderService.getTableOrderByBranchIdAndSeatNumber(branchId, seatNumber)
-
-                    .ifPresent(orderVOList::add);
+        if (totalTable < 1) {
+            throw new IllegalStateException("전체 좌석의 번호는 1보다 커야합니다.");
         }
-        return orderVOList;
+
+        // new orderVO(-1l,-1,-1, Map.of()) : default 값 (order 존재 하지 않음)
+        for (int seatNumber = 1; seatNumber <= totalTable; seatNumber++) {
+            orderVO orderVOOptional = orderService.getTableOrderByBranchIdAndSeatNumber(branchId, seatNumber)
+                    .orElse(new orderVO(-1L, -1, -1, -1, new ArrayList<>()));
+            orderDetailList.add(orderVOOptional);
+        }
+        System.out.println(orderDetailList);
+        return orderDetailList;
     }
 
     @PostMapping("/getOneTableInfo/{branchId}/{seatNumber}")
-    public orderVO getOneTableOrder(@PathVariable(value = "branchId") Long branchId, @PathVariable(value = "seatNumber") int seatNumber){
+    public orderVO getOneTableOrder(@PathVariable(value = "branchId") Long branchId, @PathVariable(value = "seatNumber") int seatNumber) {
 
-        Optional<orderVO> oVO;
-        oVO = orderService.getTableOrderByBranchIdAndSeatNumber(branchId,seatNumber);
+        // new orderVO(-1l,-1,-1, Map.of()) : default 값 (order 존재 하지 않음)
+        return orderService.getTableOrderByBranchIdAndSeatNumber(branchId, seatNumber)
+                .orElse(new orderVO(-1L, -1, -1, -1, new ArrayList<>()));
         //if(oVO.isEmpty()) throw new NoSuchElementException("현재 좌석에 주문이 없습니다.");
 
-        return oVO.get();
     }
+
+    @PostMapping("/getTakeoutOrder/{branchId}")
+    public List<orderVO> getAllTakeoutOrder(@PathVariable(value = "branchId") Long branchId) {
+
+        // new orderVO(-1l,-1,-1, Map.of()) : default 값 (order 존재 하지 않음)
+        return orderService.getTakeoutOrderByBranchIdAndSeatNumber(branchId);
+    }
+
+//    @PostMapping("/addOrderDetail")
+//    public Long addOrderDetail(@RequestBody newOrderVO){
+//
+//    }
 
 }
 

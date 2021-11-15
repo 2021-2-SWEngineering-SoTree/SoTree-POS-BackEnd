@@ -62,6 +62,7 @@ public class MenuController {
             System.out.println("blank!");
             return "null input";
         }
+        System.out.println("menu" + mvo.getManagerId());
 
         Optional<Manager> manager = managerRepository.findById(mvo.getManagerId());
 
@@ -75,7 +76,6 @@ public class MenuController {
         menu.setPrice(mvo.getPrice());
         menu.setManager(manager.get());
         menuService.saveMenu(menu);
-
 
         for (MenuIngredient menuIngredient : mvo.getMenuIngredientLists()) {
             menuIngredient.setMenu(menu);
@@ -142,8 +142,10 @@ public class MenuController {
 
         System.out.println("managerId = " + managerId);
 
-        Optional<Manager> manager = managerRepository.findById(Long.parseLong(managerId));
-        return menuService.getAllMenu(manager.get());
+        Manager manager = managerRepository.findById(Long.parseLong(managerId))
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
+
+        return menuService.getAllMenu(manager);
     }
 
 //    @PostMapping("/isPresent")
