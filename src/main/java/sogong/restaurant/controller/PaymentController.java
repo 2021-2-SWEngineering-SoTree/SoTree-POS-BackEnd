@@ -26,14 +26,18 @@ public class PaymentController {
         Long employeeId = Long.parseLong(param.get("employeeId"));
         String payTime = param.get("payTime");
         String method = param.get("method");
+        Long managerId = Long.parseLong(param.get("branchId"));
 
-        return paymentService.makeMenu(orderId,employeeId,payTime,method);
+        return paymentService.makeMenu(orderId,employeeId,payTime,method,managerId);
     }
 
     @PostMapping("/sendToCompany")
-    public String sendToCompany(@RequestBody Long paymentId){
+    public String sendToCompany(@RequestBody Map<String,String> param){
 
-        return paymentService.sendToCompany(paymentId);
+        Long paymentId = Long.parseLong(param.get("paymentId"));
+        Long branchId = Long.parseLong(param.get("branchId"));
+
+        return paymentService.sendToCompany(paymentId,branchId);
     }
 
 

@@ -145,12 +145,24 @@ public class LoginController {
     }
 
     @RequestMapping("/getAllPersonName")
-    public List<String> findAllPersonName(){
+    public List<Map<String,String>> findAllPersonName(){
         //요청 파라미터 없음
-        List<User> all = userRepository.findAll();
-        List<String> ret=new ArrayList<>();
-        for(int i=0;i<all.size();i++){
-            ret.add(all.get(i).getPersonName());
+        //List<User> all = userRepository.findAll();
+        List<Manager> managers = managerRepository.findAll();
+        List<Employee> employees = employeeRepository.findAll();
+        List<Map<String,String>> ret=new ArrayList<>();
+        for(int i=0;i<managers.size();i++){
+            Map<String,String> one = new HashMap<>();
+            one.put("ManagerId",String.valueOf(managers.get(i).getId()));
+            one.put("personName",managers.get(i).getUser().getPersonName());
+            ret.add(one);
+        }
+
+        for(int i=0;i<employees.size();i++){
+            Map<String,String> one = new HashMap<>();
+            one.put("EmployeeId",String.valueOf(employees.get(i).getId()));
+            one.put("personName",employees.get(i).getUser().getPersonName());
+            ret.add(one);
         }
 
         return ret;

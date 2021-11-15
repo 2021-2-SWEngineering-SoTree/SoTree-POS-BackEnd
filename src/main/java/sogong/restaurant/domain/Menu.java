@@ -32,10 +32,10 @@ public class Menu {
     @JoinColumn(name = "BranchId")
     private Manager manager;
 
+
     // orderdetailList -> Menu 단방향
     //@OneToMany(mappedBy = "menu")
     //@JsonBackReference
     //private List<OrderDetail> orderDetailList = new ArrayList<>();
-
 
 }
