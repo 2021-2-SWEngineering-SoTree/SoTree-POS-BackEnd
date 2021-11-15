@@ -2,7 +2,8 @@ package sogong.restaurant.domain;
 
 import lombok.*;
 
-import javax.persistence.*;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 
 @Entity
 @Setter
@@ -11,14 +12,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Builder
 @DiscriminatorValue(value = MenuOrder.OrderType.Values.TABLE_ORDER)
-public class TableOrder extends MenuOrder{
+public class TableOrder extends MenuOrder {
 
-//    @Id
-//    @Column(name = "TableOrderId")
-//    @GeneratedValue(strategy= GenerationType.IDENTITY)
-//    private Long id;
     private int seatNumber;
-    private Boolean isSeated;
-
-
 }

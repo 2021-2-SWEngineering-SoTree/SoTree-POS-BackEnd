@@ -3,6 +3,7 @@ package sogong.restaurant.domain;
 import lombok.*;
 
 import javax.persistence.*;
+
 @Entity
 @Setter
 @Getter
@@ -13,17 +14,18 @@ public class OrderDetail {
 
     @Id
     @Column(name = "OrderDetailId")
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private int quantity;
+    private Boolean isSeated;
 
     @ManyToOne
-    @JoinColumn(name="MenuId")
+    @JoinColumn(name = "MenuId")
     private Menu menu;
 
     @ManyToOne
-    @JoinColumn(name="OrderId")
+    @JoinColumn(name = "OrderId")
     private MenuOrder menuOrder;
 
 }
