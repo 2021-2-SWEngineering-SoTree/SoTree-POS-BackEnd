@@ -15,7 +15,8 @@ import java.util.List;
 public class orderVO {
 
     private Long orderId;
-    private int seatNumber;
+    private int seatNumber = -1;
+    private int takeoutTicketNumber = -1;
     private int totalPrice;
     private List<OrderDetailSummary> orderDetailSummaries;
 
