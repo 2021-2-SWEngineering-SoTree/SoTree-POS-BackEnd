@@ -10,10 +10,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface OrderDetailRepository extends JpaRepository<OrderDetail,Long> {
-    Optional<List<OrderDetail>> findAllByMenuOrder(MenuOrder menuOrder);
+public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
     Optional<List<OrderDetail>> findOrderDetailByMenuOrder(MenuOrder menuorder);
+
     Optional<List<OrderDetail>> findOrderDetailByMenuOrderAndMenu(MenuOrder menuOrder, Menu menu);
+
+    List<OrderDetailSummary> findAllByMenuOrder(MenuOrder menuOrder);
 }
+
 
 

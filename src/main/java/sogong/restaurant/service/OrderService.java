@@ -49,15 +49,9 @@ public class OrderService {
                 .findAny();
 
         if (tableOrder.isPresent()) {
-            // orderDetails
-            List<OrderDetail> orderDetails = orderDetailRepository.findAllByMenuOrder(tableOrder.get()).
-                    orElseGet(ArrayList::new);
+            List<OrderDetailSummary> orderDetailSummary = orderDetailRepository.findAllByMenuOrder(tableOrder.get());
 
-            for (OrderDetail s : orderDetails) {
-                zipOrderDetail.put(s.getMenu().getMenuName(), Long.valueOf(s.getQuantity()));
-            }
-
-            ret = Optional.of(new orderVO(tableOrder.get().getId(), seatNumber, tableOrder.get().getTotalPrice(), zipOrderDetail));
+            ret = Optional.of(new orderVO(tableOrder.get().getId(), seatNumber, tableOrder.get().getTotalPrice(), orderDetailSummary));
         }
         return ret;
     }

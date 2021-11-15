@@ -146,7 +146,7 @@ public class OrderController {
         // new orderVO(-1l,-1,-1, Map.of()) : default 값 (order 존재 하지 않음)
         for (int seatNumber = 1; seatNumber <= totalTable; seatNumber++) {
             orderVO orderVOOptional = orderService.getTableOrderByBranchIdAndSeatNumber(branchId, seatNumber)
-                    .orElse(new orderVO(-1L, -1, -1, Map.of()));
+                    .orElse(new orderVO(-1L, -1, -1, new ArrayList<>()));
             orderDetailList.add(orderVOOptional);
         }
         System.out.println(orderDetailList);
@@ -158,10 +158,15 @@ public class OrderController {
 
         // new orderVO(-1l,-1,-1, Map.of()) : default 값 (order 존재 하지 않음)
         return orderService.getTableOrderByBranchIdAndSeatNumber(branchId, seatNumber)
-                .orElse(new orderVO(-1L, -1, -1, Map.of()));
+                .orElse(new orderVO(-1L, -1, -1, new ArrayList<>()));
         //if(oVO.isEmpty()) throw new NoSuchElementException("현재 좌석에 주문이 없습니다.");
 
     }
+
+//    @PostMapping("/addOrderDetail")
+//    public Long addOrderDetail(@RequestBody newOrderVO){
+//
+//    }
 
 }
 

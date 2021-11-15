@@ -4,8 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import sogong.restaurant.repository.OrderDetailSummary;
 
-import java.util.Map;
+import java.util.List;
 
 @Getter
 @Setter
@@ -16,7 +17,7 @@ public class orderVO {
     private Long orderId;
     private int seatNumber;
     private int totalPrice;
-    private Map<String, Long> orderDetails;
+    private List<OrderDetailSummary> orderDetailSummaries;
 
 
 }
