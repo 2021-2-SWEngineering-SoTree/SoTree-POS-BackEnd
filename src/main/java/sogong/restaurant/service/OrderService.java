@@ -2,6 +2,7 @@ package sogong.restaurant.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sogong.restaurant.VO.orderVO;
 import sogong.restaurant.domain.OrderDetail;
 import sogong.restaurant.domain.TableOrder;
 import sogong.restaurant.domain.TakeoutOrder;
@@ -28,17 +29,17 @@ public class OrderService {
     @Autowired
     MenuRepository menuRepository;
 
-    public List<OrderDetail> getTableOrderByBranchIdAndSeatNumber(Long BranchId, int seatNumber) {
+    public Optional<orderVO> getTableOrderByBranchIdAndSeatNumber(Long BranchId, int seatNumber) {
 
         //나중에 현재 식사하고 있는 주문에 대한 정보 받아오는 것 로직 추가해야함.
         // --> validDuplicateTableOrder
-        List<OrderDetail> ret = new ArrayList<>();
-        // Map<String,Long> zipOrderDetail = new HashMap<>();
+        Optional<orderVO> ret = Optional.empty();
+        Map<String, Long> zipOrderDetail = new HashMap<>();
 
         List<TableOrder> tableOrderList = tableOrderRepository
                 .findAllByManager(managerRepository.findById(BranchId)
                         .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다.")));
-
+        System.out.println(tableOrderList);
 
         // list 중 파라미터의 seatnumber와 동일한 좌석 번호를 가진 order 찾기
         // 없으면 error
@@ -49,14 +50,14 @@ public class OrderService {
 
         if (tableOrder.isPresent()) {
             // orderDetails
-            ret = orderDetailRepository.findAllByMenuOrder(tableOrder.get()).
+            List<OrderDetail> orderDetails = orderDetailRepository.findAllByMenuOrder(tableOrder.get()).
                     orElseGet(ArrayList::new);
 
-//            for (OrderDetail s : orderDetails) {
-//                zipOrderDetail.put(s.getMenu().getMenuName(), Long.valueOf(s.getQuantity()));
-//            }
-//
-//            ret = Optional.of(new orderVO(tableOrder.get().getId(), seatNumber, tableOrder.get().getTotalPrice(), zipOrderDetail));
+            for (OrderDetail s : orderDetails) {
+                zipOrderDetail.put(s.getMenu().getMenuName(), Long.valueOf(s.getQuantity()));
+            }
+
+            ret = Optional.of(new orderVO(tableOrder.get().getId(), seatNumber, tableOrder.get().getTotalPrice(), zipOrderDetail));
         }
         return ret;
     }

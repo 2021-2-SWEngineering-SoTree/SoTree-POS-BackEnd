@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sogong.restaurant.VO.newOrderVO;
+import sogong.restaurant.VO.orderVO;
 import sogong.restaurant.domain.*;
 import sogong.restaurant.repository.EmployeeRepository;
 import sogong.restaurant.repository.ManagerRepository;
@@ -76,7 +77,8 @@ public class OrderController {
 
         order.setOrderType(MenuOrder.OrderType.TABLE_ORDER);
         order.setSeatNumber(oVO.getSeatNumber());
-        order.setIsSeated(oVO.getIsSeated());
+        //order.setIsSeated(oVO.getIsSeated());
+        order.setIsSeated(Boolean.TRUE);
 
         // branchId로 find manager
         order.setTotalPrice(oVO.getTotalPrice());
@@ -134,23 +136,29 @@ public class OrderController {
     }
 
     @PostMapping("/getTableNumber/{branchId}/{totalTable}")
-    public List<List<OrderDetail>> getAllTableOrder(@PathVariable(value = "branchId") Long branchId, @PathVariable(value = "totalTable") int totalTable) {
-        List<List<OrderDetail>> orderDetailList = new ArrayList<>();
+    public List<orderVO> getAllTableOrder(@PathVariable(value = "branchId") Long branchId, @PathVariable(value = "totalTable") int totalTable) {
+        List<orderVO> orderDetailList = new ArrayList<>();
 
         if (totalTable < 1) {
             throw new IllegalStateException("전체 좌석의 번호는 1보다 커야합니다.");
         }
 
+        // new orderVO(-1l,-1,-1, Map.of()) : default 값 (order 존재 하지 않음)
         for (int seatNumber = 1; seatNumber <= totalTable; seatNumber++) {
-            orderDetailList.add(orderService.getTableOrderByBranchIdAndSeatNumber(branchId, seatNumber));
+            orderVO orderVOOptional = orderService.getTableOrderByBranchIdAndSeatNumber(branchId, seatNumber)
+                    .orElse(new orderVO(-1L, -1, -1, Map.of()));
+            orderDetailList.add(orderVOOptional);
         }
+        System.out.println(orderDetailList);
         return orderDetailList;
     }
 
     @PostMapping("/getOneTableInfo/{branchId}/{seatNumber}")
-    public List<OrderDetail> getOneTableOrder(@PathVariable(value = "branchId") Long branchId, @PathVariable(value = "seatNumber") int seatNumber) {
+    public orderVO getOneTableOrder(@PathVariable(value = "branchId") Long branchId, @PathVariable(value = "seatNumber") int seatNumber) {
 
-        return orderService.getTableOrderByBranchIdAndSeatNumber(branchId, seatNumber);
+        // new orderVO(-1l,-1,-1, Map.of()) : default 값 (order 존재 하지 않음)
+        return orderService.getTableOrderByBranchIdAndSeatNumber(branchId, seatNumber)
+                .orElse(new orderVO(-1L, -1, -1, Map.of()));
         //if(oVO.isEmpty()) throw new NoSuchElementException("현재 좌석에 주문이 없습니다.");
 
     }
