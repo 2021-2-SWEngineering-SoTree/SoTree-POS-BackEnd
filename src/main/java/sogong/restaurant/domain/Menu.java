@@ -29,9 +29,10 @@ public class Menu {
     @JoinColumn(name="BranchId")
     private Manager manager;
 
+    /*
     @OneToMany(mappedBy = "menu")
     private List<OrderDetail> orderDetailList = new ArrayList<>();
-
+    */
 
 
 }
