@@ -33,6 +33,5 @@
 ## Sprint
 ### 1. [Sprint #1 (11/3~11/9)](https://github.com/2021-2-SWEngineering-SoTree/SoTree-POS-BackEnd/issues/4)
 
-* Menu(메뉴), Stock(재고)에 대한 Repository / Service / Controller 구현
-* 유저 로그인 
+### 2. [Sprint #2 (11/10~11/16)](https://github.com/2021-2-SWEngineering-SoTree/SoTree-POS-BackEnd/issues/5)
 
