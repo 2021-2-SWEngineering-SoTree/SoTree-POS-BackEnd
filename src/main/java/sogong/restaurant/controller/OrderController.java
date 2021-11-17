@@ -132,7 +132,8 @@ public class OrderController {
 
         orderService.addTakeoutOrder(order, orderDetails);
 
-        return "OK";
+        return String.valueOf(order.getId());
+
     }
 
     @PostMapping("/getTableOrder/{branchId}/{totalTable}")
