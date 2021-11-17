@@ -7,7 +7,7 @@ import sogong.restaurant.VO.menuVO;
 import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.Menu;
 import sogong.restaurant.domain.MenuIngredient;
-import sogong.restaurant.repository.ManagerRepository;
+import sogong.restaurant.service.ManagerService;
 import sogong.restaurant.service.MenuIngredientService;
 import sogong.restaurant.service.MenuService;
 
@@ -20,13 +20,13 @@ public class MenuController {
 
     private final MenuService menuService;
     private final MenuIngredientService menuIngredientService;
-    private final ManagerRepository managerRepository;
+    private final ManagerService managerService;
 
     @Autowired
-    public MenuController(MenuService menuService, MenuIngredientService menuIngredientService, ManagerRepository managerRepository) {
+    public MenuController(MenuService menuService, MenuIngredientService menuIngredientService, ManagerService managerService) {
         this.menuService = menuService;
         this.menuIngredientService = menuIngredientService;
-        this.managerRepository = managerRepository;
+        this.managerService = managerService;
     }
 
 
@@ -64,17 +64,13 @@ public class MenuController {
         }
         System.out.println("menu" + mvo.getManagerId());
 
-        Optional<Manager> manager = managerRepository.findById(mvo.getManagerId());
-
-        if (manager.isEmpty()) {
-            System.out.println("blank manager");
-            return "null manager";
-        }
+        Manager manager = managerService.getOneManager(mvo.getManagerId())
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
 
         menu.setMenuName(mvo.getMenuName());
         menu.setMenuCategory(mvo.getMenuCategory());
         menu.setPrice(mvo.getPrice());
-        menu.setManager(manager.get());
+        menu.setManager(manager);
         menuService.saveMenu(menu);
 
         for (MenuIngredient menuIngredient : mvo.getMenuIngredientLists()) {
@@ -89,25 +85,28 @@ public class MenuController {
 
     @PutMapping("/{id}")
     public String updateMenu(@RequestBody menuVO mvo) {
-        Optional<Manager> manager = managerRepository.findById(mvo.getManagerId());
-        if (!manager.isPresent()) {
-            return "null manager";
+        Manager manager = managerService.getOneManager(mvo.getManagerId())
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
+
+        Menu menu = menuService.getOneMenu(mvo.getMenuName(), manager)
+                .orElseThrow(() -> new NoSuchElementException("해당 메뉴가 없습니다."));
+
+        // 메뉴 예외 처리
+        if (mvo.getMenuName() == null || mvo.getMenuCategory() == null || mvo.getPrice() == 0) {
+            System.out.println("blank!");
+            return "null input";
         }
 
-        Optional<Menu> menuo = menuService.getOneMenu(mvo.getMenuName(), manager.get());
-
-        if (menuo.isEmpty()) {
-            return "null menu";
-        }
-
-
-        Menu menu = menuo.get();
-
-        menu.setMenuName(mvo.getMenuName());
         menu.setMenuCategory(mvo.getMenuCategory());
         menu.setPrice(mvo.getPrice());
 
-        menuService.saveMenu(menu);
+        // 이름 변경 안 됐을 때, 중복검증 없음
+        if (mvo.getMenuName().equals(menu.getMenuName())) {
+            menuService.updateMenuWithoutName(menu);
+        } else {
+            menuService.saveMenu(menu);
+        }
+
         return "redirect:/";
     }
 
@@ -119,19 +118,12 @@ public class MenuController {
         }
 
 
-        Optional<Manager> manager = managerRepository.findById(mvo.getManagerId());
-        if (!manager.isPresent()) {
-            return "null manager";
-        }
+        Manager manager = managerService.getOneManager(mvo.getManagerId())
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
 
-        Optional<Menu> menuo = menuService.getOneMenu(mvo.getMenuName(), manager.get());
+        Menu menu = menuService.getOneMenu(mvo.getMenuName(), manager)
+                .orElseThrow(() -> new NoSuchElementException("해당 메뉴가 없습니다."));
 
-        if (menuo.isEmpty()) {
-            return "null menu";
-        }
-
-
-        Menu menu = menuo.get();
         menuService.deleteMenu(menu.getId());
         return "redirect:/";
     }
@@ -142,7 +134,7 @@ public class MenuController {
 
         System.out.println("managerId = " + managerId);
 
-        Manager manager = managerRepository.findById(Long.parseLong(managerId))
+        Manager manager = managerService.getOneManager(Long.parseLong(managerId))
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
 
         return menuService.getAllMenu(manager);
@@ -177,32 +169,32 @@ public class MenuController {
 
         String menuName = params.get("menuName");
         Long managerId = Long.parseLong(params.get("managerId"));
-        Optional<Manager> manager = managerRepository.findById(managerId);
-        if (manager.isEmpty()) {
-            return null;
-        }
+        Manager manager = managerService.getOneManager(managerId)
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
 
-        Optional<Menu> menu = menuService.getOneMenu(menuName, manager.get());
-
-        System.out.println("menu.get().getMenuName() = " + menu.get().getMenuName());
+        Menu menu = menuService.getOneMenu(menuName, manager)
+                .orElseThrow(() -> new NoSuchElementException("해당 메뉴가 없습니다."));
 
 
-        List<MenuIngredient> menuIngredients = menuIngredientService.getMenuIngredientByMenu(menu.get());
+        System.out.println("menu.get().getMenuName() = " + menu.getMenuName());
+
+
+        List<MenuIngredient> menuIngredients = menuIngredientService.getMenuIngredientByMenu(menu);
 
         List<Map<String, String>> r = new ArrayList<>();
 
         Map<String, String> paramss = new HashMap<>();
-        paramss.put("menuName", menu.get().getMenuName());
-        paramss.put("price", String.valueOf(menu.get().getPrice()));
-        paramss.put("menuCategory", menu.get().getMenuCategory());
+        paramss.put("menuName", menu.getMenuName());
+        paramss.put("price", String.valueOf(menu.getPrice()));
+        paramss.put("menuCategory", menu.getMenuCategory());
 
         //r.add(params); id, ingredientName, count만 사용.
 
-        for (int i = 0; i < menuIngredients.size(); i++) {
+        for (MenuIngredient menuIngredient : menuIngredients) {
             Map<String, String> param = new HashMap<>();
-            param.put("id", String.valueOf(menuIngredients.get(i).getId()));
-            param.put("ingredientName", menuIngredients.get(i).getIngredientName());
-            param.put("count", String.valueOf(menuIngredients.get(i).getCount()));
+            param.put("id", String.valueOf(menuIngredient.getId()));
+            param.put("ingredientName", menuIngredient.getIngredientName());
+            param.put("count", String.valueOf(menuIngredient.getCount()));
 
             r.add(param);
         }

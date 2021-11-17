@@ -25,9 +25,14 @@ public class StockService {
         return stockRepository.save(stock).getId();
     }
 
+    @Transactional
+    public Long updateStockWithoutStockName(Stock stock) {
+        return stockRepository.save(stock).getId();
+    }
+
     // 같은 지점에서 재고 이름 중복 방지
     private void validateDuplicateStock(Stock stock) {
-        stockRepository.findStockByStockNameAndManager(stock.getStockName(), stock.getManager())
+        stockRepository.findStockByManagerAndStockName(stock.getManager(), stock.getStockName())
                 .ifPresent(s -> {
                     throw new IllegalStateException("이미 존재하는 재고입니다.");
                 });
@@ -37,8 +42,8 @@ public class StockService {
         return stockRepository.findAllByManager(manager);
     }
 
-    public Optional<Stock> getOneStock(String stockName) {
-        return stockRepository.findStockByStockName(stockName);
+    public Optional<Stock> getOneStock(Manager manager, String stockName) {
+        return stockRepository.findStockByManagerAndStockName(manager, stockName);
     }
 
     @Transactional

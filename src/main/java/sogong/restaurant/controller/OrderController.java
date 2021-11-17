@@ -8,7 +8,7 @@ import sogong.restaurant.VO.newOrderVO;
 import sogong.restaurant.VO.orderVO;
 import sogong.restaurant.domain.*;
 import sogong.restaurant.repository.EmployeeRepository;
-import sogong.restaurant.repository.ManagerRepository;
+import sogong.restaurant.service.ManagerService;
 import sogong.restaurant.service.OrderDetailService;
 import sogong.restaurant.service.OrderService;
 
@@ -30,7 +30,7 @@ public class OrderController {
     @Autowired
     private final OrderDetailService orderDetailService;
     @Autowired
-    private final ManagerRepository managerRepository;
+    private final ManagerService managerService;
     @Autowired
     private final EmployeeRepository employeeRepository;
 
@@ -55,7 +55,7 @@ public class OrderController {
     public String addTableOrder(@RequestBody newOrderVO oVO) {
 
         // Manager(branchId) & 주문 받은 직원
-        Manager manager = managerRepository.findById(oVO.getManagerId())
+        Manager manager = managerService.getOneManager(oVO.getManagerId())
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
         Employee employee = employeeRepository.findById(oVO.getEmployeeId())
                 .orElseThrow(() -> new NoSuchElementException("해당 직원이 존재하지 않습니다."));
@@ -99,7 +99,7 @@ public class OrderController {
         MenuOrder.OrderType orderType = MenuOrder.OrderType.valueOf(oVO.getOrderType());
 
         // Manager(branchId) & 주문 받은 직원
-        Manager manager = managerRepository.findById(oVO.getManagerId())
+        Manager manager = managerService.getOneManager(oVO.getManagerId())
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
         Employee employee = employeeRepository.findById(oVO.getEmployeeId())
                 .orElseThrow(() -> new NoSuchElementException("해당 직원이 존재하지 않습니다."));

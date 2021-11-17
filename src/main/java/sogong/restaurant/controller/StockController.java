@@ -10,7 +10,7 @@ import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.Stock;
 import sogong.restaurant.domain.StockDetail;
 import sogong.restaurant.repository.EmployeeRepository;
-import sogong.restaurant.repository.ManagerRepository;
+import sogong.restaurant.service.ManagerService;
 import sogong.restaurant.service.StockDetailService;
 import sogong.restaurant.service.StockService;
 
@@ -27,7 +27,7 @@ public class StockController {
     @Autowired
     private final StockDetailService stockDetailService;
     @Autowired
-    private final ManagerRepository managerRepository;
+    private final ManagerService managerService;
     @Autowired
     private final EmployeeRepository employeeRepository;
 
@@ -38,8 +38,8 @@ public class StockController {
 
         Stock stock = new Stock();
 
-        Manager manager = managerRepository.findById(stockvo.getManagerId())
-                .orElseThrow(() -> new NoSuchElementException());
+        Manager manager = managerService.getOneManager(stockvo.getManagerId())
+                .orElseThrow(() -> new NoSuchElementException("해당 재고가 존재하지 않습니다."));
 
         stock.setStockName(stockvo.getStockName());
         stock.setQuantity(stockvo.getQuantity());
@@ -47,11 +47,10 @@ public class StockController {
         stockService.saveStock(stock);
 
         System.out.println(stockvo.getEmployeeId());
-        Employee employee = employeeRepository.findById(stockvo.getEmployeeId())
-                .orElseThrow(() ->
-                        new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
+
 
         for (StockDetail stockDetail : stockvo.getStockDetailList()) {
+            Employee employee = stockDetail.getEmployee();
             stockDetail.setStock(stock);
             stockDetail.setEmployee(employee);
             stockDetailService.addStockDetail(stockDetail);
@@ -62,12 +61,19 @@ public class StockController {
 
     @PutMapping("/{id}")
     public String updateStock(@RequestBody StockVO stockvo) {
-        Stock stock = stockService.getOneStock(stockvo.getStockName()).get();
+        Stock stock = stockService.getOneStock(managerService.getOneManager(stockvo.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
+                        stockvo.getStockName())
+                .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
 
         stock.setStockName(stockvo.getStockName());
         stock.setQuantity(stockvo.getQuantity());
 
-        stockService.saveStock(stock);
+        // 이름 변경 안 됐을 때, 중복검증 없음
+        if (stockvo.getStockName().equals(stock.getStockName())) {
+            stockService.updateStockWithoutStockName(stock);
+        } else {
+            stockService.saveStock(stock);
+        }
 
         return "redirect:/";
     }
@@ -80,7 +86,9 @@ public class StockController {
         for (StockDetail stockDetail : stockvo.getStockDetailList()) {
             stockDetailService.deleteStockDetail(stockDetail.getId());
         }
-        Stock stock = stockService.getOneStock(stockvo.getStockName()).get();
+        Stock stock = stockService.getOneStock(managerService.getOneManager(stockvo.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
+                        stockvo.getStockName())
+                .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
         stockService.deleteStock(stock.getId());
 
         return "redirect:/";
@@ -90,8 +98,9 @@ public class StockController {
     public List<Stock> getAllStock(@RequestBody String managerId) {
         //managerId 숫자만 body에 넣어서 요청하면 된다.
 
-        Optional<Manager> manager = managerRepository.findById(Long.parseLong(managerId));
-        return stockService.getAllStock(manager.get());
+        Manager manager = managerService.getOneManager(Long.parseLong(managerId))
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
+        return stockService.getAllStock(manager);
     }
 
 //    @PostMapping("/isPresent")
@@ -113,21 +122,24 @@ public class StockController {
 //        }
 //    }
 
+    // manager 필요해서 파라미터 stockVO로 수정함
     @PostMapping("/getByName")
-    public List<Map<String, String>> getByName(@RequestBody String stockName) {
+    public List<Map<String, String>> getByName(@RequestBody StockVO stockVO) {
 
-        Optional<Stock> stock = stockService.getOneStock(stockName);
+        Stock stock = stockService.getOneStock(managerService.getOneManager(stockVO.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
+                        stockVO.getStockName())
+                .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
 
-        System.out.println("stock.get().getStockName() = " + stock.get().getStockName());
+        System.out.println("stock.get().getStockName() = " + stock.getStockName());
 
 
-        List<StockDetail> stockDetails = stockDetailService.getStockDetailByStock(stock.get());
+        List<StockDetail> stockDetails = stockDetailService.getStockDetailByStock(stock);
 
         List<Map<String, String>> r = new ArrayList<>();
 
         Map<String, String> params = new HashMap<>();
-        params.put("stockName", stock.get().getStockName());
-        params.put("quantity", String.valueOf(stock.get().getQuantity()));
+        params.put("stockName", stock.getStockName());
+        params.put("quantity", String.valueOf(stock.getQuantity()));
 
         r.add(params);
 
@@ -141,5 +153,23 @@ public class StockController {
         }
 
         return r;
+    }
+
+    // stockVO로 stock & stockDetail 넣어주면 거기에 stockdetail 추가
+    // addStock 과 달리 새로운 stock을 추가하는게 아니라, 기존 stock에 stockdetail만 추가가
+    @PostMapping("/addStockDetail")
+    public String addStockDetail(@RequestBody StockVO stockVO) {
+
+        Stock stock = stockService.getOneStock(managerService.getOneManager(stockVO.getManagerId())
+                        .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")), stockVO.getStockName())
+                .orElseThrow(() -> new NoSuchElementException("해당 재고가 존재하지 않습니다."));
+
+        for (StockDetail stockDetail : stockVO.getStockDetailList()) {
+            Employee employee = stockDetail.getEmployee();
+            stockDetail.setStock(stock);
+            stockDetail.setEmployee(employee);
+            stockDetailService.addStockDetail(stockDetail);
+        }
+        return "OK!";
     }
 }

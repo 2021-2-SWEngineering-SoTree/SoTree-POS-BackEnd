@@ -23,6 +23,11 @@ public class MenuService {
         return menuRepository.save(menu).getId();
     }
 
+    @Transactional
+    public Long updateMenuWithoutName(Menu menu) {
+        return menuRepository.save(menu).getId();
+    }
+
     // 같은 지점에서 메뉴 이름 중복 방지
     private void validateDuplicateMenu(Menu menu) {
         menuRepository.findMenuByMenuNameAndManager(menu.getMenuName(), menu.getManager())
