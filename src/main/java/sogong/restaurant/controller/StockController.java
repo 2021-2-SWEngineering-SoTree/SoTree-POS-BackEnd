@@ -39,7 +39,7 @@ public class StockController {
         Stock stock = new Stock();
 
         Manager manager = managerService.getOneManager(stockvo.getManagerId())
-                .orElseThrow(() -> new NoSuchElementException("해당 재고가 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
 
         stock.setStockName(stockvo.getStockName());
         stock.setQuantity(stockvo.getQuantity());
@@ -61,9 +61,9 @@ public class StockController {
 
     @PutMapping("/{id}")
     public String updateStock(@RequestBody StockVO stockvo) {
-        Stock stock = stockService.getOneStock(managerService.getOneManager(stockvo.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
-                        stockvo.getStockName())
-                .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
+        Stock stock = stockService.getOneStock(managerService.getOneManager(stockvo.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다.")),
+                stockvo.getStockName())
+                .orElseThrow(() -> new NoSuchElementException("해당 재고가  존재하지 않습니다."));
 
         stock.setStockName(stockvo.getStockName());
         stock.setQuantity(stockvo.getQuantity());
@@ -86,9 +86,9 @@ public class StockController {
         for (StockDetail stockDetail : stockvo.getStockDetailList()) {
             stockDetailService.deleteStockDetail(stockDetail.getId());
         }
-        Stock stock = stockService.getOneStock(managerService.getOneManager(stockvo.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
-                        stockvo.getStockName())
-                .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
+        Stock stock = stockService.getOneStock(managerService.getOneManager(stockvo.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다.")),
+                stockvo.getStockName())
+                .orElseThrow(() -> new NoSuchElementException("해당 재고가 존재하지 않습니다."));
         stockService.deleteStock(stock.getId());
 
         return "redirect:/";
@@ -99,7 +99,7 @@ public class StockController {
         //managerId 숫자만 body에 넣어서 요청하면 된다.
 
         Manager manager = managerService.getOneManager(Long.parseLong(managerId))
-                .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
         return stockService.getAllStock(manager);
     }
 
@@ -126,9 +126,9 @@ public class StockController {
     @PostMapping("/getByName")
     public List<Map<String, String>> getByName(@RequestBody StockVO stockVO) {
 
-        Stock stock = stockService.getOneStock(managerService.getOneManager(stockVO.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
-                        stockVO.getStockName())
-                .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
+        Stock stock = stockService.getOneStock(managerService.getOneManager(stockVO.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다.")),
+                stockVO.getStockName())
+                .orElseThrow(() -> new NoSuchElementException("해당 재고가 존재하지 않습니다."));
 
         System.out.println("stock.get().getStockName() = " + stock.getStockName());
 
@@ -161,7 +161,7 @@ public class StockController {
     public String addStockDetail(@RequestBody StockVO stockVO) {
 
         Stock stock = stockService.getOneStock(managerService.getOneManager(stockVO.getManagerId())
-                        .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")), stockVO.getStockName())
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다.")), stockVO.getStockName())
                 .orElseThrow(() -> new NoSuchElementException("해당 재고가 존재하지 않습니다."));
 
         for (StockDetail stockDetail : stockVO.getStockDetailList()) {

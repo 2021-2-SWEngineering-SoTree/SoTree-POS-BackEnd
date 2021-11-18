@@ -65,7 +65,7 @@ public class MenuController {
         System.out.println("menu" + mvo.getManagerId());
 
         Manager manager = managerService.getOneManager(mvo.getManagerId())
-                .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
 
         menu.setMenuName(mvo.getMenuName());
         menu.setMenuCategory(mvo.getMenuCategory());
@@ -86,10 +86,10 @@ public class MenuController {
     @PutMapping("/{id}")
     public String updateMenu(@RequestBody menuVO mvo) {
         Manager manager = managerService.getOneManager(mvo.getManagerId())
-                .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
 
         Menu menu = menuService.getOneMenu(mvo.getMenuName(), manager)
-                .orElseThrow(() -> new NoSuchElementException("해당 메뉴가 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
 
         // 메뉴 예외 처리
         if (mvo.getMenuName() == null || mvo.getMenuCategory() == null || mvo.getPrice() == 0) {
@@ -119,10 +119,10 @@ public class MenuController {
 
 
         Manager manager = managerService.getOneManager(mvo.getManagerId())
-                .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
 
         Menu menu = menuService.getOneMenu(mvo.getMenuName(), manager)
-                .orElseThrow(() -> new NoSuchElementException("해당 메뉴가 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
 
         menuService.deleteMenu(menu.getId());
         return "redirect:/";
@@ -170,10 +170,10 @@ public class MenuController {
         String menuName = params.get("menuName");
         Long managerId = Long.parseLong(params.get("managerId"));
         Manager manager = managerService.getOneManager(managerId)
-                .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
 
         Menu menu = menuService.getOneMenu(menuName, manager)
-                .orElseThrow(() -> new NoSuchElementException("해당 메뉴가 없습니다."));
+                .orElseThrow(() -> new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
 
 
         System.out.println("menu.get().getMenuName() = " + menu.getMenuName());
