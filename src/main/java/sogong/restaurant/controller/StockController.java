@@ -46,11 +46,13 @@ public class StockController {
         stock.setManager(manager);
         stockService.saveStock(stock);
 
-        System.out.println(stockvo.getEmployeeId());
-
 
         for (StockDetail stockDetail : stockvo.getStockDetailList()) {
-            Employee employee = stockDetail.getEmployee();
+            System.out.println(stockDetail);
+            //Employee employee = stockDetail.getEmployee();
+            Employee employee = employeeRepository.findById(stockvo.getEmployeeId())
+                    .orElseThrow(() -> new NoSuchElementException("해당 직원이 없습니다."));
+            System.out.println("직원 : "+ employee.getId());
             stockDetail.setStock(stock);
             stockDetail.setEmployee(employee);
             stockDetailService.addStockDetail(stockDetail);
