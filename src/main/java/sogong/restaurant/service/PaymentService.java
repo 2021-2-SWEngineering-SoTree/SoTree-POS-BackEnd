@@ -64,7 +64,7 @@ public class PaymentService {
         //여기서 통계에 관한 처리를 해줘야 할듯
 
         MenuOrder menuOrder = payment.get().getMenuOrder();
-        if(menuOrder.getOrderType().equals(MenuOrder.OrderType.TABLE_ORDER.getValue())){
+        if(menuOrder.getOrderType().equals(MenuOrder.OrderType.TABLE_ORDER)){
             TableOrder tableOrder = (TableOrder) menuOrder;
             tableOrder.setIsSeated(false);
             menuOrderRepository.save(tableOrder);
