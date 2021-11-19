@@ -57,8 +57,12 @@ public class OrderController {
         // Manager(branchId) & 주문 받은 직원
         Manager manager = managerService.getOneManager(oVO.getManagerId())
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
-        Employee employee = employeeRepository.findById(oVO.getEmployeeId())
-                .orElseThrow(() -> new NoSuchElementException("해당 직원이 존재하지 않습니다."));
+
+        Employee employee = null;
+        if(oVO.getEmployeeId()!=-1) {
+            employee = employeeRepository.findById(oVO.getEmployeeId())
+                    .orElseThrow(() -> new NoSuchElementException("해당 직원이 존재하지 않습니다."));
+        }
 
         // 예외 처리
         if (OrderType.valueOf(oVO.getOrderType()) != OrderType.TABLE_ORDER) {
@@ -101,9 +105,12 @@ public class OrderController {
         // Manager(branchId) & 주문 받은 직원
         Manager manager = managerService.getOneManager(oVO.getManagerId())
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
-        Employee employee = employeeRepository.findById(oVO.getEmployeeId())
-                .orElseThrow(() -> new NoSuchElementException("해당 직원이 존재하지 않습니다."));
 
+        Employee employee = null;
+        if(oVO.getEmployeeId()!=-1) {
+            employee = employeeRepository.findById(oVO.getEmployeeId())
+                    .orElseThrow(() -> new NoSuchElementException("해당 직원이 존재하지 않습니다."));
+        }
         // 예외 처리
         if (OrderType.valueOf(oVO.getOrderType()) != OrderType.TAKEOUT_ORDER) {
             System.out.println(oVO.getOrderType());

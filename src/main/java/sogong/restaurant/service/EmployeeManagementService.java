@@ -76,7 +76,11 @@ public class EmployeeManagementService {
                 List<Payment> all2 = paymentRepository.findByManagerAndDateBetween(branchId, stdate, endate);
                 for(int i=0;i<all2.size();i++) {
                     Map<String, String> payRec = new HashMap<>();
-                    payRec.put("이름",all2.get(i).getEmployee().getUser().getPersonName());
+                    if(all2.get(i).getEmployee()==null){
+                        payRec.put("이름",all2.get(i).getManager().getUser().getPersonName());
+                    }
+                    else
+                        payRec.put("이름",all2.get(i).getEmployee().getUser().getPersonName());
                     payRec.put("결제 종류",all2.get(i).getMethod());
                     payRec.put("결제 일자",all2.get(i).getPayTime());
                     payRec.put("주문 번호",String.valueOf(all2.get(i).getMenuOrder().getId()));
@@ -97,7 +101,11 @@ public class EmployeeManagementService {
 
                 for(int i=0;i<all3.size();i++){
                     Map<String, String> orderRec = new HashMap<>();
-                    orderRec.put("이름",all3.get(i).getEmployee().getUser().getPersonName());
+                    if(all3.get(i).getEmployee()==null){
+                        orderRec.put("이름",all3.get(i).getManager().getUser().getPersonName());
+                    }
+                    else
+                        orderRec.put("이름",all3.get(i).getEmployee().getUser().getPersonName());
                     orderRec.put("주문합계",String.valueOf(all3.get(i).getTotalPrice()));
                     orderRec.put("주문번호",String.valueOf(all3.get(i).getId()));
                     MenuOrder.OrderType orderType = all3.get(i).getOrderType();
