@@ -150,8 +150,14 @@ public class OrderService {
                     // 기존 orderDetail 과 수량도 같으면 재고처리 안하고 다음 메뉴에 대한 주문으로 넘어감
                     if (orderDetail.getMenu().equals(menu)) {
                         if (orderDetail.getQuantity() == orderDetailMap.get(key)) {
-                            continue outerloop;
+
+                        } else {  // 수량 변화 있을 때
+                            // addStockDetail 에서 재고 확인 후 이상 없으면 orderdetail 생성
+                            orderDetail.setQuantity(orderDetailMap.get(key));
+                            orderDetailService.addOrderDetail(orderDetail);
+
                         }
+                        continue outerloop;
                     }
                 }
 
@@ -173,6 +179,16 @@ public class OrderService {
                     // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
                     stockDetailService.addStockDetail(stock, stockDetail);
                 }
+
+                // addStockDetail 에서 재고 확인 후 이상 없으면 orderdetail 생성
+                OrderDetail orderDetail = new OrderDetail();
+                orderDetail.setMenuOrder(tableOrder);
+                orderDetail.setMenu(menu);
+                orderDetail.setQuantity(orderDetailMap.get(key));
+                orderDetailService.addOrderDetail(orderDetail);
+                System.out.println("orderDetail");
+                System.out.println("Menu Name =" + orderDetail.getMenu().getMenuName());
+                
             }
         }
         return tableOrder.getId();

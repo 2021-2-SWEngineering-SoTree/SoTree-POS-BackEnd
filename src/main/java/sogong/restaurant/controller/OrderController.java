@@ -91,7 +91,7 @@ public class OrderController {
         order.setTotalPrice(oVO.getTotalPrice());
         // order.setOrderDate(oVO.get);
         order.setStartTime(oVO.getStartTime());
-        order.setEndTime(oVO.getEndTime());
+        //order.setEndTime(oVO.getEndTime());
         order.setEmployee(employee);
         order.setManager(manager);
 
@@ -135,7 +135,7 @@ public class OrderController {
         order.setTotalPrice(oVO.getTotalPrice());
         // order.setOrderDate(oVO.get);
         order.setStartTime(oVO.getStartTime());
-        order.setEndTime(oVO.getEndTime());
+        //order.setEndTime(oVO.getEndTime());
         order.setEmployee(employee);
         order.setManager(manager);
         order.setIsSeated(Boolean.TRUE);
@@ -218,7 +218,7 @@ public class OrderController {
         order.setTotalPrice(oVO.getTotalPrice());
         // order.setOrderDate(oVO.get);
         order.setStartTime(oVO.getStartTime());
-        order.setEndTime(oVO.getEndTime());
+        //order.setEndTime(oVO.getEndTime());
         order.setEmployee(employee);
         // order.setManager(manager);
 
