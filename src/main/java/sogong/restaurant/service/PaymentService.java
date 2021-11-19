@@ -1,5 +1,6 @@
 package sogong.restaurant.service;
 
+import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sogong.restaurant.domain.*;
@@ -21,7 +22,10 @@ public class PaymentService {
     private MenuOrderRepository menuOrderRepository;
     @Autowired
     private ManagerRepository managerRepository;
-
+    @Autowired
+    private MenuRepository menuRepository;
+    @Autowired
+    private MenuStatisticRepository menuStatisticRepository;
 
     public int getFinalPrice(int totalPrice){
         return totalPrice;
@@ -67,9 +71,33 @@ public class PaymentService {
         if(payment.isEmpty()) throw new
                 NoSuchElementException("해당하는 결제 정보가 없습니다.");
 
-        //여기서 통계에 관한 처리를 해줘야 할듯
-
         MenuOrder menuOrder = payment.get().getMenuOrder();
+        //여기서 통계에 관한 처리를 해줘야 할듯
+        String stdate = payment.get().getPayTime().substring(0,10);
+        System.out.println("stdate = " + stdate);
+
+        for(OrderDetail orderDetail : menuOrder.getOrderDetailList()){
+            Menu menu = orderDetail.getMenu();
+            Optional<MenuStatistic> menuStatistic = menuStatisticRepository.findByMenuIdAndBranchIdAndDate(branchId,menu.getId(),stdate);
+            //현재 날짜의 메뉴 통계가 없다면 새로 만들어야 함.
+            if(menuStatistic.isEmpty()) {
+                MenuStatistic menuStatistic1 = new MenuStatistic();
+                menuStatistic1.setMenu(menu);
+                menuStatistic1.setQuantity(orderDetail.getQuantity());
+                menuStatistic1.setManager(optionalManager.get());
+                menuStatistic1.setDate(stdate);
+                menuStatisticRepository.save(menuStatistic1);
+            }
+            //있으면 업데이트해야함.
+            else{
+                menuStatistic.get().setQuantity(menuStatistic.get().getQuantity() + orderDetail.getQuantity());
+                menuStatisticRepository.save(menuStatistic.get());
+            }
+        }
+
+
+
+        //테이블오더 자리 비활성화
         if(menuOrder.getOrderType().equals(MenuOrder.OrderType.TABLE_ORDER)){
             TableOrder tableOrder = (TableOrder) menuOrder;
             tableOrder.setIsSeated(false);
