@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import sogong.restaurant.domain.*;
 import sogong.restaurant.repository.*;
 import sogong.restaurant.service.LoginService;
+import sogong.restaurant.service.UserService;
+import sogong.restaurant.util.GenerateAlphaNumericString;
 import sogong.restaurant.util.JwtTokenProvider;
 
 import java.util.*;
@@ -25,6 +27,7 @@ public class LoginController {
     private final EmployeeRepository employeeRepository;
     private final StockRepository stockRepository;
     private final MenuRepository menuRepository;
+    //private final UserService userService;
 
     @RequestMapping("/login")
     public String login(@RequestBody HashMap<String, String>map){
@@ -44,7 +47,7 @@ public class LoginController {
                 .orElseThrow(() -> new NoSuchElementException());
 
         if(!passwordEncoder.matches(pw,user.getPassword())) {
-            return null;
+            return "wrong password";
         }
             else {
             String token = jwtTokenProvider.createToken(user.getLoginId(), user.getRoles());
@@ -179,6 +182,88 @@ public class LoginController {
         if(menus.isEmpty() || stocks.isEmpty()) return true;
         else return false;
 
+    }
+
+    @PutMapping("/updateUser")
+    public String updateUser(@RequestBody Map<String,String> param){
+
+        //Long userId = Long.parseLong(param.get("userId"));
+        String birthDay = param.get("birthDay");
+        String email = param.get("email");
+        String loginId = param.get("loginId");
+        //String password = param.get("password");
+        String phoneNumber = param.get("phoneNumber");
+        String userName = param.get("userName");
+
+        Optional<User> user = userRepository.findByLoginId(loginId);
+        if(user.isEmpty()) throw new NoSuchElementException("존재하지 않는 유저입니다.");
+
+        User user1 = user.get();
+
+        user1.setLoginId(loginId);
+        user1.setUserName(userName);
+        user1.setPhoneNumber(phoneNumber);
+        //user1.setPassword(passwordEncoder.encode(password));
+        user1.setEmail(email);
+        user1.setBirthDay(birthDay);
+
+        userRepository.save(user1);
+
+        return "OK";
+    }
+
+    @PutMapping("/updateUserPw")
+    public String updateUserPw(@RequestBody Map<String,String>param){
+        String prevPw = param.get("prevPw");
+        String changePw = param.get("changePw");
+        String loginId = param.get("loginId");
+
+        Optional<User> optionalUser = userRepository.findByLoginId(loginId);
+        User user = optionalUser.get();
+
+        if(!passwordEncoder.matches(prevPw,user.getPassword())) throw new IllegalStateException("비밀번호가 틀립니다.");
+
+        user.setPassword(passwordEncoder.encode(changePw));
+        userRepository.save(user);
+        return "OK";
+    }
+
+    @PostMapping("/getUserByLoginId")
+    public User getUserByLoginId(@RequestBody String loginId){
+        return userRepository.findByLoginId(loginId).get();
+    }
+
+    @PostMapping("/findLoginId")
+    public String findLoginId(@RequestBody Map<String,String> param){
+
+        String userName = param.get("userName");
+        String birthDay = param.get("birthDay");
+        String phoneNumber = param.get("phoneNumber");
+        String email = param.get("email");
+
+        Optional<User> user= userRepository.findByUserNameAndBirthDayAndPhoneNumberAndEmail(userName,birthDay,phoneNumber,email);
+        if(user.isEmpty()) throw new NoSuchElementException("존재하지 않는 유저입니다.");
+        else return user.get().getLoginId();
+
+    }
+
+    @PostMapping("/findUserPw")
+    public String findUserPw(@RequestBody Map<String,String> param){
+        String userName = param.get("userName");
+        String loginId = param.get("loginId");
+        String phoneNumber = param.get("phoneNumber");
+        String email = param.get("email");
+
+        Optional<User> user= userRepository.findByUserNameAndLoginIdAndPhoneNumberAndEmail(userName,loginId,phoneNumber,email);
+        if(user.isEmpty()) throw new NoSuchElementException("존재하지 않는 유저입니다.");
+        else {
+            User user1 = user.get();
+            String newPw = GenerateAlphaNumericString.getRandomString(10);
+
+            user1.setPassword(passwordEncoder.encode(newPw));
+            userRepository.save(user1);
+            return newPw;
+        }
     }
 
 }

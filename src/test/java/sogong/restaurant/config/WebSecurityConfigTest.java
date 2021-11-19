@@ -23,4 +23,12 @@ class WebSecurityConfigTest {
         Assertions.assertThat(passwordEncoder.matches(raw,passwordEncoder.encode(raw))).isEqualTo(true);
     }
 
+    @Test
+    void passwordTest(){
+
+        String raw = "asdf";
+        System.out.println("encoded : "+passwordEncoder.encode(raw));
+
+    }
+
 }
