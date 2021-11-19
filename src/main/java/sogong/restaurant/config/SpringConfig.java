@@ -2,16 +2,12 @@ package sogong.restaurant.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import sogong.restaurant.domain.Stock;
-import sogong.restaurant.domain.StockDetail;
 import sogong.restaurant.repository.MenuIngredientRepository;
 import sogong.restaurant.repository.MenuRepository;
 import sogong.restaurant.repository.StockDetailRepository;
 import sogong.restaurant.repository.StockRepository;
 import sogong.restaurant.service.MenuIngredientService;
 import sogong.restaurant.service.MenuService;
-import sogong.restaurant.service.StockDetailService;
-import sogong.restaurant.service.StockService;
 
 @Configuration
 public class SpringConfig {
@@ -37,11 +33,5 @@ public class SpringConfig {
     public MenuIngredientService menuIngredientService() {
         return new MenuIngredientService(menuIngredientRepository);
     }
-
-    @Bean
-    public StockService stockService() { return new StockService(stockRepository);}
-
-    @Bean
-    public StockDetailService stockDetailService() {return new StockDetailService(stockDetailRepository);}
 
 }

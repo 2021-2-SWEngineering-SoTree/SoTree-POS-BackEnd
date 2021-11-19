@@ -1,6 +1,8 @@
 package sogong.restaurant.service;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.Stock;
 import sogong.restaurant.repository.StockRepository;
@@ -10,14 +12,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Transactional
+@Service
+@AllArgsConstructor
 public class StockService {
 
-    private final StockRepository stockRepository;
-
     @Autowired
-    public StockService(StockRepository stockRepository) {
-        this.stockRepository = stockRepository;
-    }
+    private final StockRepository stockRepository;
 
     @Transactional
     public Long saveStock(Stock stock) {
@@ -39,7 +39,7 @@ public class StockService {
     }
 
     public List<Stock> getAllStock(Manager manager) {
-        return stockRepository.findAllByManager(manager);
+        return stockRepository.findAllByManagerAndActive(manager, Boolean.TRUE);
     }
 
     public Optional<Stock> getOneStock(Manager manager, String stockName) {

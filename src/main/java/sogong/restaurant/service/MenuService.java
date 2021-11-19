@@ -36,8 +36,9 @@ public class MenuService {
                 });
     }
 
+    // Active한 메뉴만 뽑기
     public List<Menu> getAllMenu(Manager manager) {
-        return menuRepository.findAllByManager(manager);
+        return menuRepository.findAllByManagerAndActive(manager, Boolean.TRUE);
     }
 
     public Optional<Menu> getOneMenu(String menuName, Manager manager) {

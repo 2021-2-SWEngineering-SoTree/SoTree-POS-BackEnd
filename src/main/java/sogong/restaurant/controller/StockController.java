@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sogong.restaurant.VO.StockVO;
+import sogong.restaurant.VO.StockdetailVO;
 import sogong.restaurant.domain.Employee;
 import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.Stock;
@@ -39,59 +40,92 @@ public class StockController {
         Stock stock = new Stock();
 
         Manager manager = managerService.getOneManager(stockvo.getManagerId())
-                .orElseThrow(() -> new NoSuchElementException("해당 재고가 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
 
         stock.setStockName(stockvo.getStockName());
-        stock.setQuantity(stockvo.getQuantity());
+        // stock.setQuantity(stockvo.getQuantity());
         stock.setManager(manager);
+        stock.setActive(Boolean.TRUE);
         stockService.saveStock(stock);
 
 
-        for (StockDetail stockDetail : stockvo.getStockDetailList()) {
-            System.out.println(stockDetail);
+        for (StockdetailVO stockdetailVO : stockvo.getStockDetailList()) {
+            System.out.println(stockdetailVO);
             //Employee employee = stockDetail.getEmployee();
-            Employee employee = employeeRepository.findById(stockvo.getEmployeeId())
-                    .orElseThrow(() -> new NoSuchElementException("해당 직원이 없습니다."));
-            System.out.println("직원 : "+ employee.getId());
+            // 직원이 없을 수도 있음
+            Employee employee = employeeRepository.findEmployeeByIdAndManager(stockdetailVO.getEmployeeId(), manager.getId())
+                    .orElse(null);
+            // System.out.println("직원 : " + employee.getId());
+
+            StockDetail stockDetail = new StockDetail();
             stockDetail.setStock(stock);
             stockDetail.setEmployee(employee);
-            stockDetailService.addStockDetail(stockDetail);
+            stockDetail.setQuantityChanged(stockdetailVO.getQuantityChanged());
+            // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
+            stockDetailService.addStockDetail(stock, stockDetail);
         }
 
         return "OK";
     }
 
-    @PutMapping("/{id}")
+    // 재고 수정
+    // 재고 양 임의 수정 or StockDetail로 수정
+    @PutMapping("/update")
     public String updateStock(@RequestBody StockVO stockvo) {
+        Manager manager = managerService.getOneManager(stockvo.getManagerId())
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
+
         Stock stock = stockService.getOneStock(managerService.getOneManager(stockvo.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
-                        stockvo.getStockName())
+                stockvo.getStockName())
                 .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
 
-        stock.setStockName(stockvo.getStockName());
-        stock.setQuantity(stockvo.getQuantity());
+        // 재고 양만 수정 가능(임의로)
+        // stock.setQuantity(stockvo.getQuantity());
+
+        for (StockdetailVO stockdetailVO : stockvo.getStockDetailList()) {
+            System.out.println(stockdetailVO);
+            //Employee employee = stockDetail.getEmployee();
+            // 직원이 없을 수도 있음
+            Employee employee = employeeRepository.findEmployeeByIdAndManager(stockdetailVO.getEmployeeId(), manager.getId())
+                    .orElse(null);
+            // System.out.println("직원 : " + employee.getId());
+
+            StockDetail stockDetail = new StockDetail();
+            stockDetail.setStock(stock);
+            stockDetail.setEmployee(employee);
+            stockDetail.setQuantityChanged(stockdetailVO.getQuantityChanged());
+            // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
+            stockDetailService.addStockDetail(stock, stockDetail);
+        }
 
         // 이름 변경 안 됐을 때, 중복검증 없음
-        if (stockvo.getStockName().equals(stock.getStockName())) {
-            stockService.updateStockWithoutStockName(stock);
-        } else {
-            stockService.saveStock(stock);
-        }
+//        if (stockvo.getStockName().equals(stock.getStockName())) {
+//            stockService.updateStockWithoutStockName(stock);
+//        } else {
+//            stockService.saveStock(stock);
+//        }
 
         return "redirect:/";
     }
 
-    //
-    @DeleteMapping("/{id}")
+    // 재고 종류 삭제
+    // stockdetail은 삭제 안함
+    // isActive 속성만 변경
+    @PutMapping("/delete")
     public String deleteStock(@RequestBody StockVO stockvo) {
+        Manager manager = managerService.getOneManager(stockvo.getManagerId())
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
 
         // StockDetail 먼저 삭제
-        for (StockDetail stockDetail : stockvo.getStockDetailList()) {
-            stockDetailService.deleteStockDetail(stockDetail.getId());
-        }
+//        for (StockDetail stockDetail : stockvo.getStockDetailList()) {
+//            stockDetailService.deleteStockDetail(stockDetail.getId());
+//        }
         Stock stock = stockService.getOneStock(managerService.getOneManager(stockvo.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
-                        stockvo.getStockName())
+                stockvo.getStockName())
                 .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
-        stockService.deleteStock(stock.getId());
+        // isActive
+        stock.setActive(Boolean.FALSE);
+        stockService.updateStockWithoutStockName(stock);
 
         return "redirect:/";
     }
@@ -102,6 +136,7 @@ public class StockController {
 
         Manager manager = managerService.getOneManager(Long.parseLong(managerId))
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
+        // active인 재고 목록 get
         return stockService.getAllStock(manager);
     }
 
@@ -129,7 +164,7 @@ public class StockController {
     public List<Map<String, String>> getByName(@RequestBody StockVO stockVO) {
 
         Stock stock = stockService.getOneStock(managerService.getOneManager(stockVO.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
-                        stockVO.getStockName())
+                stockVO.getStockName())
                 .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
 
         System.out.println("stock.get().getStockName() = " + stock.getStockName());
@@ -157,21 +192,34 @@ public class StockController {
         return r;
     }
 
-    // stockVO로 stock & stockDetail 넣어주면 거기에 stockdetail 추가
-    // addStock 과 달리 새로운 stock을 추가하는게 아니라, 기존 stock에 stockdetail만 추가가
-    @PostMapping("/addStockDetail")
-    public String addStockDetail(@RequestBody StockVO stockVO) {
-
-        Stock stock = stockService.getOneStock(managerService.getOneManager(stockVO.getManagerId())
-                        .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")), stockVO.getStockName())
-                .orElseThrow(() -> new NoSuchElementException("해당 재고가 존재하지 않습니다."));
-
-        for (StockDetail stockDetail : stockVO.getStockDetailList()) {
-            Employee employee = stockDetail.getEmployee();
-            stockDetail.setStock(stock);
-            stockDetail.setEmployee(employee);
-            stockDetailService.addStockDetail(stockDetail);
-        }
-        return "OK!";
-    }
+//    // stockVO로 stockDetail 넣어주면 거기에 stockdetail 추가
+//    // addStock 과 달리 새로운 stock을 추가하는게 아니라, 기존 stock에 stockdetail만 추가가
+//    @PostMapping("/addStockDetail")
+//    public String addStockDetail(@RequestBody StockVO stockVO) {
+//
+//        Stock stock = stockService.getOneStock(managerService.getOneManager(stockVO.getManagerId())
+//                .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")), stockVO.getStockName())
+//                .orElseThrow(() -> new NoSuchElementException("해당 재고가 존재하지 않습니다."));
+//
+//        for (StockdetailVO stockdetailVO : stockVO.getStockDetailList()) {
+//
+//            Employee employee = employeeRepository.findEmployeeByIdAndManager(stockdetailVO.getEmployeeId(), manager.getId())
+//                    .orElseThrow(() -> new NoSuchElementException("해당 직원이 없습니다."));
+//            System.out.println("직원 : " + employee.getId());
+//
+//            int currentQuantity = stock.getQuantity(); // 현재 양
+//            int quantityChanged = stockdetailVO.getQuantityChanged(); // 변화량
+//
+//            int finalQuantity = currentQuantity + quantityChanged;   // 변화 이후
+//
+//
+//            StockDetail stockDetail = new StockDetail();
+//            stockDetail.setStock(stock);
+//            stockDetail.setEmployee(employee);
+//            stockDetail.setQuantityChanged(quantityChanged);
+//            stockDetail.setFinalQuantity(); // 처음 재고 설정이므로 변화 이후 양도 동일함
+//            stockDetailService.addStockDetail(stockDetail);
+//        }
+//        return "OK!";
+//    }
 }

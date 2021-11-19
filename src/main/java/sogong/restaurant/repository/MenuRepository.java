@@ -9,9 +9,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface MenuRepository extends JpaRepository<Menu,Long> {
-    public Optional<Menu> findMenuByMenuName(String MenuName);
-    public Optional<Menu> findMenuByMenuNameAndManager(String menuName, Manager manager);
-    public List<Menu> findAllByManager(Manager manager);
-    public List<Menu> findAllById(Long id);
+public interface MenuRepository extends JpaRepository<Menu, Long> {
+    Optional<Menu> findMenuByMenuName(String MenuName);
+
+    Optional<Menu> findMenuByMenuNameAndManager(String menuName, Manager manager);
+
+    List<Menu> findAllByManagerAndActive(Manager manager, Boolean active);
+
+    List<Menu> findAllById(Long id);
 }

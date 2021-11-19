@@ -5,16 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class StockVO {
-    private String stockName;
-    private int quantity;
-    private Long managerId;
+public class StockdetailVO {
+
+    private String time;
+    private int quantityChanged; // 변화량
     private Long employeeId;
-    List<StockdetailVO> stockDetailList;
 }

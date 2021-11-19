@@ -1,15 +1,11 @@
 package sogong.restaurant.domain;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Setter
@@ -25,6 +21,8 @@ public class Menu {
     private String menuName;
     private int price;
     private String menuCategory;
+
+    private Boolean active; // 현재 사용중인 메뉴인지 여부
 
     // 가게에 대한 key
     @ManyToOne

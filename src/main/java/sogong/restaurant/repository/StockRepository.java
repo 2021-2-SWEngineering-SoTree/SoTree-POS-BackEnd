@@ -11,7 +11,7 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
 
     Optional<Stock> findStockByManagerAndStockName(Manager manager, String stockName);
 
-    List<Stock> findAllByManager(Manager manager);
+    List<Stock> findAllByManagerAndActive(Manager manager, Boolean active);
 
     List<Stock> findAllById(Long id);
 }
