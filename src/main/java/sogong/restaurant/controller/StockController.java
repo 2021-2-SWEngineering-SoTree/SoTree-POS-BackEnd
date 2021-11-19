@@ -39,16 +39,29 @@ public class StockController {
 
         Stock stock = new Stock();
 
+
         Manager manager = managerService.getOneManager(stockvo.getManagerId())
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
 
-        stock.setStockName(stockvo.getStockName());
-        // stock.setQuantity(stockvo.getQuantity());
-        stock.setManager(manager);
-        stock.setActive(Boolean.TRUE);
-        stockService.saveStock(stock);
+        Optional<Stock> stock1 = stockService.getOneStock(manager, stockvo.getStockName());
+        if (stock1.isPresent()) {   // 비활성화된 stock이 있는 경우
+            // 활성화된 stock인데 추가하는 것이므로 에러
+            if (stock1.get().getActive()) {
+                throw new IllegalStateException("이미 존재하는 재고입니다.");
+            } else {
+                stock = stock1.get();
+                stock.setActive(Boolean.TRUE);
+            }
+            stockService.updateStockWithoutStockName(stock);
+        } else { // 기존 stock 없는 경우 stock 처음부터 지정
+            stock.setStockName(stockvo.getStockName());
+            // stock.setQuantity(stockvo.getQuantity());
+            stock.setManager(manager);
+            stock.setActive(Boolean.TRUE);
+            stockService.saveStock(stock);
+        }
 
-
+        // StockDetail로 재고의 양 등 초기 설정
         for (StockdetailVO stockdetailVO : stockvo.getStockDetailList()) {
             System.out.println(stockdetailVO);
             //Employee employee = stockDetail.getEmployee();
@@ -123,8 +136,11 @@ public class StockController {
         Stock stock = stockService.getOneStock(managerService.getOneManager(stockvo.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
                 stockvo.getStockName())
                 .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
-        // isActive
+
+        // 비활성화 & 양 0으로 초기화
         stock.setActive(Boolean.FALSE);
+        stock.setQuantity(0);
+
         stockService.updateStockWithoutStockName(stock);
 
         return "redirect:/";
