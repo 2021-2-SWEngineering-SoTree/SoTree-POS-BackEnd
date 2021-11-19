@@ -163,7 +163,7 @@ public class StockController {
     public String addStockDetail(@RequestBody StockVO stockVO) {
 
         Stock stock = stockService.getOneStock(managerService.getOneManager(stockVO.getManagerId())
-                        .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")), stockVO.getStockName())
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")), stockVO.getStockName())
                 .orElseThrow(() -> new NoSuchElementException("해당 재고가 존재하지 않습니다."));
 
         for (StockDetail stockDetail : stockVO.getStockDetailList()) {

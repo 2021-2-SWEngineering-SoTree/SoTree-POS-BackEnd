@@ -34,11 +34,17 @@ public class PaymentService {
         Optional<MenuOrder> menuOrder=menuOrderRepository.findById(orderId);
         if(menuOrder.isEmpty()) throw new NoSuchElementException("존재하지 않는 주문정보입니다.");
 
-        Optional<Employee> employee = employeeRepository.findEmployeeByIdAndManager(employeeId,managerId);
-        if(employee.isEmpty()) throw new NoSuchElementException("존재하지 않는 직원입니다.");
-
         Payment payment = new Payment();
-        payment.setEmployee(employee.get());
+        if(employeeId==-1){
+            payment.setEmployee(null);
+        }
+        else{
+            Optional<Employee> employee = employeeRepository.findEmployeeByIdAndManager(employeeId,managerId);
+            if(employee.isEmpty()) throw new NoSuchElementException("존재하지 않는 직원입니다.");
+
+            payment.setEmployee(employee.get());
+        }
+
         payment.setManager(optionalManager.get());
         payment.setMenuOrder(menuOrder.get());
         payment.setPayTime(payTime);
