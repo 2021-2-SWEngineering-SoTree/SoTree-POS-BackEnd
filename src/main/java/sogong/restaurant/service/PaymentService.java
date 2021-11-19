@@ -34,11 +34,17 @@ public class PaymentService {
         Optional<MenuOrder> menuOrder=menuOrderRepository.findById(orderId);
         if(menuOrder.isEmpty()) throw new NoSuchElementException("존재하지 않는 주문정보입니다.");
 
-        Optional<Employee> employee = employeeRepository.findEmployeeByIdAndManager(employeeId,managerId);
-        if(employee.isEmpty()) throw new NoSuchElementException("존재하지 않는 직원입니다.");
-
         Payment payment = new Payment();
-        payment.setEmployee(employee.get());
+        if(employeeId==-1){
+            payment.setEmployee(null);
+        }
+        else{
+            Optional<Employee> employee = employeeRepository.findEmployeeByIdAndManager(employeeId,managerId);
+            if(employee.isEmpty()) throw new NoSuchElementException("존재하지 않는 직원입니다.");
+
+            payment.setEmployee(employee.get());
+        }
+
         payment.setManager(optionalManager.get());
         payment.setMenuOrder(menuOrder.get());
         payment.setPayTime(payTime);
@@ -64,7 +70,7 @@ public class PaymentService {
         //여기서 통계에 관한 처리를 해줘야 할듯
 
         MenuOrder menuOrder = payment.get().getMenuOrder();
-        if(menuOrder.getOrderType().equals(MenuOrder.OrderType.TABLE_ORDER.getValue())){
+        if(menuOrder.getOrderType().equals(MenuOrder.OrderType.TABLE_ORDER)){
             TableOrder tableOrder = (TableOrder) menuOrder;
             tableOrder.setIsSeated(false);
             menuOrderRepository.save(tableOrder);
