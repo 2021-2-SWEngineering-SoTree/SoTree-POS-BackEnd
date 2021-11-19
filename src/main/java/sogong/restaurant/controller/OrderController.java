@@ -8,6 +8,7 @@ import sogong.restaurant.VO.newOrderVO;
 import sogong.restaurant.VO.orderVO;
 import sogong.restaurant.domain.*;
 import sogong.restaurant.repository.EmployeeRepository;
+import sogong.restaurant.repository.TableOrderRepository;
 import sogong.restaurant.service.ManagerService;
 import sogong.restaurant.service.OrderDetailService;
 import sogong.restaurant.service.OrderService;
@@ -33,6 +34,8 @@ public class OrderController {
     private final ManagerService managerService;
     @Autowired
     private final EmployeeRepository employeeRepository;
+    @Autowired
+    private final TableOrderRepository tableOrderRepository;
 
     // @PostMapping("/currentSeatOrder")
 //    public orderVO validName(@RequestBody Map<String, String> param) {
@@ -59,7 +62,7 @@ public class OrderController {
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
 
         Employee employee = null;
-        if(oVO.getEmployeeId()!=-1) {
+        if (oVO.getEmployeeId() != -1) {
             employee = employeeRepository.findById(oVO.getEmployeeId())
                     .orElseThrow(() -> new NoSuchElementException("해당 직원이 존재하지 않습니다."));
         }
@@ -88,7 +91,7 @@ public class OrderController {
         order.setTotalPrice(oVO.getTotalPrice());
         // order.setOrderDate(oVO.get);
         order.setStartTime(oVO.getStartTime());
-        order.setEndTime(oVO.getEndTime());
+        //order.setEndTime(oVO.getEndTime());
         order.setEmployee(employee);
         order.setManager(manager);
 
@@ -107,7 +110,7 @@ public class OrderController {
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
 
         Employee employee = null;
-        if(oVO.getEmployeeId()!=-1) {
+        if (oVO.getEmployeeId() != -1) {
             employee = employeeRepository.findById(oVO.getEmployeeId())
                     .orElseThrow(() -> new NoSuchElementException("해당 직원이 존재하지 않습니다."));
         }
@@ -132,7 +135,7 @@ public class OrderController {
         order.setTotalPrice(oVO.getTotalPrice());
         // order.setOrderDate(oVO.get);
         order.setStartTime(oVO.getStartTime());
-        order.setEndTime(oVO.getEndTime());
+        //order.setEndTime(oVO.getEndTime());
         order.setEmployee(employee);
         order.setManager(manager);
         order.setIsSeated(Boolean.TRUE);
@@ -175,7 +178,53 @@ public class OrderController {
     public List<orderVO> getAllTakeoutOrder(@PathVariable(value = "branchId") Long branchId) {
 
         // new orderVO(-1l,-1,-1, Map.of()) : default 값 (order 존재 하지 않음)
-        return orderService.getTakeoutOrderByBranchIdAndSeatNumber(branchId);
+        return orderService.getTakeoutOrderByBranchId(branchId);
+    }
+
+    @PutMapping("/updateTableOrder")
+    public String updateTableOrder(@RequestBody newOrderVO oVO) {
+
+        // Manager(branchId) & 주문 받은 직원
+        Manager manager = managerService.getOneManager(oVO.getManagerId())
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
+
+        Employee employee = null;
+        if (oVO.getEmployeeId() != -1) {  // -1이면 null 임
+            employee = employeeRepository.findById(oVO.getEmployeeId())
+                    .orElseThrow(() -> new NoSuchElementException("해당 직원이 존재하지 않습니다."));
+        }
+
+        // 예외 처리
+        if (OrderType.valueOf(oVO.getOrderType()) != OrderType.TABLE_ORDER) {
+            System.out.println(oVO.getOrderType());
+            return "Wrong Order Type";
+        }
+
+        if (oVO.getOrderDetails().isEmpty()) {
+            System.out.println("Wrong Order!");
+            return "null Order Details";
+        }
+
+        TableOrder order = tableOrderRepository.findTableOrderByManagerAndId(manager, oVO.getOrderId())
+                .orElseThrow(() -> new NoSuchElementException("해당 주문이 존재하지 않습니다"));
+
+        List<Map<String, Integer>> orderDetails = oVO.getOrderDetails();
+
+        // order.setOrderType(MenuOrder.OrderType.TABLE_ORDER);
+        order.setSeatNumber(oVO.getSeatNumber());
+        //order.setIsSeated(oVO.getIsSeated());
+        // order.setIsSeated(Boolean.TRUE);
+
+        order.setTotalPrice(oVO.getTotalPrice());
+        // order.setOrderDate(oVO.get);
+        order.setStartTime(oVO.getStartTime());
+        //order.setEndTime(oVO.getEndTime());
+        order.setEmployee(employee);
+        // order.setManager(manager);
+
+        orderService.updateTableOrder(order, orderDetails);
+
+        return Long.toString(order.getId());
     }
 
 //    @PostMapping("/addOrderDetail")
