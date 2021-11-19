@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Setter
@@ -22,7 +23,10 @@ public class Menu {
     private int price;
     private String menuCategory;
 
-    private Boolean active; // 현재 사용중인 메뉴인지 여부
+    @NotNull
+    @Column(columnDefinition = "boolean default true")
+    private Boolean active; // 현재 사용중인 재고인지 여부
+
 
     // 가게에 대한 key
     @ManyToOne

@@ -1,11 +1,9 @@
 package sogong.restaurant.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import sogong.restaurant.VO.orderVO;
-import sogong.restaurant.domain.OrderDetail;
-import sogong.restaurant.domain.TableOrder;
-import sogong.restaurant.domain.TakeoutOrder;
+import sogong.restaurant.domain.*;
 import sogong.restaurant.repository.*;
 
 import javax.transaction.Transactional;
@@ -15,20 +13,18 @@ import java.util.stream.Collectors;
 
 @Transactional
 @Service
+@RequiredArgsConstructor
 public class OrderService {
 
-    @Autowired
-    OrderDetailRepository orderDetailRepository;
-    @Autowired
-    TableOrderRepository tableOrderRepository;
-    @Autowired
-    TakeoutOrderRepository takeoutOrderRepository;
-    @Autowired
-    ManagerRepository managerRepository;
-    @Autowired
-    OrderDetailService orderDetailService;
-    @Autowired
-    MenuRepository menuRepository;
+    private final OrderDetailRepository orderDetailRepository;
+    private final TableOrderRepository tableOrderRepository;
+    private final TakeoutOrderRepository takeoutOrderRepository;
+    private final ManagerRepository managerRepository;
+    private final OrderDetailService orderDetailService;
+    private final MenuRepository menuRepository;
+    private final MenuIngredientService menuIngredientService;
+    private final StockService stockService;
+    private final StockDetailService stockDetailService;
 
     public Optional<orderVO> getTableOrderByBranchIdAndSeatNumber(Long BranchId, int seatNumber) {
 
@@ -87,14 +83,40 @@ public class OrderService {
         validateDuplicateTableOrder(tableOrder);
 
         tableOrderRepository.save(tableOrder);
+
+        Employee employee = tableOrder.getEmployee();
+
+        // 주어진 모든 orderdetail 순회
         for (Map<String, Integer> orderDetailMap : orderDetailList) {
 
+            // orderdetail 안에 여러 메뉴들 순회
             for (String key : orderDetailMap.keySet()) {
+                Menu menu = menuRepository.findMenuByMenuName(key).
+                        orElseThrow(() ->
+                                new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
+
+                // 주문 들어온 메뉴의 재료랑 재고 비교
+                List<MenuIngredient> menuIngredientList = menuIngredientService.getMenuIngredientByMenu(menu);
+
+                // 메뉴 재료와 같은 이름을 가진 재고에 대한 수정
+                // stockdetail 직원은 주문 받은 직원
+                for (MenuIngredient menuIngredient : menuIngredientList) {
+                    Stock stock = stockService.getOneStock(tableOrder.getManager(), menuIngredient.getIngredientName())
+                            .orElseThrow(() ->
+                                    new NoSuchElementException("해당 재고가 존재하지 않습니다."));
+
+                    StockDetail stockDetail = new StockDetail();
+                    stockDetail.setStock(stock);
+                    stockDetail.setEmployee(employee);
+                    stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1));
+                    // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
+                    stockDetailService.addStockDetail(stock, stockDetail);
+                }
+
+                // addStockDetail 에서 재고 확인 후 이상 없으면 orderdetail 생성
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setMenuOrder(tableOrder);
-                orderDetail.setMenu(menuRepository.findMenuByMenuName(key).
-                        orElseThrow(() ->
-                                new NoSuchElementException("해당 메뉴가 존재하지 않습니다.")));
+                orderDetail.setMenu(menu);
                 orderDetail.setQuantity(orderDetailMap.get(key));
                 orderDetailService.addOrderDetail(orderDetail);
                 System.out.println("orderDetail");
@@ -102,6 +124,50 @@ public class OrderService {
             }
         }
         return tableOrder.getId();
+
+    }
+
+    public Long addTakeoutOrder(TakeoutOrder takeoutOrder, List<Map<String, Integer>> orderDetailList) {
+        takeoutOrderRepository.save(takeoutOrder);
+
+        Employee employee = takeoutOrder.getEmployee();
+
+        for (Map<String, Integer> orderDetailMap : orderDetailList) {
+
+            for (String key : orderDetailMap.keySet()) {
+
+                Menu menu = menuRepository.findMenuByMenuName(key).
+                        orElseThrow(() ->
+                                new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
+
+                // 주문 들어온 메뉴의 재료랑 재고 비교
+                List<MenuIngredient> menuIngredientList = menuIngredientService.getMenuIngredientByMenu(menu);
+
+                // 메뉴 재료와 같은 이름을 가진 재고에 대한 수정
+                // stockdetail 직원은 주문 받은 직원
+                for (MenuIngredient menuIngredient : menuIngredientList) {
+                    Stock stock = stockService.getOneStock(takeoutOrder.getManager(), menuIngredient.getIngredientName())
+                            .orElseThrow(() ->
+                                    new NoSuchElementException("해당 재고가 존재하지 않습니다."));
+
+                    StockDetail stockDetail = new StockDetail();
+                    stockDetail.setStock(stock);
+                    stockDetail.setEmployee(employee);
+                    stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1));
+                    // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
+                    stockDetailService.addStockDetail(stock, stockDetail);
+                }
+
+                OrderDetail orderDetail = new OrderDetail();
+                orderDetail.setMenuOrder(takeoutOrder);
+                orderDetail.setMenu(menu);
+                orderDetail.setQuantity(orderDetailMap.get(key));
+                orderDetailService.addOrderDetail(orderDetail);
+                System.out.println("orderDetail");
+                System.out.println("Menu Name =" + orderDetail.getMenu().getMenuName());
+            }
+        }
+        return takeoutOrder.getId();
 
     }
 
@@ -119,26 +185,6 @@ public class OrderService {
                         throw new IllegalStateException("해당 좌석에 다른 주문이 존재합니다.");
                     }
                 });
-    }
-
-    public Long addTakeoutOrder(TakeoutOrder takeoutOrder, List<Map<String, Integer>> orderDetailList) {
-        takeoutOrderRepository.save(takeoutOrder);
-        for (Map<String, Integer> orderDetailMap : orderDetailList) {
-
-            for (String key : orderDetailMap.keySet()) {
-                OrderDetail orderDetail = new OrderDetail();
-                orderDetail.setMenuOrder(takeoutOrder);
-                orderDetail.setMenu(menuRepository.findMenuByMenuName(key).
-                        orElseThrow(() ->
-                                new NoSuchElementException("해당 메뉴가 존재하지 않습니다.")));
-                orderDetail.setQuantity(orderDetailMap.get(key));
-                orderDetailService.addOrderDetail(orderDetail);
-                System.out.println("orderDetail");
-                System.out.println("Menu Name =" + orderDetail.getMenu().getMenuName());
-            }
-        }
-        return takeoutOrder.getId();
-
     }
 
 

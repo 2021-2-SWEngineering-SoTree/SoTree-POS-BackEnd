@@ -18,7 +18,6 @@ public class OrderDetail {
     private Long id;
 
     private int quantity;
-    private Boolean isSeated;
 
     @ManyToOne
     @JoinColumn(name = "MenuId")

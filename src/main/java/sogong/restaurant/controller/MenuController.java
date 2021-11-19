@@ -71,6 +71,7 @@ public class MenuController {
         menu.setMenuCategory(mvo.getMenuCategory());
         menu.setPrice(mvo.getPrice());
         menu.setManager(manager);
+        menu.setActive(Boolean.TRUE);
         menuService.saveMenu(menu);
 
         for (MenuIngredient menuIngredient : mvo.getMenuIngredientLists()) {
@@ -110,12 +111,12 @@ public class MenuController {
         return "redirect:/";
     }
 
-    @DeleteMapping("/{id}")
+    @PutMapping("/delete")
     public String delete(@RequestBody menuVO mvo) {
         // MenuIngredient 먼저 삭제
-        for (MenuIngredient menuIngredient : mvo.getMenuIngredientLists()) {
-            menuIngredientService.deleteMenuIngredient(menuIngredient.getId());
-        }
+//        for (MenuIngredient menuIngredient : mvo.getMenuIngredientLists()) {
+//            menuIngredientService.deleteMenuIngredient(menuIngredient.getId());
+//        }
 
 
         Manager manager = managerService.getOneManager(mvo.getManagerId())
@@ -124,7 +125,8 @@ public class MenuController {
         Menu menu = menuService.getOneMenu(mvo.getMenuName(), manager)
                 .orElseThrow(() -> new NoSuchElementException("해당 메뉴가 없습니다."));
 
-        menuService.deleteMenu(menu.getId());
+        menu.setActive(Boolean.FALSE);
+        menuService.updateMenuWithoutName(menu);
         return "redirect:/";
     }
 
