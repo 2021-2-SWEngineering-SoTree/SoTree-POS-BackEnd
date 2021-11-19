@@ -27,6 +27,8 @@ public class newOrderVO {
 
     private List<Map<String, Integer>> orderDetails;
 
+    private Long orderId;
+
     private Long employeeId;
     private Long managerId;
 

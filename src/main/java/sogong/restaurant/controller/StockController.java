@@ -133,15 +133,21 @@ public class StockController {
 //        for (StockDetail stockDetail : stockvo.getStockDetailList()) {
 //            stockDetailService.deleteStockDetail(stockDetail.getId());
 //        }
+
         Stock stock = stockService.getOneStock(managerService.getOneManager(stockvo.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
                 stockvo.getStockName())
                 .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
 
+
+        StockDetail stockDetail = new StockDetail();
+        stockDetail.setStock(stock);
+        stockDetail.setQuantityChanged(stock.getQuantity() * (-1));
+
         // 비활성화 & 양 0으로 초기화
         stock.setActive(Boolean.FALSE);
-        stock.setQuantity(0);
 
         stockService.updateStockWithoutStockName(stock);
+        stockDetailService.addStockDetail(stock, stockDetail);
 
         return "redirect:/";
     }

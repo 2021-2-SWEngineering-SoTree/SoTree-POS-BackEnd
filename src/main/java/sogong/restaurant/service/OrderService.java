@@ -53,7 +53,7 @@ public class OrderService {
         return ret;
     }
 
-    public List<orderVO> getTakeoutOrderByBranchIdAndSeatNumber(Long BranchId) {
+    public List<orderVO> getTakeoutOrderByBranchId(Long BranchId) {
 
         //나중에 현재 식사하고 있는 주문에 대한 정보 받아오는 것 로직 추가해야함.
         // --> validDuplicateTableOrder
@@ -121,6 +121,58 @@ public class OrderService {
                 orderDetailService.addOrderDetail(orderDetail);
                 System.out.println("orderDetail");
                 System.out.println("Menu Name =" + orderDetail.getMenu().getMenuName());
+            }
+        }
+        return tableOrder.getId();
+
+    }
+
+    // 재고 어떻게 처리? - 새로 안만든건 그냥 그대로 두기
+    //
+    public Long updateTableOrder(TableOrder tableOrder, List<Map<String, Integer>> orderDetailList) {
+        tableOrderRepository.save(tableOrder);
+
+        Employee employee = tableOrder.getEmployee();
+
+        for (Map<String, Integer> orderDetailMap : orderDetailList) {
+
+            // orderdetail 안에 여러 메뉴들 순회
+            outerloop:
+            for (String key : orderDetailMap.keySet()) {
+                Menu menu = menuRepository.findMenuByMenuName(key).
+                        orElseThrow(() ->
+                                new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
+
+                // orderDetail의 메뉴와 비교해서 기존 orderdetail 찾기
+                List<OrderDetail> orderDetailByMenuOrder = orderDetailService.getOrderDetailByMenuOrder(tableOrder);
+                for (OrderDetail orderDetail : orderDetailByMenuOrder) {
+
+                    // 기존 orderDetail 과 수량도 같으면 재고처리 안하고 다음 메뉴에 대한 주문으로 넘어감
+                    if (orderDetail.getMenu().equals(menu)) {
+                        if (orderDetail.getQuantity() == orderDetailMap.get(key)) {
+                            continue outerloop;
+                        }
+                    }
+                }
+
+
+                // 주문 들어온 메뉴의 재료랑 재고 비교
+                List<MenuIngredient> menuIngredientList = menuIngredientService.getMenuIngredientByMenu(menu);
+
+                // 메뉴 재료와 같은 이름을 가진 재고에 대한 수정
+                // stockdetail 직원은 주문 받은 직원
+                for (MenuIngredient menuIngredient : menuIngredientList) {
+                    Stock stock = stockService.getOneStock(tableOrder.getManager(), menuIngredient.getIngredientName())
+                            .orElseThrow(() ->
+                                    new NoSuchElementException("해당 재고가 존재하지 않습니다."));
+
+                    StockDetail stockDetail = new StockDetail();
+                    stockDetail.setStock(stock);
+                    stockDetail.setEmployee(employee);
+                    stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1));
+                    // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
+                    stockDetailService.addStockDetail(stock, stockDetail);
+                }
             }
         }
         return tableOrder.getId();
