@@ -8,7 +8,6 @@ import sogong.restaurant.VO.newOrderVO;
 import sogong.restaurant.VO.orderVO;
 import sogong.restaurant.domain.*;
 import sogong.restaurant.repository.EmployeeRepository;
-import sogong.restaurant.repository.TableOrderRepository;
 import sogong.restaurant.service.ManagerService;
 import sogong.restaurant.service.OrderDetailService;
 import sogong.restaurant.service.OrderService;
@@ -34,8 +33,6 @@ public class OrderController {
     private final ManagerService managerService;
     @Autowired
     private final EmployeeRepository employeeRepository;
-    @Autowired
-    private final TableOrderRepository tableOrderRepository;
 
     // @PostMapping("/currentSeatOrder")
 //    public orderVO validName(@RequestBody Map<String, String> param) {
@@ -54,6 +51,55 @@ public class OrderController {
 //        return orderService.getTableOrderByBranchIdAndSeatNumber(BranchId, seatNumber).orElse(null);
 //    }
 
+    /**
+     * TableOrder 목록
+     */
+    @PostMapping("/getTableOrder/{branchId}/{totalTable}")
+    public List<orderVO> getAllTableOrder(@PathVariable(value = "branchId") Long branchId, @PathVariable(value = "totalTable") int totalTable) {
+        List<orderVO> orderDetailList = new ArrayList<>();
+
+        if (totalTable < 1) {
+            throw new IllegalStateException("전체 좌석의 번호는 1보다 커야합니다.");
+        }
+
+        // new orderVO(-1l,-1,-1, Map.of()) : default 값 (order 존재 하지 않음)
+        for (int seatNumber = 1; seatNumber <= totalTable; seatNumber++) {
+            orderVO orderVOOptional = orderService.getTableOrderByBranchIdAndSeatNumber(branchId, seatNumber)
+                    .orElse(new orderVO(-1L, -1, -1, -1, new ArrayList<>()));
+            orderDetailList.add(orderVOOptional);
+        }
+        System.out.println(orderDetailList);
+        return orderDetailList;
+    }
+
+    /**
+     * TableOrder 상세 정보
+     */
+    @PostMapping("/getOneTableInfo/{branchId}/{seatNumber}")
+    public orderVO getOneTableOrder(@PathVariable(value = "branchId") Long branchId, @PathVariable(value = "seatNumber") int seatNumber) {
+
+        // new orderVO(-1l,-1,-1, Map.of()) : default 값 (order 존재 하지 않음)
+        return orderService.getTableOrderByBranchIdAndSeatNumber(branchId, seatNumber)
+                .orElse(new orderVO(-1L, -1, -1, -1, new ArrayList<>()));
+        //if(oVO.isEmpty()) throw new NoSuchElementException("현재 좌석에 주문이 없습니다.");
+
+    }
+
+    /**
+     * TakeoutOrder 목록
+     */
+
+    @PostMapping("/getTakeoutOrder/{branchId}")
+    public List<orderVO> getAllTakeoutOrder(@PathVariable(value = "branchId") Long branchId) {
+
+        // new orderVO(-1l,-1,-1, Map.of()) : default 값 (order 존재 하지 않음)
+        return orderService.getTakeoutOrderByBranchId(branchId);
+    }
+
+
+    /**
+     * TableOrder 최초 추가
+     */
     @PostMapping("/addTableOrder")
     public String addTableOrder(@RequestBody newOrderVO oVO) {
 
@@ -100,6 +146,75 @@ public class OrderController {
         return Long.toString(order.getId());
     }
 
+    /**
+     * TableOrder 수정
+     */
+    @PutMapping("/updateTableOrder")
+    public String updateTableOrder(@RequestBody newOrderVO oVO) {
+
+        // Manager(branchId) & 주문 받은 직원
+        Manager manager = managerService.getOneManager(oVO.getManagerId())
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
+
+        Employee employee = null;
+        if (oVO.getEmployeeId() != -1) {  // -1이면 null 임
+            employee = employeeRepository.findById(oVO.getEmployeeId())
+                    .orElseThrow(() -> new NoSuchElementException("해당 직원이 존재하지 않습니다."));
+        }
+
+        // 예외 처리
+        if (OrderType.valueOf(oVO.getOrderType()) != OrderType.TABLE_ORDER) {
+            System.out.println(oVO.getOrderType());
+            return "Wrong Order Type";
+        }
+
+        if (oVO.getOrderDetails().isEmpty()) {
+            System.out.println("Wrong Order!");
+            return "null Order Details";
+        }
+
+        TableOrder tableOrder = orderService.getOneTableOrder(manager, oVO.getOrderId());
+
+        List<Map<String, Integer>> orderDetails = oVO.getOrderDetails();
+
+        // order.setOrderType(MenuOrder.OrderType.TABLE_ORDER);
+        tableOrder.setSeatNumber(oVO.getSeatNumber());
+        //order.setIsSeated(oVO.getIsSeated());
+        // order.setIsSeated(Boolean.TRUE);
+
+        tableOrder.setTotalPrice(oVO.getTotalPrice());
+        // order.setOrderDate(oVO.get);
+        tableOrder.setStartTime(oVO.getStartTime());
+        //order.setEndTime(oVO.getEndTime());
+        tableOrder.setEmployee(employee);
+        // order.setManager(manager);
+
+        orderService.updateTableOrder(tableOrder, orderDetails);
+
+        return Long.toString(tableOrder.getId());
+    }
+
+    @DeleteMapping("/deleteTableOrder")
+    public String deleteTableOrder(@RequestBody newOrderVO oVO) {
+        Manager manager = managerService.getOneManager(oVO.getManagerId())
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
+
+        TableOrder tableOrder = orderService.getOneTableOrder(manager, oVO.getOrderId());
+
+        // 해당 Order에 딸린 orderDetail 삭제
+        List<OrderDetail> orderDetailList = orderDetailService.getOrderDetailByMenuOrder(tableOrder);
+        for (OrderDetail orderDetail : orderDetailList) {
+            orderDetailService.deleteOrderDetail(orderDetail.getId());
+        }
+
+        orderService.deleteTableOrder(tableOrder.getId());
+        return "redirect:/";
+
+    }
+
+    /**
+     * TakeoutOrder 최초 추가
+     */
     @PostMapping("/addTakeoutOrder")
     public String addTakeoutOrder(@RequestBody newOrderVO oVO) {
 
@@ -146,43 +261,11 @@ public class OrderController {
 
     }
 
-    @PostMapping("/getTableOrder/{branchId}/{totalTable}")
-    public List<orderVO> getAllTableOrder(@PathVariable(value = "branchId") Long branchId, @PathVariable(value = "totalTable") int totalTable) {
-        List<orderVO> orderDetailList = new ArrayList<>();
-
-        if (totalTable < 1) {
-            throw new IllegalStateException("전체 좌석의 번호는 1보다 커야합니다.");
-        }
-
-        // new orderVO(-1l,-1,-1, Map.of()) : default 값 (order 존재 하지 않음)
-        for (int seatNumber = 1; seatNumber <= totalTable; seatNumber++) {
-            orderVO orderVOOptional = orderService.getTableOrderByBranchIdAndSeatNumber(branchId, seatNumber)
-                    .orElse(new orderVO(-1L, -1, -1, -1, new ArrayList<>()));
-            orderDetailList.add(orderVOOptional);
-        }
-        System.out.println(orderDetailList);
-        return orderDetailList;
-    }
-
-    @PostMapping("/getOneTableInfo/{branchId}/{seatNumber}")
-    public orderVO getOneTableOrder(@PathVariable(value = "branchId") Long branchId, @PathVariable(value = "seatNumber") int seatNumber) {
-
-        // new orderVO(-1l,-1,-1, Map.of()) : default 값 (order 존재 하지 않음)
-        return orderService.getTableOrderByBranchIdAndSeatNumber(branchId, seatNumber)
-                .orElse(new orderVO(-1L, -1, -1, -1, new ArrayList<>()));
-        //if(oVO.isEmpty()) throw new NoSuchElementException("현재 좌석에 주문이 없습니다.");
-
-    }
-
-    @PostMapping("/getTakeoutOrder/{branchId}")
-    public List<orderVO> getAllTakeoutOrder(@PathVariable(value = "branchId") Long branchId) {
-
-        // new orderVO(-1l,-1,-1, Map.of()) : default 값 (order 존재 하지 않음)
-        return orderService.getTakeoutOrderByBranchId(branchId);
-    }
-
-    @PutMapping("/updateTableOrder")
-    public String updateTableOrder(@RequestBody newOrderVO oVO) {
+    /**
+     * TakeoutOrder 수정
+     */
+    @PutMapping("/updateTakeoutOrder")
+    public String updateTakeoutOrder(@RequestBody newOrderVO oVO) {
 
         // Manager(branchId) & 주문 받은 직원
         Manager manager = managerService.getOneManager(oVO.getManagerId())
@@ -195,7 +278,7 @@ public class OrderController {
         }
 
         // 예외 처리
-        if (OrderType.valueOf(oVO.getOrderType()) != OrderType.TABLE_ORDER) {
+        if (OrderType.valueOf(oVO.getOrderType()) != OrderType.TAKEOUT_ORDER) {
             System.out.println(oVO.getOrderType());
             return "Wrong Order Type";
         }
@@ -205,32 +288,39 @@ public class OrderController {
             return "null Order Details";
         }
 
-        TableOrder order = tableOrderRepository.findTableOrderByManagerAndId(manager, oVO.getOrderId())
-                .orElseThrow(() -> new NoSuchElementException("해당 주문이 존재하지 않습니다"));
+        TakeoutOrder takeoutOrder = orderService.getOneTakeoutOrder(manager, oVO.getOrderId());
 
         List<Map<String, Integer>> orderDetails = oVO.getOrderDetails();
 
-        // order.setOrderType(MenuOrder.OrderType.TABLE_ORDER);
-        order.setSeatNumber(oVO.getSeatNumber());
-        //order.setIsSeated(oVO.getIsSeated());
-        // order.setIsSeated(Boolean.TRUE);
-
-        order.setTotalPrice(oVO.getTotalPrice());
+        takeoutOrder.setTotalPrice(oVO.getTotalPrice());
         // order.setOrderDate(oVO.get);
-        order.setStartTime(oVO.getStartTime());
-        //order.setEndTime(oVO.getEndTime());
-        order.setEmployee(employee);
-        // order.setManager(manager);
+        takeoutOrder.setStartTime(oVO.getStartTime());
+        // order.setEndTime(oVO.getEndTime());
+        takeoutOrder.setEmployee(employee);
+        // takeoutOrder.setIsSeated(Boolean.TRUE);
 
-        orderService.updateTableOrder(order, orderDetails);
+        orderService.updateTakeoutOrder(takeoutOrder, orderDetails);
 
-        return Long.toString(order.getId());
+        return Long.toString(takeoutOrder.getId());
     }
 
-//    @PostMapping("/addOrderDetail")
-//    public Long addOrderDetail(@RequestBody newOrderVO){
-//
-//    }
+    @DeleteMapping("/deleteTakeoutOrder")
+    public String deleteTakeoutOrder(@RequestBody newOrderVO oVO) {
+        Manager manager = managerService.getOneManager(oVO.getManagerId())
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
+
+        TakeoutOrder takeoutOrder = orderService.getOneTakeoutOrder(manager, oVO.getOrderId());
+
+        // 해당 Order에 딸린 orderDetail 삭제
+        List<OrderDetail> orderDetailList = orderDetailService.getOrderDetailByMenuOrder(takeoutOrder);
+        for (OrderDetail orderDetail : orderDetailList) {
+            orderDetailService.deleteOrderDetail(orderDetail.getId());
+        }
+
+        orderService.deleteTakeoutOrder(takeoutOrder.getId());
+        return "redirect:/";
+
+    }
 
 }
 
