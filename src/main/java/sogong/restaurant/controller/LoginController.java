@@ -120,8 +120,9 @@ public class LoginController {
                 .loginId(user.get("loginId"))
                 .birthDay(user.get("birthDay")).userName(user.get("userName"))
                 .email(user.get("email")).phoneNumber(user.get("phoneNumber"))
-                .password(passwordEncoder.encode(user.get("password")))
-                .roles(Collections.singletonList("ROLE_USER")).build();
+                .password(passwordEncoder.encode(user.get("password"))).build();
+        //user는 생성할때 권한을 더이상 가지지 않는다.
+                //.roles(Collections.singletonList("ROLE_USER")).build();
 
         System.out.println("user1.getUsername() = " + user1.getUsername());
 
@@ -264,6 +265,83 @@ public class LoginController {
             userRepository.save(user1);
             return newPw;
         }
+    }
+
+    @PostMapping("/getAllUser")
+    public List<Map<String,String>> getAllUser(@RequestBody Long branchId){
+        List<Map<String,String>> ret = new ArrayList<>();
+
+        Optional<Manager> manager = managerRepository.findById(branchId);
+        if(manager.isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
+
+        Map<String,String> man = new HashMap<>();
+        man.put("loginId",manager.get().getUser().getLoginId());
+        man.put("userName",manager.get().getUser().getUsername());
+        man.put("personName",manager.get().getUser().getPersonName());
+        man.put("birthDay",manager.get().getUser().getBirthDay());
+        man.put("email",manager.get().getUser().getEmail());
+        man.put("phoneNumber",manager.get().getUser().getPhoneNumber());
+        man.put("position", "manager");
+
+        ret.add(man);
+
+        for(Employee employee : employeeRepository.findEmployeesByManager(manager.get())){
+            Map<String,String> one = new HashMap<>();
+
+            one.put("loginId",employee.getUser().getLoginId());
+            one.put("userName",employee.getUser().getUsername());
+            one.put("personName",employee.getUser().getPersonName());
+            one.put("birthDay",employee.getUser().getBirthDay());
+            one.put("email",employee.getUser().getEmail());
+            one.put("phoneNumber",employee.getUser().getPhoneNumber());
+
+            if(employee.getUser().getAuthorities().isEmpty()){
+                one.put("position", "not_granted_employee");
+            }
+            else{
+                one.put("position","employee");
+            }
+
+            ret.add(one);
+        }
+
+        return ret;
+
+    }
+
+    @PostMapping("/allowEmployee")
+    public String allowEmployee(@RequestBody Map<String,String> param){
+        Long branchId = Long.parseLong(param.get("branchId"));
+        Long employeeId = Long.parseLong(param.get("employeeId"));
+        Optional<Employee> employeeByIdAndManager = employeeRepository.findEmployeeByIdAndManager(employeeId, branchId);
+        if(employeeByIdAndManager.isEmpty()) throw new NoSuchElementException("존재하지 않는 직원 or 가게입니다.");
+
+        Employee employee = employeeByIdAndManager.get();
+
+        User user = employee.getUser();
+
+        User addUser = new User();
+        Employee addEmployee = new Employee();
+
+        addUser.setRoles(Collections.singletonList("ROLE_USER"));
+        addUser.setUserName(user.getUsername());
+        addUser.setLoginId(user.getLoginId());
+        addUser.setPassword(user.getPassword());
+        addUser.setEmail(user.getEmail());
+        addUser.setBirthDay(user.getBirthDay());
+        addUser.setId(user.getId());
+        addUser.setPhoneNumber(user.getPhoneNumber());
+
+        userRepository.save(addUser);
+
+        addEmployee.setUser(addUser);
+        addEmployee.setManager(managerRepository.findById(branchId).get());
+        addEmployee.setId(employeeId);
+        addEmployee.setCommuteState(false);
+
+        employeeRepository.save(addEmployee);
+
+        return "OK";
     }
 
 }
