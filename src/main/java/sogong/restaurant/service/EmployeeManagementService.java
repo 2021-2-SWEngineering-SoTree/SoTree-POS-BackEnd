@@ -3,18 +3,13 @@ package sogong.restaurant.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
-import sogong.restaurant.domain.CommuteRecord;
-import sogong.restaurant.domain.MenuOrder;
-import sogong.restaurant.domain.Payment;
-import sogong.restaurant.domain.TableOrder;
-import sogong.restaurant.repository.CommuteRecordRepository;
-import sogong.restaurant.repository.MenuOrderRepository;
-import sogong.restaurant.repository.PaymentRepository;
-import sogong.restaurant.repository.StockRepository;
+import sogong.restaurant.domain.*;
+import sogong.restaurant.repository.*;
 
 import javax.transaction.Transactional;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
-
 @Service
 @Transactional
 public class EmployeeManagementService {
@@ -22,14 +17,14 @@ public class EmployeeManagementService {
     private CommuteRecordRepository commuteRecordRepository;
     private PaymentRepository paymentRepository;
     private MenuOrderRepository menuOrderRepository;
-    private StockRepository stockRepository;
+    private StockDetailRepository stockDetailRepository;
 
     @Autowired
-    public EmployeeManagementService(CommuteRecordRepository commuteRecordRepository, PaymentRepository paymentRepository, MenuOrderRepository menuOrderRepository, StockRepository stockRepository) {
+    public EmployeeManagementService(CommuteRecordRepository commuteRecordRepository, PaymentRepository paymentRepository, MenuOrderRepository menuOrderRepository, StockDetailRepository stockDetailRepository) {
         this.commuteRecordRepository = commuteRecordRepository;
         this.paymentRepository = paymentRepository;
         this.menuOrderRepository = menuOrderRepository;
-        this.stockRepository = stockRepository;
+        this.stockDetailRepository = stockDetailRepository;
     }
 
     public List<Map<String,String>> getAllEmployeeActivity(String criterion, String date, Long branchId){
@@ -108,6 +103,7 @@ public class EmployeeManagementService {
                         orderRec.put("이름",all3.get(i).getEmployee().getUser().getPersonName());
                     orderRec.put("주문합계",String.valueOf(all3.get(i).getTotalPrice()));
                     orderRec.put("주문번호",String.valueOf(all3.get(i).getId()));
+                    orderRec.put("주문일자",all3.get(i).getStartTime());
                     MenuOrder.OrderType orderType = all3.get(i).getOrderType();
                     if(orderType.equals(MenuOrder.OrderType.TABLE_ORDER)){
                         TableOrder tableOrder = (TableOrder) all3.get(i);
@@ -123,7 +119,25 @@ public class EmployeeManagementService {
 
                 break;
             case "STOCK":
+                List<StockDetail> all4 = stockDetailRepository.findAllByDateAndBranchId(branchId,stdate,endate);
 
+                for(int i=0;i<all4.size();i++){
+                    Map<String, String> stockRec = new HashMap<>();
+                    Employee employee = all4.get(i).getEmployee();
+                    if(employee==null){
+                        stockRec.put("이름","NULL");
+                    }
+                    else
+                        stockRec.put("이름",employee.getUser().getPersonName());
+                    stockRec.put("재고번호",String.valueOf(all4.get(i).getStock().getId()));
+                    stockRec.put("재고이름",all4.get(i).getStock().getStockName());
+                    stockRec.put("변화량",String.valueOf(all4.get(i).getQuantityChanged()));
+                    stockRec.put("변경후수량",String.valueOf(all4.get(i).getFinalQuantity()));
+                    SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                    stockRec.put("수정일자", transFormat.format(all4.get(i).getTime()));
+
+                    ret.add(stockRec);
+                }
 
                 break;
         }
