@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.Stock;
 import sogong.restaurant.repository.StockRepository;
+import sogong.restaurant.repository.StockSummary;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -44,6 +45,10 @@ public class StockService {
 
     public Optional<Stock> getOneStock(Manager manager, String stockName) {
         return stockRepository.findStockByManagerAndStockName(manager, stockName);
+    }
+
+    public List<StockSummary> getAllStockWithOutActiveCondition(Manager manager){
+        return stockRepository.findAllByManager(manager);
     }
 
     @Transactional

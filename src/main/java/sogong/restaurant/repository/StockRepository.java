@@ -10,8 +10,9 @@ import java.util.Optional;
 public interface StockRepository extends JpaRepository<Stock, Long> {
 
     Optional<Stock> findStockByManagerAndStockName(Manager manager, String stockName);
+    Optional<Stock> findStockByManagerAndId(Manager manager, Long stockId);
 
     List<Stock> findAllByManagerAndActive(Manager manager, Boolean active);
-
+    List<StockSummary> findAllByManager(Manager manager);
     List<Stock> findAllById(Long id);
 }
