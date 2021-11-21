@@ -10,7 +10,7 @@ import sogong.restaurant.domain.Employee;
 import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.Stock;
 import sogong.restaurant.domain.StockDetail;
-import sogong.restaurant.repository.EmployeeRepository;
+import sogong.restaurant.repository.*;
 import sogong.restaurant.service.ManagerService;
 import sogong.restaurant.service.StockDetailService;
 import sogong.restaurant.service.StockService;
@@ -31,6 +31,9 @@ public class StockController {
     private final ManagerService managerService;
     @Autowired
     private final EmployeeRepository employeeRepository;
+
+    @Autowired
+    private final StockDetailRepository stockDetailRepository;
 
 
     // 관리자가 재고 종류를 추가하는 경우
@@ -244,4 +247,32 @@ public class StockController {
 //        }
 //        return "OK!";
 //    }
+
+
+    @PostMapping("/getAllStockDetailsOnSelectionStock")
+    public List<StockDetailSummary> getAllStockDetails(@RequestBody Map<String, String> stockInfo) {
+
+        String managerId = stockInfo.get("managerId");
+        String stockName = stockInfo.get("stockName");
+
+        Manager manager = managerService.getOneManager(Long.parseLong(managerId))
+                .orElseThrow(()-> new NoSuchElementException("해당 지점이 없습니다."));
+        Stock stock = stockService.getOneStock(manager,stockName)
+                .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
+        List<StockDetailSummary> stockdetailInfos = stockDetailRepository.findAllByStock(stock);
+
+        System.out.println(stockdetailInfos.get(0).getQuantityChanged());
+
+        return stockdetailInfos;
+    }
+
+    @PostMapping("/getAllStockWithOutActiveCondition")
+    public List<StockSummary> getAllStockWithOutActiveCondition(@RequestBody String managerId) {
+        //managerId 숫자만 body에 넣어서 요청하면 된다.
+
+        Manager manager = managerService.getOneManager(Long.parseLong(managerId))
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
+        // active 속성에 상관없이 Stock리스트 제공
+        return stockService.getAllStockWithOutActiveCondition(manager);
+    }
 }
