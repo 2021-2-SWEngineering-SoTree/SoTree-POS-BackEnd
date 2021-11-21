@@ -284,13 +284,13 @@ public class OrderService {
                 // orderDetail의 메뉴와 비교해서 기존 orderdetail 찾기
                 List<OrderDetail> orderDetailByMenuOrder = orderDetailService.getOrderDetailByMenuOrder(takeoutOrder);
                 for (OrderDetail orderDetail : orderDetailByMenuOrder) {
-                    if (orderDetailMap.get(key) == 0) {   // 수량이 0일 때 orderDetail 삭제
-                        orderDetailService.deleteOrderDetail(orderDetail.getId());
-                        continue outerloop;
 
-                    }
                     // 기존 orderDetail 과 수량도 같으면 재고처리 안하고 다음 메뉴에 대한 주문으로 넘어감
                     if (orderDetail.getMenu().equals(menu)) {
+                        if (orderDetailMap.get(key) == 0) {   // 수량이 0일 때 orderDetail 삭제
+                            orderDetailService.deleteOrderDetail(orderDetail.getId());
+                            continue outerloop;
+                        }
                         if (orderDetail.getQuantity() != orderDetailMap.get(key)) {  // 수량 변화 있을 때
                             // addStockDetail 에서 재고 확인 후 이상 없으면 orderdetail 생성
                             orderDetail.setQuantity(orderDetailMap.get(key));
