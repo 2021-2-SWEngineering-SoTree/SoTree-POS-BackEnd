@@ -294,6 +294,7 @@ public class LoginController {
             one.put("birthDay",employee.getUser().getBirthDay());
             one.put("email",employee.getUser().getEmail());
             one.put("phoneNumber",employee.getUser().getPhoneNumber());
+            one.put("employeeId",String.valueOf(employee.getId()));
 
             if(employee.getUser().getAuthorities().isEmpty()){
                 one.put("position", "not_granted_employee");
