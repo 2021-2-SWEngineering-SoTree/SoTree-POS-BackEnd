@@ -7,6 +7,7 @@ import sogong.restaurant.domain.*;
 import sogong.restaurant.repository.*;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -108,4 +109,51 @@ public class PaymentService {
         return "OK";
     }
 
+    public List<PaymentSummary> getAllByManagerId(Long branchId) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findAllByManager(branchId);
+    }
+
+    public List<PaymentDaySummary> getSortedBYDAYFORTOTAL(Long branchId) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findAllByManagerAndPayTimeFROMALLBYDAY(branchId);
+    }
+
+    public List<PaymentWeekSummary> getSortedBYWEEK(Long branchId, String start, String end) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findAllByManagerAndPayTimeFROMWEEK(branchId, start, end);
+    }
+
+    public List<PaymentMonthSummary> getSortedByMonth(Long branchId, String start, String end) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findAllByManagerAndPayTimeFromMonth(branchId, start, end);
+    }
+
+    public PayMentTodaySummary getTodaySummarySale(Long branchId, String start, String end) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findByManagerToday(branchId, start, end);
+    }
+
+    public List<PaymentWeeklySummary> getWeeklySaleSummary(Long branchId) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findByManagerAAndPayTimeFromWeekly(branchId);
+    }
 }
