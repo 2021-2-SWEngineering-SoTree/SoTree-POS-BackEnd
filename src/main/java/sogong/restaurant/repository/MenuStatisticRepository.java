@@ -28,7 +28,7 @@ public interface MenuStatisticRepository extends JpaRepository<MenuStatistic,Lon
     @Query(value = "select ms.MenuStatisticId,ms.date,ms.quantity,ms.BranchId,ms.MenuId from MenuStatistic ms, Menu m where ms.BranchId = :bid and m.MenuId=ms.MenuId and m.menuCategory=:cat and DAYOFWEEK(ms.date)=:d", nativeQuery = true)
     public List<MenuStatistic>findByBranchIdAndCategoryAndDay(@Param(value = "bid")Long bid,@Param(value = "d")Long day,@Param("cat") String category);
 
-    @Query(value = "select ms.MenuId,sum(ms.quantity) as quantity, count(ms.quantity) as totalCount ,m.MenuName as MenuName from pos.MenuStatistic ms, pos.Menu m" +
+    @Query(value = "select ms.MenuId,sum(ms.quantity) as quantity, count(ms.quantity) as totalCount ,m.MenuName as MenuName, m.price from pos.MenuStatistic ms, pos.Menu m" +
             " where ms.BranchId =:bid and m.MenuId=ms.MenuId and DATE(ms.date) between CURDATE()-7 AND CURDATE()  group by MenuId  order by quantity desc limit 5", nativeQuery = true)
     public List<MenuStatisticWeeklySummary>findByBranchAndMenuONRecentWeekly(@Param(value="bid")Long ranchId);
 

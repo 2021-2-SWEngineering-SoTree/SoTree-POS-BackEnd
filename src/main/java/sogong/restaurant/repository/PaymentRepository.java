@@ -3,6 +3,7 @@ package sogong.restaurant.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 import sogong.restaurant.domain.Employee;
 import sogong.restaurant.domain.Payment;
@@ -43,14 +44,19 @@ public interface PaymentRepository extends JpaRepository<Payment,Long> {
     FROM payment
     GROUP BY DAYOFWEEK(payTime);
 */
-    @Query(value = "SELECT WEEK(payTime) weeks,sum(finalPrice) as totalSale, count(finalPrice) as totalCount FROM payment where payTime >= :st and payTime <= :end and BranchId =:bid GROUP BY weeks", nativeQuery = true)
+    @Query(value = "SELECT WEEK(payTime) weeks,sum(finalPrice) as totalSale, count(finalPrice) as totalCount," +
+            "count(CASE WHEN WEEK(payTime)=WEEK(now()) AND method=\"현금\" THEN finalPrice END) AS CashTotal,\n" +
+            "sum(CASE WHEN WEEK(payTime)=WEEK(now()) AND method=\"현금\" THEN finalPrice END) AS CashTotalSale,\n" +
+            "count(CASE WHEN WEEK(payTime)=WEEK(now()) AND method=\"카드\" THEN finalPrice END) AS CardTotal,\n" +
+            "sum(CASE WHEN WEEK(payTime)=WEEK(now()) AND method=\"카드\"THEN finalPrice END) AS CardTotalSale" +
+            " FROM payment where payTime >= :st and payTime <= :end and BranchId =:bid GROUP BY weeks order by weeks", nativeQuery = true)
     public List<PaymentWeekSummary> findAllByManagerAndPayTimeFROMWEEK(@Param(value="bid")Long branchId, @Param(value="st")String start, @Param(value="end")String end);
 
 
     @Query(value = "select MONTH(payTime) as months, sum(finalPrice) as totalSale, count(finalPrice) as totalCount," +
             " sum(CASE WHEN method='카드'Then finalPrice END) as cardTotalSale, count(CASE WHEN method='카드'Then finalPrice END) as cardTotal," +
             " sum(CASE WHEN method='현금'Then finalPrice END) as cashTotalSale, count(CASE WHEN method='현금'Then finalPrice END) as cashTotal" +
-            " FROM pos.payment where payTime >=:st and payTime <= :end and BranchId =:bid GROUP BY months\n", nativeQuery = true)
+            " FROM pos.payment where payTime >=:st and payTime <= :end and BranchId =:bid GROUP BY months order by months\n", nativeQuery = true)
     public List<PaymentMonthSummary> findAllByManagerAndPayTimeFromMonth(@Param(value="bid")Long branchId, @Param(value="st")String start, @Param(value="end")String end);
 
     @Query(value = "SELECT sum(finalPrice) as yearSale, count(finalPrice) as yearCount, \n" +
@@ -73,4 +79,9 @@ public interface PaymentRepository extends JpaRepository<Payment,Long> {
 
     @Query(value="select day(payTime) as date, count(finalPrice) as totalCount, sum(finalPrice) as totalSale from pos.payment where BranchId =:bid AND DATE(payTime) between CURDATE()-7 AND CURDATE() group by date order by date", nativeQuery = true)
     public List<PaymentWeeklySummary> findByManagerAndPayTimeFROMRecent7Days(@Param(value="bid")Long branchId);
+
+    @Query(value = "SELECT DAYOFWEEK(payTime) AS DateRange, count(finalPrice) AS total, sum(finalPrice) AS totalSale FROM pos.payment" +
+            " WHERE BranchId =:bid AND payTime >= :st AND payTime <= :end " +
+            "GROUP BY DAYOFWEEK(payTime) order by DAYOFWEEK(payTime)", nativeQuery = true)
+    public List<PaymentDaySummary> findAllByManagerAndPayTimeBetweenWeeks(@Param(value = "bid")Long branchId, @Param(value="st")String start, @Param(value = "end")String end);
 }
