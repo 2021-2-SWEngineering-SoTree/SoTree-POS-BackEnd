@@ -9,6 +9,7 @@ import sogong.restaurant.domain.MenuStatistic;
 import sogong.restaurant.repository.ManagerRepository;
 import sogong.restaurant.repository.MenuRepository;
 import sogong.restaurant.repository.MenuStatisticRepository;
+import sogong.restaurant.repository.MenuStatisticWeeklySummary;
 
 import javax.transaction.Transactional;
 import java.text.DateFormat;
@@ -92,5 +93,12 @@ public class MenuStatisticService {
         return makeRet(all);
     }
 
+    public List<MenuStatisticWeeklySummary> getWeeklyTopFiveMenu(Long branchId){
+
+        Optional<Manager> optionalManager = managerRepository.findById(branchId);
+        if(optionalManager.isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
+
+        return menuStatisticRepository.findByBranchAndMenuONRecentWeekly(branchId);
+    }
 
 }

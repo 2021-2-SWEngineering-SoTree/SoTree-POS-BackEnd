@@ -3,5 +3,5 @@ package sogong.restaurant.repository;
 public interface PaymentWeekSummary {
     String getWeeks();
     Long getTotalCount();
-    Long getTotalPrice();
+    Long getTotalSale();
 }

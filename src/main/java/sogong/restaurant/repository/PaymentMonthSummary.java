@@ -3,9 +3,9 @@ package sogong.restaurant.repository;
 public interface PaymentMonthSummary {
     String getMonths();
     Long getTotalCount();
-    Long getTotalPrice();
-    Long getCardTotalPrice();
+    Long getTotalSale();
+    Long getCardTotalSale();
     Long getCardTotal();
-    Long getCashTotalPrice();
+    Long getCashTotalSale();
     Long getCashTotal();
 }

@@ -156,4 +156,12 @@ public class PaymentService {
 
         return paymentRepository.findByManagerAAndPayTimeFromWeekly(branchId);
     }
+
+    public List<PaymentWeeklySummary> getRecent7DaysSaleSummary(Long branchId) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findByManagerAndPayTimeFROMRecent7Days(branchId);
+    }
 }
