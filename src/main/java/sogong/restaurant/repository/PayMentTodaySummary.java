@@ -1,12 +1,16 @@
 package sogong.restaurant.repository;
 
 public interface PayMentTodaySummary {
-    Long getYearPrice();
+    Long getYearSale();
     Long getYearCount();
     Long getWeekCount();
-    Long getWeekPrice();
-    Long getMonthPrice();
+    Long getWeekSale();
+    Long getMonthSale();
     Long getMonthCount();
-    Long getTodayPrice();
+    Long getTodaySale();
     Long getTodayCount();
+    Long getTodayCashTotalSale();
+    Long getTodayCashTotal();
+    Long getTodayCardTotalSale();
+    Long getTodayCardTotal();
 }

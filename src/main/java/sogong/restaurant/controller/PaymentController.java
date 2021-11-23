@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sogong.restaurant.repository.*;
+import sogong.restaurant.service.MenuStatisticService;
 import sogong.restaurant.service.PaymentService;
 
 import java.util.HashMap;
@@ -21,6 +22,9 @@ public class PaymentController {
 
     @Autowired
     private PaymentService paymentService;
+
+    @Autowired
+    private MenuStatisticService menuStatisticService;
 
     @PostMapping("/makePayment")
     public Long makePayment(@RequestBody Map<String,String> param){
@@ -82,7 +86,9 @@ public class PaymentController {
         Map<String, Object> response = new HashMap<>();
 
         response.put("saleSummary", paymentService.getTodaySummarySale(Long.parseLong(branchId), start, end));
-        response.put("data", "zz");
+        response.put("recentSevenDays", paymentService.getRecent7DaysSaleSummary(Long.parseLong(branchId)));
+        response.put("DaySummary", paymentService.getSortedBYDAYFORTOTAL(Long.parseLong(branchId)));
+        response.put("TopFiveMenu", menuStatisticService.getWeeklyTopFiveMenu(Long.parseLong(branchId)));
 
         return response;
     }
@@ -90,6 +96,11 @@ public class PaymentController {
     @PostMapping("/getWeeklySaleInfo")
     public List<PaymentWeeklySummary> getWeeklySaleInfo(@RequestBody String branchId){
         return paymentService.getWeeklySaleSummary(Long.parseLong(branchId));
+    }
+
+    @PostMapping("/getRecent7DaysSaleInfo")
+    public List<PaymentWeeklySummary> getRecent7DaysSaleInfo(@RequestBody String branchId){
+        return paymentService.getRecent7DaysSaleSummary(Long.parseLong(branchId));
     }
 
 }

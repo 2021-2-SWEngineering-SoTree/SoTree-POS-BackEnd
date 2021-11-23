@@ -43,28 +43,34 @@ public interface PaymentRepository extends JpaRepository<Payment,Long> {
     FROM payment
     GROUP BY DAYOFWEEK(payTime);
 */
-    @Query(value = "SELECT WEEK(payTime) weeks,sum(finalPrice) as totalPrice, count(finalPrice) as totalCount FROM payment where payTime >= :st and payTime <= :end and BranchId =:bid GROUP BY weeks", nativeQuery = true)
+    @Query(value = "SELECT WEEK(payTime) weeks,sum(finalPrice) as totalSale, count(finalPrice) as totalCount FROM payment where payTime >= :st and payTime <= :end and BranchId =:bid GROUP BY weeks", nativeQuery = true)
     public List<PaymentWeekSummary> findAllByManagerAndPayTimeFROMWEEK(@Param(value="bid")Long branchId, @Param(value="st")String start, @Param(value="end")String end);
 
 
-    @Query(value = "select MONTH(payTime) as months, sum(finalPrice) as totalPrice, count(finalPrice) as totalCount," +
-            " sum(CASE WHEN method='카드'Then finalPrice END) as cardTotalPrice, count(CASE WHEN method='카드'Then finalPrice END) as cardTotal," +
-            " sum(CASE WHEN method='현금'Then finalPrice END) as cashTotalPrice, count(CASE WHEN method='현금'Then finalPrice END) as cashTotal" +
+    @Query(value = "select MONTH(payTime) as months, sum(finalPrice) as totalSale, count(finalPrice) as totalCount," +
+            " sum(CASE WHEN method='카드'Then finalPrice END) as cardTotalSale, count(CASE WHEN method='카드'Then finalPrice END) as cardTotal," +
+            " sum(CASE WHEN method='현금'Then finalPrice END) as cashTotalSale, count(CASE WHEN method='현금'Then finalPrice END) as cashTotal" +
             " FROM pos.payment where payTime >=:st and payTime <= :end and BranchId =:bid GROUP BY months\n", nativeQuery = true)
     public List<PaymentMonthSummary> findAllByManagerAndPayTimeFromMonth(@Param(value="bid")Long branchId, @Param(value="st")String start, @Param(value="end")String end);
 
-    @Query(value = "SELECT sum(finalPrice) as yearPrice, count(finalPrice) as yearCount, \n" +
+    @Query(value = "SELECT sum(finalPrice) as yearSale, count(finalPrice) as yearCount, \n" +
             "count(CASE WHEN WEEK(payTime) =  WEEK(now()) THEN finalPrice END) AS weekCount,\n" +
-            "sum(CASE WHEN WEEK(payTime) =  WEEK(now()) THEN finalPrice END) AS weekPrice,\n" +
+            "sum(CASE WHEN WEEK(payTime) =  WEEK(now()) THEN finalPrice END) AS weekSale,\n" +
             "count(CASE WHEN Month(payTime) = Month(now()) THEN finalPrice END) AS monthCount,\n" +
-            "sum(CASE WHEN Month(payTime) = Month(now()) THEN finalPrice END) AS monthPrice,\n" +
+            "sum(CASE WHEN Month(payTime) = Month(now()) THEN finalPrice END) AS monthSale,\n" +
             "count(CASE WHEN date(payTime)=date(now()) THEN finalPrice END) AS todayCount,\n" +
-            "sum(CASE WHEN date(payTime)=date(now()) THEN finalPrice END) AS todayPrice\n" +
-            "FROM pos.payment where BranchId = :bid and payTime >=:st and payTime <= :end", nativeQuery = true)
+            "sum(CASE WHEN date(payTime)=date(now()) THEN finalPrice END) AS todaySale,\n" +
+            "count(CASE WHEN date(payTime)=date(now()) AND method ='현금' THEN finalPrice END) AS todayCashTotal,\n" +
+            "sum(CASE WHEN date(payTime)=date(now()) AND method ='현금' THEN finalPrice END) AS todayCashTotalSale,\n" +
+            "count(CASE WHEN date(payTime)=date(now()) AND method = '카드' THEN finalPrice END) AS todayCardTotal,\n" +
+            "sum(CASE WHEN date(payTime)=date(now()) AND method ='카드' THEN finalPrice END) AS todayCardTotalSale\n" +
+            "FROM payment where BranchId = :bid and payTime >=:st and payTime <= :end", nativeQuery = true)
     public PayMentTodaySummary findByManagerToday(@Param(value="bid")Long branchId, @Param(value="st")String start, @Param(value="end")String end);
 
 
-    @Query(value ="SELECT day(payTime) as date, sum(finalPrice) as totalPrice, count(finalPrice) as totalCount FROM pos.payment where BranchId=:bid and week(payTime)=week(now()) group by date order by date",  nativeQuery = true)
+    @Query(value ="SELECT day(payTime) as date, sum(finalPrice) as totalSale, count(finalPrice) as totalCount FROM pos.payment where BranchId=:bid and week(payTime)=week(now()) group by date order by date",  nativeQuery = true)
     public List<PaymentWeeklySummary> findByManagerAAndPayTimeFromWeekly(@Param(value="bid")Long branchId);
 
+    @Query(value="select day(payTime) as date, count(finalPrice) as totalCount, sum(finalPrice) as totalSale from pos.payment where BranchId =:bid AND DATE(payTime) between CURDATE()-7 AND CURDATE() group by date order by date", nativeQuery = true)
+    public List<PaymentWeeklySummary> findByManagerAndPayTimeFROMRecent7Days(@Param(value="bid")Long branchId);
 }
