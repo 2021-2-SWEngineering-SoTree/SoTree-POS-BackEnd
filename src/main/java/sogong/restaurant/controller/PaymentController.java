@@ -119,4 +119,33 @@ public class PaymentController {
         return paymentService.combinePay(payTime,method,Integer.parseInt(price),branchId);
     }
 
+    @PostMapping("/getDaySaleInfo")
+    public Map<String, Object>  getDaySaleInfo(@RequestBody Map<String,String> param){
+
+        String start = param.get("start");
+        String end = param.get("end");
+        String branchId = param.get("branchId");
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("dayOfWeekSaleSummary", paymentService.getSortedByDayOfWeekSaleSummary(Long.parseLong(branchId), start, end));
+        response.put("daySaleSummary", paymentService.getDaySaleSummary(Long.parseLong(branchId), start, end));
+
+        return response;
+    }
+
+    @PostMapping("/getSaleInfoBetween")
+    public Map<String, Object>  getSaleInfoBetween(@RequestBody Map<String,String> param){
+
+        String start = param.get("start");
+        String end = param.get("end");
+        String branchId = param.get("branchId");
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("hourSummary", paymentService.getHourSaleSummary(Long.parseLong(branchId), start, end));
+        response.put("dateSaleSummary", paymentService.getSortedByDateSaleSummary(Long.parseLong(branchId), start, end));
+        response.put("sumSummary", paymentService.getSumSaleSummary(Long.parseLong(branchId), start, end));
+        return response;
+    }
 }
