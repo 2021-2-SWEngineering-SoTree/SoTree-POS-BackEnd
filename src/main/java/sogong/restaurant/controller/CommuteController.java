@@ -1,39 +1,59 @@
 package sogong.restaurant.controller;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import sogong.restaurant.VO.CommuteVO;
+import sogong.restaurant.domain.CommuteRecord;
 import sogong.restaurant.service.CommuteService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RestController()
 @Slf4j
+@RequestMapping("/commute")
 public class CommuteController {
 
     @Autowired
-    private CommuteService employeeService;
+    private CommuteService commuteService;
 
 
     @PostMapping("/recordCome")
-    String recordCome(@RequestBody Map<String, String> param){
+    String recordCome(@RequestBody Map<String, String> param) {
         Long employeeId = Long.parseLong(param.get("employeeId"));
         String commingTime = param.get("time");
         Long branchId = Long.parseLong(param.get("branchId"));
 
-        return employeeService.recordCome(employeeId, commingTime,branchId);
+        return commuteService.recordCome(employeeId, commingTime, branchId);
     }
 
     @PostMapping("/recordOut")
-    String recordOut(@RequestBody Map<String, String> param){
+    String recordOut(@RequestBody Map<String, String> param) {
         Long employeeId = Long.parseLong(param.get("employeeId"));
         String commingTime = param.get("time");
         Long branchId = Long.parseLong(param.get("branchId"));
 
-        return employeeService.recordOut(employeeId, commingTime,branchId);
+        return commuteService.recordOut(employeeId, commingTime, branchId);
+    }
+
+    @PostMapping("/getOneEmployeeCommuteRecord/{branchId}/{employeeId}")
+    List<CommuteVO> getOneEmployeeCommuteRecord(@PathVariable(value = "branchId") Long branchId, @PathVariable(value = "employeeId") Long employeeId) {
+        List<CommuteVO> commuteVOList = new ArrayList<>();
+
+        List<CommuteRecord> commuteRecordList = commuteService.getOneEmployeeRecords(employeeId, branchId);
+
+        for (CommuteRecord commuteRecord : commuteRecordList) {
+            CommuteVO commuteVO = new CommuteVO();
+
+            commuteVO.setIsComing(commuteRecord.getIsComing());
+            commuteVO.setTime(commuteRecord.getTime());
+
+            commuteVOList.add(commuteVO);
+        }
+
+        return commuteVOList;
     }
 
 }

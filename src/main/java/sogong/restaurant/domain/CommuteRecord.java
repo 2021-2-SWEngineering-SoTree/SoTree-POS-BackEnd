@@ -17,19 +17,19 @@ public class CommuteRecord {
 
     @Id
     @Column(name = "CommuteRecordId")
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long Id;
 
     @ManyToOne
-    @JoinColumn(name="EmployeeId")
+    @JoinColumn(name = "EmployeeId")
     private Employee employee;
 
     @ManyToOne
     @JoinColumn(name = "ManagerId")
     private Manager manager;
 
-    Boolean isComing;
-    @JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm", timezone="Asia/Seoul")
+    Boolean isComing;  // True : 출근 기록 , False : 퇴근 기록
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
     String time;
 
 }
