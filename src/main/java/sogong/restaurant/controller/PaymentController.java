@@ -38,6 +38,7 @@ public class PaymentController {
         return paymentService.makeMenu(orderId,employeeId,payTime,method,managerId);
     }
 
+
     @PostMapping("/sendToCompany")
     public String sendToCompany(@RequestBody Map<String,String> param){
 
@@ -101,6 +102,21 @@ public class PaymentController {
     @PostMapping("/getRecent7DaysSaleInfo")
     public List<PaymentWeeklySummary> getRecent7DaysSaleInfo(@RequestBody String branchId){
         return paymentService.getRecent7DaysSaleSummary(Long.parseLong(branchId));
+    }
+
+    @PostMapping("/combinePay")
+    public String combinePay(@RequestBody Map<String,String> param){
+
+        //여기서 실제로 카드회사와의 결제가 진행되어야 함. 지금은 그냥 다 되었다고 가정
+
+        String payTime = param.get("payTime");
+        String method = param.get("method");
+        String price = param.get("price");
+        Long branchId = Long.parseLong(param.get("branchId"));
+
+
+
+        return paymentService.combinePay(payTime,method,Integer.parseInt(price),branchId);
     }
 
 }
