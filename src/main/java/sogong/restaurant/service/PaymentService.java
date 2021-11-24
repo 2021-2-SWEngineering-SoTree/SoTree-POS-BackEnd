@@ -27,6 +27,8 @@ public class PaymentService {
     private MenuRepository menuRepository;
     @Autowired
     private MenuStatisticRepository menuStatisticRepository;
+    @Autowired
+    private PayStatisticRepository payStatisticRepository;
 
     public int getFinalPrice(int totalPrice){
         return totalPrice;
@@ -57,6 +59,10 @@ public class PaymentService {
         payment.setFinalPrice(getFinalPrice(menuOrder.get().getTotalPrice()));
 
         paymentRepository.save(payment);
+
+        if(!method.equals("복합")){
+            combinePay(payTime,method,menuOrder.get().getTotalPrice(),managerId);
+        }
 
         return payment.getId();
     }
@@ -163,5 +169,20 @@ public class PaymentService {
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
 
         return paymentRepository.findByManagerAndPayTimeFROMRecent7Days(branchId);
+    }
+
+    public String combinePay(String payTime, String method, int price, Long branchId){
+
+        if(managerRepository.findById(branchId).isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
+
+        PayStatistic payStatistic = new PayStatistic();
+
+        payStatistic.setPayTime(payTime);
+        payStatistic.setPrice(price);
+        payStatistic.setManager(managerRepository.findById(branchId).get());
+        payStatistic.setMethod(method);
+
+        payStatisticRepository.save(payStatistic);
+        return "OK";
     }
 }
