@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import sogong.restaurant.domain.Menu;
 import sogong.restaurant.domain.MenuOrder;
 import sogong.restaurant.domain.OrderDetail;
+import sogong.restaurant.summary.OrderDetailSummary;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,15 +1,14 @@
 package sogong.restaurant.controller;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import sogong.restaurant.repository.*;
 import sogong.restaurant.service.MenuStatisticService;
 import sogong.restaurant.service.PaymentService;
+import sogong.restaurant.summary.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -65,6 +64,11 @@ public class PaymentController {
         String start = param.get("start");
         String end = param.get("end");
         String branchId = param.get("branchId");
+
+        /*Map<String, Object> response = new HashMap<>();
+        response.put("saleSummary", paymentService.getSortedBYWEEK(Long.parseLong(branchId), start, end));
+        response.put("orderTypeSummary", paymentService.getWeekOrderTypeSummary(Long.parseLong(branchId), start, end));*/
+
         return paymentService.getSortedBYWEEK(Long.parseLong(branchId), start, end);
     }
 
@@ -74,6 +78,11 @@ public class PaymentController {
         String start = param.get("start");
         String end = param.get("end");
         String branchId = param.get("branchId");
+
+        /*Map<String, Object> response = new HashMap<>();
+        response.put("saleSummary", paymentService.getSortedByMonth(Long.parseLong(branchId), start, end));
+        response.put("orderTypeSummary", paymentService.getMonthOrderTypeSummary(Long.parseLong(branchId), start, end));*/
+
         return paymentService.getSortedByMonth(Long.parseLong(branchId), start, end);
     }
 
@@ -90,6 +99,7 @@ public class PaymentController {
         response.put("recentSevenDays", paymentService.getRecent7DaysSaleSummary(Long.parseLong(branchId)));
         response.put("DaySummary", paymentService.getSortedBYDAYFORTOTAL(Long.parseLong(branchId)));
         response.put("TopFiveMenu", menuStatisticService.getWeeklyTopFiveMenu(Long.parseLong(branchId)));
+        response.put("OrderTypeSummary", paymentService.getTodayOrderTypeSummary(Long.parseLong(branchId)));
 
         return response;
     }
@@ -120,7 +130,7 @@ public class PaymentController {
     }
 
     @PostMapping("/getDaySaleInfo")
-    public Map<String, Object>  getDaySaleInfo(@RequestBody Map<String,String> param){
+    public Map<String, Object> getDaySaleInfo(@RequestBody Map<String,String> param){
 
         String start = param.get("start");
         String end = param.get("end");
@@ -130,12 +140,13 @@ public class PaymentController {
 
         response.put("dayOfWeekSaleSummary", paymentService.getSortedByDayOfWeekSaleSummary(Long.parseLong(branchId), start, end));
         response.put("daySaleSummary", paymentService.getDaySaleSummary(Long.parseLong(branchId), start, end));
+        response.put("orderTypeSummary", paymentService.getDayOrderTypeSummary(Long.parseLong(branchId), start, end));
 
         return response;
     }
 
     @PostMapping("/getSaleInfoBetween")
-    public Map<String, Object>  getSaleInfoBetween(@RequestBody Map<String,String> param){
+    public Map<String, Object> getSaleInfoBetween(@RequestBody Map<String,String> param){
 
         String start = param.get("start");
         String end = param.get("end");
@@ -146,6 +157,7 @@ public class PaymentController {
         response.put("hourSummary", paymentService.getHourSaleSummary(Long.parseLong(branchId), start, end));
         response.put("dateSaleSummary", paymentService.getSortedByDateSaleSummary(Long.parseLong(branchId), start, end));
         response.put("sumSummary", paymentService.getSumSaleSummary(Long.parseLong(branchId), start, end));
+        response.put("orderTypeSumSummary", paymentService.getBetweenInputOrderTypeSumSummary(Long.parseLong(branchId), start, end));
         return response;
     }
 }

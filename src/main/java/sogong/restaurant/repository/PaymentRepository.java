@@ -3,10 +3,9 @@ package sogong.restaurant.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
-import sogong.restaurant.domain.Employee;
 import sogong.restaurant.domain.Payment;
+import sogong.restaurant.summary.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -107,4 +106,34 @@ public interface PaymentRepository extends JpaRepository<Payment,Long> {
             "sum(CASE WHEN method='카드'THEN finalPrice END) AS CardTotalSale\n" +
             "FROM pos.payment where payTime >= :st and payTime <= :end and BranchId =:bid", nativeQuery = true)
     public List<PaymentSumSummary> findByManagerAndPayTimeSumSummaryBetweenInput(@Param(value = "bid") Long branchId, @Param(value = "st") String start, @Param(value = "end") String end);
+
+    @Query(value = "SELECT month(payTime) as month,\n" +
+            "count(CASE WHEN orderType='TABLE_ORDER' THEN finalPrice END) as tableTotalCount, sum(CASE WHEN orderType='TABLE_ORDER' THEN finalPrice END) as tableTotalSale,\n" +
+            "count(CASE WHEN orderType='TAKEOUT_ORDER' THEN finalPrice END) as takeOutTotalCount, sum(CASE WHEN orderType='TAKEOUT_ORDER' THEN finalPrice END) as takeOutTotalSale \n" +
+            "FROM pos.payment as p join pos.menuorder as o ON p.orderId = o.orderId where payTime >= :st AND payTime <= :end AND p.BranchId = :bid group by month order by month ", nativeQuery = true)
+    public List<PaymentMonthOrderTypeSummary> findByMangerANDOrderIdANDPayTimeANDOrderTypeMonthSummary(@Param(value = "bid") Long branchId, @Param(value = "st") String start, @Param(value = "end") String end);
+
+    @Query(value = "SELECT Date(payTime) as date,\n" +
+            "count(CASE WHEN orderType='TABLE_ORDER' THEN finalPrice END) as tableTotalCount, sum(CASE WHEN orderType='TABLE_ORDER' THEN finalPrice END) as tableTotalSale,\n" +
+            "count(CASE WHEN orderType='TAKEOUT_ORDER' THEN finalPrice END) as takeOutTotalCount, sum(CASE WHEN orderType='TAKEOUT_ORDER' THEN finalPrice END) as takeOutTotalSale \n" +
+            "FROM pos.payment as p join pos.menuorder as o ON p.orderId = o.orderId where Date(payTime) = Date(now()) AND p.BranchId = :bid group by date", nativeQuery = true)
+    public List<PaymentTodayOrderTypeSummary> findByMangerANDOrderIdANDPayTimeANDOrderTypeTodaySummary(@Param(value = "bid") Long branchId);
+
+    @Query(value = "SELECT week(payTime) as date,\n" +
+            "count(CASE WHEN orderType='TABLE_ORDER' THEN finalPrice END) as tableTotalCount, sum(CASE WHEN orderType='TABLE_ORDER' THEN finalPrice END) as tableTotalSale,\n" +
+            "count(CASE WHEN orderType='TAKEOUT_ORDER' THEN finalPrice END) as takeOutTotalCount, sum(CASE WHEN orderType='TAKEOUT_ORDER' THEN finalPrice END) as takeOutTotalSale \n" +
+            "FROM pos.payment as p join pos.menuorder as o ON p.orderId = o.orderId where payTime >= :st AND payTime <= :end AND p.BranchId = :bid group by date order by date", nativeQuery = true)
+    public List<PaymentTodayOrderTypeSummary> findByManagerANDOrderIdANDPayTimeANDOrderTypeWeekSummary(@Param(value = "bid") Long branchId, @Param(value = "st") String start, @Param(value = "end") String end);
+
+    @Query(value = "SELECT Day(payTime) as date,\n" +
+            "count(CASE WHEN orderType='TABLE_ORDER' THEN finalPrice END) as tableTotalCount, sum(CASE WHEN orderType='TABLE_ORDER' THEN finalPrice END) as tableTotalSale,\n" +
+            "count(CASE WHEN orderType='TAKEOUT_ORDER' THEN finalPrice END) as takeOutTotalCount, sum(CASE WHEN orderType='TAKEOUT_ORDER' THEN finalPrice END) as takeOutTotalSale \n" +
+            "FROM pos.payment as p join pos.menuorder as o ON p.orderId = o.orderId where payTime >= :st AND payTime <= :end AND p.BranchId = :bid group by date order by date", nativeQuery = true)
+    public List<PaymentTodayOrderTypeSummary> findByManagerANDOrderIdANDPayTimeANDOrderTypeDaySummary(@Param(value = "bid") Long branchId, @Param(value = "st") String start, @Param(value = "end") String end);
+
+    @Query(value = "SELECT \n" +
+            "count(CASE WHEN orderType='TABLE_ORDER' THEN finalPrice END) as tableTotalCount, sum(CASE WHEN orderType='TABLE_ORDER' THEN finalPrice END) as tableTotalSale,\n" +
+            "count(CASE WHEN orderType='TAKEOUT_ORDER' THEN finalPrice END) as takeOutTotalCount, sum(CASE WHEN orderType='TAKEOUT_ORDER' THEN finalPrice END) as takeOutTotalSale \n" +
+            "FROM pos.payment as p join pos.menuorder as o ON p.orderId = o.orderId where payTime >= :st AND payTime <= :end AND p.BranchId = :bid", nativeQuery = true)
+    public List<PaymentTodayOrderTypeSummary> findByManagerAndOrderIdAndPayTimeAndOrderTypeBetweenInputSumSummary(@Param(value = "bid") Long branchId, @Param(value = "st") String start, @Param(value = "end") String end);
 }

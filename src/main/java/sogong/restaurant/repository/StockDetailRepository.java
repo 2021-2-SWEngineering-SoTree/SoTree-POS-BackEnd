@@ -3,9 +3,9 @@ package sogong.restaurant.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import sogong.restaurant.domain.MenuOrder;
 import sogong.restaurant.domain.Stock;
 import sogong.restaurant.domain.StockDetail;
+import sogong.restaurant.summary.StockDetailSummary;
 
 
 import java.util.List;

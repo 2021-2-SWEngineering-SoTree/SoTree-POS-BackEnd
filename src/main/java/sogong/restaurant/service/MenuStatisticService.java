@@ -1,20 +1,15 @@
 package sogong.restaurant.service;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sogong.restaurant.domain.Manager;
-import sogong.restaurant.domain.Menu;
 import sogong.restaurant.domain.MenuStatistic;
 import sogong.restaurant.repository.ManagerRepository;
 import sogong.restaurant.repository.MenuRepository;
 import sogong.restaurant.repository.MenuStatisticRepository;
-import sogong.restaurant.repository.MenuStatisticWeeklySummary;
+import sogong.restaurant.summary.MenuStatisticWeeklySummary;
 
 import javax.transaction.Transactional;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Transactional

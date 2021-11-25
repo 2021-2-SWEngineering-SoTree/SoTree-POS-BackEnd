@@ -1,6 +1,7 @@
-package sogong.restaurant.repository;
+package sogong.restaurant.summary;
 
-public interface PaymentSumSummary {
+public interface PaymentWeekSummary {
+    String getWeeks();
     Long getTotalCount();
     Long getTotalSale();
     Long getCashTotal();
