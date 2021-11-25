@@ -18,7 +18,7 @@ public class CommuteRecord {
     @Id
     @Column(name = "CommuteRecordId")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long Id;
+    Long id;
 
     @ManyToOne
     @JoinColumn(name = "EmployeeId")

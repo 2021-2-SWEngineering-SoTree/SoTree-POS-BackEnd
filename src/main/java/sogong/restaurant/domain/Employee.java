@@ -17,15 +17,15 @@ public class Employee {
 
     @Id
     @Column(name = "EmployeeId")
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    Long Id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
     boolean commuteState;
     @OneToOne
-    @JoinColumn(name="UserId")
+    @JoinColumn(name = "UserId")
     private User user;
 
     @ManyToOne
-    @JoinColumn(name="BranchId")
+    @JoinColumn(name = "BranchId")
     private Manager manager;
 
 }
