@@ -57,6 +57,10 @@ public abstract class MenuOrder {
     @Enumerated(EnumType.STRING)
     private OrderType orderType; //  TABLE_ORDER,TAKEOUT_ORDER
 
+    // 낙관적 lock
+    @Version
+    private Integer version;
+
     //@JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd", timezone="Asia/Seoul")
     //private String orderDate;
 
@@ -72,6 +76,7 @@ public abstract class MenuOrder {
 
     @OneToMany(mappedBy = "menuOrder")
     private List<OrderDetail> orderDetailList = new ArrayList<>();
+
 
 }
 
