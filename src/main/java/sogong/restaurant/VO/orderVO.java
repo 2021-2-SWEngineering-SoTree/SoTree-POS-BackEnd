@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import sogong.restaurant.repository.OrderDetailSummary;
+import sogong.restaurant.summary.OrderDetailSummary;
 
 import java.util.List;
 

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.Stock;
 import sogong.restaurant.repository.StockRepository;
-import sogong.restaurant.repository.StockSummary;
+import sogong.restaurant.summary.StockSummary;
 
 import javax.transaction.Transactional;
 import java.util.List;

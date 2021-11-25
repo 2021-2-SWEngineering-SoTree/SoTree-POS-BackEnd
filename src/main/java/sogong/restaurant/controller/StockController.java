@@ -14,6 +14,8 @@ import sogong.restaurant.repository.*;
 import sogong.restaurant.service.ManagerService;
 import sogong.restaurant.service.StockDetailService;
 import sogong.restaurant.service.StockService;
+import sogong.restaurant.summary.StockDetailSummary;
+import sogong.restaurant.summary.StockSummary;
 
 import java.util.*;
 

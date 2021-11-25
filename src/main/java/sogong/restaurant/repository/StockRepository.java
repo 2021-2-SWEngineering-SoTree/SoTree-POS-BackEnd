@@ -3,6 +3,7 @@ package sogong.restaurant.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.Stock;
+import sogong.restaurant.summary.StockSummary;
 
 import java.util.List;
 import java.util.Optional;

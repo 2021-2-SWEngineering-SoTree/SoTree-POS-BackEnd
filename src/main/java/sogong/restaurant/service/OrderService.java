@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sogong.restaurant.VO.orderVO;
 import sogong.restaurant.domain.*;
 import sogong.restaurant.repository.*;
+import sogong.restaurant.summary.OrderDetailSummary;
 
 import java.util.*;
 import java.util.stream.Collectors;

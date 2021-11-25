@@ -1,4 +1,4 @@
-package sogong.restaurant.repository;
+package sogong.restaurant.summary;
 
 public interface StockSummary {
     String getId();

@@ -1,11 +1,10 @@
 package sogong.restaurant.service;
 
-import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import sogong.restaurant.domain.*;
 import sogong.restaurant.repository.*;
+import sogong.restaurant.summary.*;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -224,4 +223,46 @@ public class PaymentService {
 
         return paymentRepository.findByManagerAndPayTimeSumSummaryBetweenInput(branchId, start, end);
     }
+
+    public List<PaymentMonthOrderTypeSummary> getMonthOrderTypeSummary(Long branchId, String start, String end) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findByMangerANDOrderIdANDPayTimeANDOrderTypeMonthSummary(branchId, start, end);
+    }
+
+    public List<PaymentTodayOrderTypeSummary> getTodayOrderTypeSummary(Long branchId) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findByMangerANDOrderIdANDPayTimeANDOrderTypeTodaySummary(branchId);
+    }
+
+    public List<PaymentTodayOrderTypeSummary> getWeekOrderTypeSummary(Long branchId, String start, String end) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findByManagerANDOrderIdANDPayTimeANDOrderTypeWeekSummary(branchId, start, end);
+    }
+
+    public List<PaymentTodayOrderTypeSummary> getDayOrderTypeSummary(Long branchId, String start, String end) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findByManagerANDOrderIdANDPayTimeANDOrderTypeDaySummary(branchId, start, end);
+    }
+
+    public List<PaymentTodayOrderTypeSummary> getBetweenInputOrderTypeSumSummary(Long branchId, String start, String end) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findByManagerAndOrderIdAndPayTimeAndOrderTypeBetweenInputSumSummary(branchId, start, end);
+    }
+
+
 }
