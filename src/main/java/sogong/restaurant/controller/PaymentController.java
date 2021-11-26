@@ -160,4 +160,13 @@ public class PaymentController {
         response.put("orderTypeSumSummary", paymentService.getBetweenInputOrderTypeSumSummary(Long.parseLong(branchId), start, end));
         return response;
     }
+
+    @PostMapping("/getReceipt")
+    List<Map<String,String>>getReceipt(@RequestBody Map<String,String> param){
+        Long branchId = Long.parseLong(param.get("branchId"));
+        Long orderId = Long.parseLong(param.get("orderId"));
+        Long paymentId = Long.parseLong(param.get("paymentId"));
+
+        return paymentService.getReceipt(branchId,orderId,paymentId);
+    }
 }

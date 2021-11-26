@@ -7,9 +7,7 @@ import sogong.restaurant.repository.*;
 import sogong.restaurant.summary.*;
 
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Transactional
 @Service
@@ -264,5 +262,46 @@ public class PaymentService {
         return paymentRepository.findByManagerAndOrderIdAndPayTimeAndOrderTypeBetweenInputSumSummary(branchId, start, end);
     }
 
+    public List<Map<String,String>>getReceipt(Long branchId, Long orderId, Long paymentId){
+        List<Map<String,String>> ret= new ArrayList<>();
+        Optional<Manager> optionalManager = managerRepository.findById(branchId);
+        if(optionalManager.isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
+
+        Manager manager = optionalManager.get();
+
+        Optional<MenuOrder> optionalMenu = menuOrderRepository.findByIdAndAndManager(orderId, manager);
+        if(optionalMenu.isEmpty()) throw new NoSuchElementException("존재하지 않는 주문정보입니다.");
+        MenuOrder menuOrder = optionalMenu.get();
+
+        Optional<Payment> optionalPayment = paymentRepository.findByIdAndManager(paymentId, branchId);
+        if(optionalPayment.isEmpty()) throw new NoSuchElementException("존재하지 않는 결제정보입니다.");
+        Payment payment = optionalPayment.get();
+
+        Map<String,String> info = new HashMap<>();
+
+        info.put("결제일시",payment.getPayTime());
+        info.put("결제 금액",String.valueOf(payment.getFinalPrice()));
+        if(menuOrder.getEmployee()==null)
+            info.put("담당자","null");
+        else
+            info.put("담당자",menuOrder.getEmployee().getUser().getPersonName());
+        info.put("결제 방법",payment.getMethod());
+        info.put("매장 전화번호",manager.getBranchPhoneNumber());
+        info.put("매장 이름",manager.getStoreName());
+        info.put("대표",manager.getUser().getPersonName());
+        ret.add(info);
+
+        for(OrderDetail orderDetail : menuOrder.getOrderDetailList()){
+            Map<String,String> one = new HashMap<>();
+
+            one.put("메뉴 이름",orderDetail.getMenu().getMenuName());
+            one.put("수량",String.valueOf(orderDetail.getQuantity()));
+            one.put("금액",String.valueOf(orderDetail.getQuantity() * orderDetail.getMenu().getPrice()));
+
+            ret.add(one);
+        }
+
+        return ret;
+    }
 
 }

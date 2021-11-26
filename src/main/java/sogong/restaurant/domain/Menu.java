@@ -26,7 +26,8 @@ public class Menu {
     @NotNull
     @Column(columnDefinition = "boolean default true")
     private Boolean active; // 현재 사용중인 재고인지 여부
-
+    private int totalQuantity;
+    private int totalTime;
 
     // 가게에 대한 key
     @ManyToOne

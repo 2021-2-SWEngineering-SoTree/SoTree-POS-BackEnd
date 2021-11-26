@@ -14,5 +14,4 @@ public interface TakeoutOrderRepository extends JpaRepository<TakeoutOrder, Long
     List<TakeoutOrder> findAllByManager(Manager manager);
 
     Optional<TakeoutOrder> findTakeoutOrderByManagerAndId(Manager manager, Long id);
-
 }
