@@ -105,6 +105,7 @@ public class EmployeeManagementService {
                     orderRec.put("주문합계",String.valueOf(all3.get(i).getTotalPrice()));
                     orderRec.put("주문번호",String.valueOf(all3.get(i).getId()));
                     orderRec.put("주문일자",all3.get(i).getStartTime());
+                    orderRec.put("주문금액",String.valueOf(all3.get(i).getTotalPrice()));
                     MenuOrder.OrderType orderType = all3.get(i).getOrderType();
                     if(orderType.equals(MenuOrder.OrderType.TABLE_ORDER)){
                         TableOrder tableOrder = (TableOrder) all3.get(i);
