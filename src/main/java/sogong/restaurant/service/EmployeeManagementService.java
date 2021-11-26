@@ -79,6 +79,7 @@ public class EmployeeManagementService {
                     payRec.put("결제 종류",all2.get(i).getMethod());
                     payRec.put("결제 일자",all2.get(i).getPayTime());
                     payRec.put("주문 번호",String.valueOf(all2.get(i).getMenuOrder().getId()));
+                    payRec.put("결제 금액",String.valueOf(all2.get(i).getFinalPrice()));
                     MenuOrder.OrderType orderType = all2.get(i).getMenuOrder().getOrderType();
                     if(orderType.equals(MenuOrder.OrderType.TABLE_ORDER)){
                         TableOrder tableOrder = (TableOrder) all2.get(i).getMenuOrder();
