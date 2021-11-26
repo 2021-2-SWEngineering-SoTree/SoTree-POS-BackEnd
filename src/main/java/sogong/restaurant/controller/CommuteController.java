@@ -2,6 +2,7 @@ package sogong.restaurant.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import sogong.restaurant.VO.CommuteVO;
 import sogong.restaurant.domain.CommuteRecord;
@@ -55,5 +56,20 @@ public class CommuteController {
 
         return commuteVOList;
     }
+
+    @PostMapping("/getAllCommuteDay")
+    public List<Map<String,String>> getAllCommuteDay(@RequestBody Map<String,String> param) throws Exception{
+        Long branchId = Long.valueOf(param.get("branchId"));
+        String month = param.get("month");
+
+
+        return commuteService.getAllCommuteDay(branchId,month);
+    }
+
+    @PostMapping("/findCommuteByEmployee")
+    public Map<String,String> findCommuteByManager(@RequestBody Long branchId){
+        return commuteService.findCommuteByManager(branchId);
+    }
+
 
 }

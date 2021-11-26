@@ -15,6 +15,6 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
     Optional<Menu> findMenuByMenuNameAndManager(String menuName, Manager manager);
 
     List<Menu> findAllByManagerAndActive(Manager manager, Boolean active);
-
+    List<Menu> findAllByManagerAndMenuCategory(Manager manager,String menuCategory);
     List<Menu> findAllById(Long id);
 }

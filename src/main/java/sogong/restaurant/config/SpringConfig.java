@@ -2,10 +2,7 @@ package sogong.restaurant.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import sogong.restaurant.repository.MenuIngredientRepository;
-import sogong.restaurant.repository.MenuRepository;
-import sogong.restaurant.repository.StockDetailRepository;
-import sogong.restaurant.repository.StockRepository;
+import sogong.restaurant.repository.*;
 import sogong.restaurant.service.MenuIngredientService;
 import sogong.restaurant.service.MenuService;
 
@@ -16,17 +13,19 @@ public class SpringConfig {
     private final MenuIngredientRepository menuIngredientRepository;
     private final StockRepository stockRepository;
     private final StockDetailRepository stockDetailRepository;
+    private final ManagerRepository managerRepository;
 
-    public SpringConfig(MenuRepository menuRepository, MenuIngredientRepository menuIngredientRepository, StockRepository stockRepository, StockDetailRepository stockDetailRepository) {
+    public SpringConfig(MenuRepository menuRepository, MenuIngredientRepository menuIngredientRepository, StockRepository stockRepository, StockDetailRepository stockDetailRepository,ManagerRepository managerRepository) {
         this.menuRepository = menuRepository;
         this.menuIngredientRepository = menuIngredientRepository;
         this.stockRepository = stockRepository;
         this.stockDetailRepository = stockDetailRepository;
+        this.managerRepository = managerRepository;
     }
 
     @Bean
     public MenuService menuService() {
-        return new MenuService(menuRepository);
+        return new MenuService(menuRepository,managerRepository);
     }
 
     @Bean

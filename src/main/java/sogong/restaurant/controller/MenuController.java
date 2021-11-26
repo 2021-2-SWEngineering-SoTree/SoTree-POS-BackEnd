@@ -206,4 +206,12 @@ public class MenuController {
         return r;
     }
 
+    @PostMapping("/getMeanTimeByCategory")
+    public Map<String,Integer> getMeanTimeByCategory(@RequestBody Map<String,String> param){
+        Long branchId = Long.parseLong(param.get("branchId"));
+        String category = param.get("category");
+
+        return menuService.getMeanTimeByCategory(branchId,category);
+    }
+
 }

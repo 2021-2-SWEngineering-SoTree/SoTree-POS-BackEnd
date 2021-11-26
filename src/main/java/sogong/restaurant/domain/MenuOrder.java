@@ -58,8 +58,8 @@ public abstract class MenuOrder {
     private OrderType orderType; //  TABLE_ORDER,TAKEOUT_ORDER
 
     // 낙관적 lock
-    @Version
-    private Integer version;
+    //@Version
+    //private int version;
 
     //@JsonFormat(shape= JsonFormat.Shape.STRING, pattern="yyyy-MM-dd", timezone="Asia/Seoul")
     //private String orderDate;

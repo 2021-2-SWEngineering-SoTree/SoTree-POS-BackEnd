@@ -2,13 +2,15 @@ package sogong.restaurant.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.Menu;
+import sogong.restaurant.repository.ManagerRepository;
 import sogong.restaurant.repository.MenuRepository;
 
 import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Transactional
 @AllArgsConstructor
@@ -16,6 +18,8 @@ public class MenuService {
 
     @Autowired
     private final MenuRepository menuRepository;
+    @Autowired
+    private final ManagerRepository managerRepository;
 
     @Transactional
     public Long saveMenu(Menu menu) {
@@ -48,6 +52,26 @@ public class MenuService {
     @Transactional
     public void deleteMenu(Long id) {
         menuRepository.deleteById(id);
+    }
+
+    public Map<String,Integer> getMeanTimeByCategory(Long branchId, String category){
+        Map<String,Integer> ret = new HashMap<>();
+
+        Optional<Manager> optionalManager = managerRepository.findById(branchId);
+        if(optionalManager.isEmpty()) throw new NoSuchElementException("가게가 존재하지 않습니다.");
+
+        Manager manager = optionalManager.get();
+
+        List<Menu> all = menuRepository.findAllByManagerAndMenuCategory(manager, category);
+
+        for(Menu menu : all){
+            int meanTime = -1;
+            if(menu.getTotalQuantity()!=0)
+                meanTime=(int)(menu.getTotalTime()/menu.getTotalQuantity());
+            ret.put(menu.getMenuName(),meanTime);
+        }
+
+        return ret;
     }
 
 }

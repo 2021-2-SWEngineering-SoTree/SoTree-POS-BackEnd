@@ -136,4 +136,6 @@ public interface PaymentRepository extends JpaRepository<Payment,Long> {
             "count(CASE WHEN orderType='TAKEOUT_ORDER' THEN finalPrice END) as takeOutTotalCount, sum(CASE WHEN orderType='TAKEOUT_ORDER' THEN finalPrice END) as takeOutTotalSale \n" +
             "FROM pos.payment as p join pos.menuorder as o ON p.orderId = o.orderId where payTime >= :st AND payTime <= :end AND p.BranchId = :bid", nativeQuery = true)
     public List<PaymentTodayOrderTypeSummary> findByManagerAndOrderIdAndPayTimeAndOrderTypeBetweenInputSumSummary(@Param(value = "bid") Long branchId, @Param(value = "st") String start, @Param(value = "end") String end);
+
+
 }

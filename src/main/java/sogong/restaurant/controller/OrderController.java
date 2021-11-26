@@ -322,5 +322,21 @@ public class OrderController {
 
     }
 
+    @PostMapping("/getTakeOutTicketInfo")
+    List<Map<String,String>>getTakeOutTicketInfo(@RequestBody Map<String,String> param){
+        Long branchId = Long.parseLong(param.get("branchId"));
+        Long orderId = Long.parseLong(param.get("orderId"));
+
+        return orderService.getTakeOutTicketInfo(branchId,orderId);
+    }
+
+    @PostMapping("/finishAlarm")
+    String finishAlarm(@RequestBody Map<String,String>param) throws Exception{
+        Long branchId = Long.parseLong(param.get("branchId"));
+        Long orderId = Long.parseLong(param.get("orderId"));
+        String finishTime = param.get("finishTime");
+        return orderService.finishAlarm(branchId,orderId,finishTime);
+    }
+
 }
 
