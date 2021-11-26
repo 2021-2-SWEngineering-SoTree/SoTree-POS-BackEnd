@@ -350,6 +350,7 @@ public class LoginController {
         addUser.setUserName(user.getPersonName());
         addUser.setLoginId(user.getLoginId());
         addUser.setPassword(user.getPassword());
+        //asdfas
         addUser.setEmail(user.getEmail());
         addUser.setBirthDay(user.getBirthDay());
         addUser.setId(user.getId());
