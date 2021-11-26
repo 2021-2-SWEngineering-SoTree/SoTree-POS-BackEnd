@@ -103,6 +103,7 @@ public class OrderService {
 
             // orderdetail 안에 여러 메뉴들 순회
             for (String key : orderDetailMap.keySet()) {
+
                 Menu menu = menuRepository.findMenuByMenuName(key).
                         orElseThrow(() ->
                                 new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
@@ -155,6 +156,7 @@ public class OrderService {
             // orderdetail 안에 여러 메뉴들 순회
             outerloop:
             for (String key : orderDetailMap.keySet()) {
+
                 Menu menu = menuRepository.findMenuByMenuName(key).
                         orElseThrow(() ->
                                 new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
@@ -173,7 +175,6 @@ public class OrderService {
                             // addStockDetail 에서 재고 확인 후 이상 없으면 orderdetail 생성
                             orderDetail.setQuantity(orderDetailMap.get(key));
                             orderDetailService.addOrderDetail(orderDetail);
-
                         }
                         continue outerloop;
                     }
@@ -281,6 +282,7 @@ public class OrderService {
             // orderdetail 안에 여러 메뉴들 순회
             outerloop:
             for (String key : orderDetailMap.keySet()) {
+
                 Menu menu = menuRepository.findMenuByMenuName(key).
                         orElseThrow(() ->
                                 new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
