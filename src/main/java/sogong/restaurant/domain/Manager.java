@@ -20,6 +20,7 @@ public class Manager {
 
     private String branchPhoneNumber;
     private String storeName;
+    private int seatCnt;
 
     @OneToOne
     @JoinColumn(name="UserId")
