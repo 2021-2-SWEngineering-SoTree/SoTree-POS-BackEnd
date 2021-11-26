@@ -4,16 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sogong.restaurant.VO.EventVO;
 import sogong.restaurant.domain.Event;
 import sogong.restaurant.domain.Manager;
 import sogong.restaurant.service.EventService;
 import sogong.restaurant.service.ManagerService;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Controller
@@ -64,5 +63,29 @@ public class EventController {
 
         eventService.saveEvent(event);
         return Long.toString(event.getId());
+    }
+
+    @PostMapping("/getAllEvent/{branchId}")
+    public List<EventVO> getAllEvents(@PathVariable(value = "branchId") Long branchId) {
+        // return할 리스트
+        List<EventVO> eventVOList = new ArrayList<>();
+
+        // manager
+        Manager manager = managerService.getOneManager(branchId)
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
+
+        List<Event> eventList = eventService.getAllEvent(manager);
+
+        for (Event event : eventList) {
+            EventVO eventVO = new EventVO();
+            eventVO.setEventDiscountRate(event.getEventDiscountRate());
+            eventVO.setEventDiscountValue(event.getEventDiscountValue());
+            eventVO.setEventName(event.getEventName());
+            eventVO.setManagerId(manager.getId());
+
+            eventVOList.add(eventVO);
+        }
+
+        return eventVOList;
     }
 }

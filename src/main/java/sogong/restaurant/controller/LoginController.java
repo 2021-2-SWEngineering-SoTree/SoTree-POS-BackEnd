@@ -2,13 +2,12 @@ package sogong.restaurant.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import sogong.restaurant.domain.*;
 import sogong.restaurant.repository.*;
 import sogong.restaurant.service.LoginService;
-import sogong.restaurant.service.UserService;
+import sogong.restaurant.service.MenuService;
 import sogong.restaurant.util.GenerateAlphaNumericString;
 import sogong.restaurant.util.JwtTokenProvider;
 
@@ -27,10 +26,11 @@ public class LoginController {
     private final EmployeeRepository employeeRepository;
     private final StockRepository stockRepository;
     private final MenuRepository menuRepository;
+    private final MenuService menuService;
     //private final UserService userService;
 
     @RequestMapping("/login")
-    public String login(@RequestBody HashMap<String, String>map){
+    public String login(@RequestBody HashMap<String, String> map) {
 
         /*
         {
@@ -39,17 +39,16 @@ public class LoginController {
         }
         형식
          */
-        
+
         String id = map.get("id");
         String pw = map.get("pw");
 
         User user = userRepository.findByLoginId(id)
                 .orElseThrow(() -> new NoSuchElementException());
 
-        if(!passwordEncoder.matches(pw,user.getPassword())) {
+        if (!passwordEncoder.matches(pw, user.getPassword())) {
             return "wrong password";
-        }
-            else {
+        } else {
             String token = jwtTokenProvider.createToken(user.getLoginId(), user.getRoles());
             //System.out.println("token = " + token);
             return token;
@@ -58,7 +57,7 @@ public class LoginController {
     }
 
     @PostMapping("/addManager")
-    public Long addManager(@RequestBody Map<String, String> manager){
+    public Long addManager(@RequestBody Map<String, String> manager) {
 
         /*
         {
@@ -88,22 +87,33 @@ public class LoginController {
         manager1.setBranchPhoneNumber(manager.get("branchPhoneNumber"));
         manager1.setSeatCnt(16);
 
-        return managerRepository.save(manager1).getId();
+        managerRepository.save(manager1);
+
+        // default 메뉴인 기타 메뉴 추가
+        Menu menu = new Menu();
+        menu.setMenuName("기타");
+        menu.setMenuCategory(null);
+        menu.setPrice(1);
+        menu.setManager(manager1);
+        menu.setActive(Boolean.TRUE);
+        menuService.saveMenu(menu);
+
+        return manager1.getId();
     }
 
     @RequestMapping("/findBranchName")
-    public Long findBranchName(@RequestBody String storeName){
+    public Long findBranchName(@RequestBody String storeName) {
         Long ret = -1l;
         System.out.println(storeName);
-        Optional<Manager> manager= managerRepository.findByStoreName(storeName);
-        if(manager.isPresent()){
+        Optional<Manager> manager = managerRepository.findByStoreName(storeName);
+        if (manager.isPresent()) {
             ret = manager.get().getId();
         }
         return ret;
     }
 
     @RequestMapping("/addUser")
-    public Long addUser(@RequestBody Map<String, String> user){
+    public Long addUser(@RequestBody Map<String, String> user) {
 
         /*
         {
@@ -123,7 +133,7 @@ public class LoginController {
                 .email(user.get("email")).phoneNumber(user.get("phoneNumber"))
                 .password(passwordEncoder.encode(user.get("password"))).build();
         //user는 생성할때 권한을 더이상 가지지 않는다.
-                //.roles(Collections.singletonList("ROLE_USER")).build();
+        //.roles(Collections.singletonList("ROLE_USER")).build();
 
         System.out.println("user1.getUsername() = " + user1.getUsername());
 
@@ -143,9 +153,12 @@ public class LoginController {
     }
 
     @RequestMapping("/userIdPresent")
-    public boolean validName(@RequestBody String loginId){
-        if(userRepository.findByLoginId(loginId).isPresent()) return false;
-        else return true;
+    public boolean validName(@RequestBody String loginId) {
+        if (userRepository.findByLoginId(loginId).isPresent()) {
+            return false;
+        } else {
+            return true;
+        }
 
     }
 
@@ -177,20 +190,25 @@ public class LoginController {
     }
 
     @RequestMapping("/requireCreate")
-    public boolean requireCreate(@RequestBody Long managerId){
+    public boolean requireCreate(@RequestBody Long managerId) {
         Optional<Manager> manager = managerRepository.findById(managerId);
-        if(!manager.isPresent()) throw new NoSuchElementException();
+        if (!manager.isPresent()) {
+            throw new NoSuchElementException();
+        }
 
         List<Menu> menus = menuRepository.findAllById(managerId);
         List<Stock> stocks = stockRepository.findAllById(managerId);
 
-        if(menus.isEmpty() || stocks.isEmpty()) return true;
-        else return false;
+        if (menus.isEmpty() || stocks.isEmpty()) {
+            return true;
+        } else {
+            return false;
+        }
 
     }
 
     @PutMapping("/updateUser")
-    public String updateUser(@RequestBody Map<String,String> param){
+    public String updateUser(@RequestBody Map<String, String> param) {
 
         //Long userId = Long.parseLong(param.get("userId"));
         String birthDay = param.get("birthDay");
@@ -204,7 +222,9 @@ public class LoginController {
         String branchPhoneNumber = param.get("branchPhoneNumber");
 
         Optional<User> user = userRepository.findByLoginId(loginId);
-        if(user.isEmpty()) throw new NoSuchElementException("존재하지 않는 유저입니다.");
+        if (user.isEmpty()) {
+            throw new NoSuchElementException("존재하지 않는 유저입니다.");
+        }
 
         User user1 = user.get();
 
@@ -231,7 +251,7 @@ public class LoginController {
     }
 
     @PutMapping("/updateUserPw")
-    public String updateUserPw(@RequestBody Map<String,String>param){
+    public String updateUserPw(@RequestBody Map<String, String> param) {
         String prevPw = param.get("prevPw");
         String changePw = param.get("changePw");
         String loginId = param.get("loginId");
@@ -239,7 +259,9 @@ public class LoginController {
         Optional<User> optionalUser = userRepository.findByLoginId(loginId);
         User user = optionalUser.get();
 
-        if(!passwordEncoder.matches(prevPw,user.getPassword())) throw new IllegalStateException("비밀번호가 틀립니다.");
+        if (!passwordEncoder.matches(prevPw, user.getPassword())) {
+            throw new IllegalStateException("비밀번호가 틀립니다.");
+        }
 
         user.setPassword(passwordEncoder.encode(changePw));
         userRepository.save(user);
@@ -256,29 +278,33 @@ public class LoginController {
     }
 
     @PostMapping("/findLoginId")
-    public String findLoginId(@RequestBody Map<String,String> param){
+    public String findLoginId(@RequestBody Map<String, String> param) {
 
         String userName = param.get("userName");
         String birthDay = param.get("birthDay");
         String phoneNumber = param.get("phoneNumber");
         String email = param.get("email");
 
-        Optional<User> user= userRepository.findByUserNameAndBirthDayAndPhoneNumberAndEmail(userName,birthDay,phoneNumber,email);
-        if(user.isEmpty()) throw new NoSuchElementException("존재하지 않는 유저입니다.");
-        else return user.get().getLoginId();
+        Optional<User> user = userRepository.findByUserNameAndBirthDayAndPhoneNumberAndEmail(userName, birthDay, phoneNumber, email);
+        if (user.isEmpty()) {
+            throw new NoSuchElementException("존재하지 않는 유저입니다.");
+        } else {
+            return user.get().getLoginId();
+        }
 
     }
 
     @PostMapping("/findUserPw")
-    public String findUserPw(@RequestBody Map<String,String> param){
+    public String findUserPw(@RequestBody Map<String, String> param) {
         String userName = param.get("userName");
         String loginId = param.get("loginId");
         String phoneNumber = param.get("phoneNumber");
         String email = param.get("email");
 
-        Optional<User> user= userRepository.findByUserNameAndLoginIdAndPhoneNumberAndEmail(userName,loginId,phoneNumber,email);
-        if(user.isEmpty()) throw new NoSuchElementException("존재하지 않는 유저입니다.");
-        else {
+        Optional<User> user = userRepository.findByUserNameAndLoginIdAndPhoneNumberAndEmail(userName, loginId, phoneNumber, email);
+        if (user.isEmpty()) {
+            throw new NoSuchElementException("존재하지 않는 유저입니다.");
+        } else {
             User user1 = user.get();
             String newPw = GenerateAlphaNumericString.getRandomString(10);
 
@@ -289,39 +315,40 @@ public class LoginController {
     }
 
     @PostMapping("/getAllUser")
-    public List<Map<String,String>> getAllUser(@RequestBody Long branchId){
-        List<Map<String,String>> ret = new ArrayList<>();
+    public List<Map<String, String>> getAllUser(@RequestBody Long branchId) {
+        List<Map<String, String>> ret = new ArrayList<>();
 
         Optional<Manager> manager = managerRepository.findById(branchId);
-        if(manager.isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
+        if (manager.isEmpty()) {
+            throw new NoSuchElementException("존재하지 않는 가게입니다.");
+        }
 
-        Map<String,String> man = new HashMap<>();
-        man.put("loginId",manager.get().getUser().getLoginId());
-        man.put("userName",manager.get().getUser().getUsername());
-        man.put("personName",manager.get().getUser().getPersonName());
-        man.put("birthDay",manager.get().getUser().getBirthDay());
-        man.put("email",manager.get().getUser().getEmail());
-        man.put("phoneNumber",manager.get().getUser().getPhoneNumber());
+        Map<String, String> man = new HashMap<>();
+        man.put("loginId", manager.get().getUser().getLoginId());
+        man.put("userName", manager.get().getUser().getUsername());
+        man.put("personName", manager.get().getUser().getPersonName());
+        man.put("birthDay", manager.get().getUser().getBirthDay());
+        man.put("email", manager.get().getUser().getEmail());
+        man.put("phoneNumber", manager.get().getUser().getPhoneNumber());
         man.put("position", "manager");
 
         ret.add(man);
 
-        for(Employee employee : employeeRepository.findEmployeesByManager(manager.get())){
-            Map<String,String> one = new HashMap<>();
+        for (Employee employee : employeeRepository.findEmployeesByManager(manager.get())) {
+            Map<String, String> one = new HashMap<>();
 
-            one.put("loginId",employee.getUser().getLoginId());
-            one.put("userName",employee.getUser().getUsername());
-            one.put("personName",employee.getUser().getPersonName());
-            one.put("birthDay",employee.getUser().getBirthDay());
-            one.put("email",employee.getUser().getEmail());
-            one.put("phoneNumber",employee.getUser().getPhoneNumber());
-            one.put("employeeId",String.valueOf(employee.getId()));
+            one.put("loginId", employee.getUser().getLoginId());
+            one.put("userName", employee.getUser().getUsername());
+            one.put("personName", employee.getUser().getPersonName());
+            one.put("birthDay", employee.getUser().getBirthDay());
+            one.put("email", employee.getUser().getEmail());
+            one.put("phoneNumber", employee.getUser().getPhoneNumber());
+            one.put("employeeId", String.valueOf(employee.getId()));
 
-            if(employee.getUser().getAuthorities().isEmpty()){
+            if (employee.getUser().getAuthorities().isEmpty()) {
                 one.put("position", "not_granted_employee");
-            }
-            else{
-                one.put("position","employee");
+            } else {
+                one.put("position", "employee");
             }
 
             ret.add(one);
@@ -332,12 +359,14 @@ public class LoginController {
     }
 
     @PostMapping("/allowEmployee")
-    public String allowEmployee(@RequestBody Map<String,String> param){
+    public String allowEmployee(@RequestBody Map<String, String> param) {
         Long branchId = Long.parseLong(param.get("branchId"));
         Long employeeId = Long.parseLong(param.get("employeeId"));
         String workSchedule = param.get("workSchedule");
         Optional<Employee> employeeByIdAndManager = employeeRepository.findEmployeeByIdAndManager(employeeId, branchId);
-        if(employeeByIdAndManager.isEmpty()) throw new NoSuchElementException("존재하지 않는 직원 or 가게입니다.");
+        if (employeeByIdAndManager.isEmpty()) {
+            throw new NoSuchElementException("존재하지 않는 직원 or 가게입니다.");
+        }
 
         Employee employee = employeeByIdAndManager.get();
 
@@ -370,12 +399,14 @@ public class LoginController {
     }
 
     @PostMapping("/updateSeatCnt")
-    String updateSeatCnt(@RequestBody Map<String,String>param){
+    String updateSeatCnt(@RequestBody Map<String, String> param) {
         Long branchId = Long.parseLong(param.get("branchId"));
         int newSeatCnt = Integer.parseInt(param.get("seatCnt"));
 
         Optional<Manager> optionalManager = managerRepository.findById(branchId);
-        if(optionalManager.isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
+        if (optionalManager.isEmpty()) {
+            throw new NoSuchElementException("존재하지 않는 가게입니다.");
+        }
 
         Manager manager = optionalManager.get();
 
