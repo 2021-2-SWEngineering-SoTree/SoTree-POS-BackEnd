@@ -163,24 +163,27 @@ public class LoginController {
     }
 
     @RequestMapping("/getAllPersonName")
-    public List<Map<String, String>> findAllPersonName() {
+    public List<Map<String,String>> findAllPersonName(@RequestBody String branchId){
         //요청 파라미터 없음
         //List<User> all = userRepository.findAll();
-        List<Manager> managers = managerRepository.findAll();
-        List<Employee> employees = employeeRepository.findAll();
-        List<Map<String, String>> ret = new ArrayList<>();
-        for (int i = 0; i < managers.size(); i++) {
-            Map<String, String> one = new HashMap<>();
-            one.put("ManagerId", String.valueOf(managers.get(i).getId()));
-            one.put("personName", managers.get(i).getUser().getPersonName());
-            ret.add(one);
-        }
+        Optional<Manager> managers = managerRepository.findById(Long.valueOf(branchId));
+        if(managers.isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
 
-        for (int i = 0; i < employees.size(); i++) {
-            Map<String, String> one = new HashMap<>();
-            one.put("EmployeeId", String.valueOf(employees.get(i).getId()));
-            one.put("personName", employees.get(i).getUser().getPersonName());
+        Manager manager = managers.get();
+
+        List<Employee> employees = employeeRepository.findEmployeesByManager(manager);
+        List<Map<String,String>> ret=new ArrayList<>();
+            Map<String,String> one = new HashMap<>();
+            one.put("ManagerId",String.valueOf(manager.getId()));
+            one.put("personName",manager.getUser().getPersonName());
             ret.add(one);
+
+
+        for(int i=0;i<employees.size();i++){
+            Map<String,String> ones = new HashMap<>();
+            ones.put("EmployeeId",String.valueOf(employees.get(i).getId()));
+            ones.put("personName",employees.get(i).getUser().getPersonName());
+            ret.add(ones);
         }
 
         return ret;
@@ -373,9 +376,10 @@ public class LoginController {
         Employee addEmployee = new Employee();
 
         addUser.setRoles(Collections.singletonList("ROLE_USER"));
-        addUser.setUserName(user.getUsername());
+        addUser.setUserName(user.getPersonName());
         addUser.setLoginId(user.getLoginId());
         addUser.setPassword(user.getPassword());
+        //asdfas
         addUser.setEmail(user.getEmail());
         addUser.setBirthDay(user.getBirthDay());
         addUser.setId(user.getId());
