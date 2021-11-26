@@ -16,6 +16,6 @@ import java.util.Optional;
 public interface EmployeeRepository extends JpaRepository<Employee,Long>{
     public Optional<Employee> findEmployeeByUser(User user);
     public List<Employee> findEmployeesByManager(Manager manager);
-    @Query(value = "select EmployeeId,commuteState,BranchId,UserId from Employee where EmployeeId = :id and BranchId = :branchId", nativeQuery = true)
+    @Query(value = "select EmployeeId,commuteState,BranchId,UserId,workSchedule from Employee where EmployeeId = :id and BranchId = :branchId", nativeQuery = true)
     public Optional<Employee>findEmployeeByIdAndManager(@Param(value = "id")Long id, @Param(value = "branchId") Long branchId);
 }

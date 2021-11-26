@@ -86,6 +86,7 @@ public class LoginController {
         manager1.setUser(user1);
         manager1.setStoreName(manager.get("storeName"));
         manager1.setBranchPhoneNumber(manager.get("branchPhoneNumber"));
+        manager1.setSeatCnt(16);
 
         return managerRepository.save(manager1).getId();
     }
@@ -314,6 +315,7 @@ public class LoginController {
     public String allowEmployee(@RequestBody Map<String,String> param){
         Long branchId = Long.parseLong(param.get("branchId"));
         Long employeeId = Long.parseLong(param.get("employeeId"));
+        String workSchedule = param.get("workSchedule");
         Optional<Employee> employeeByIdAndManager = employeeRepository.findEmployeeByIdAndManager(employeeId, branchId);
         if(employeeByIdAndManager.isEmpty()) throw new NoSuchElementException("존재하지 않는 직원 or 가게입니다.");
 
@@ -339,8 +341,30 @@ public class LoginController {
         addEmployee.setManager(managerRepository.findById(branchId).get());
         addEmployee.setId(employeeId);
         addEmployee.setCommuteState(false);
+        addEmployee.setWorkSchedule(workSchedule);
 
         employeeRepository.save(addEmployee);
+
+        return "OK";
+    }
+
+    @PostMapping("/updateSeatCnt")
+    String updateSeatCnt(@RequestBody Map<String,String>param){
+        Long branchId = Long.parseLong(param.get("branchId"));
+        int newSeatCnt = Integer.parseInt(param.get("seatCnt"));
+
+        Optional<Manager> optionalManager = managerRepository.findById(branchId);
+        if(optionalManager.isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
+
+        Manager manager = optionalManager.get();
+
+        manager.setSeatCnt(newSeatCnt);
+        manager.setUser(manager.getUser());
+        manager.setId(manager.getId());
+        manager.setBranchPhoneNumber(manager.getBranchPhoneNumber());
+        manager.setStoreName(manager.getStoreName());
+
+        managerRepository.save(manager);
 
         return "OK";
     }

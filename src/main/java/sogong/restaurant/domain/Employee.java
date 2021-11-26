@@ -23,6 +23,8 @@ public class Employee {
     @OneToOne
     @JoinColumn(name = "UserId")
     private User user;
+    String workSchedule;
+
 
     @ManyToOne
     @JoinColumn(name = "BranchId")
