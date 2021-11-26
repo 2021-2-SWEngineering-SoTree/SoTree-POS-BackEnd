@@ -197,6 +197,9 @@ public class LoginController {
         String phoneNumber = param.get("phoneNumber");
         String userName = param.get("userName");
 
+        String storeName = param.get("storeName");
+        String branchPhoneNumber = param.get("branchPhoneNumber");
+
         Optional<User> user = userRepository.findByLoginId(loginId);
         if(user.isEmpty()) throw new NoSuchElementException("존재하지 않는 유저입니다.");
 
@@ -210,6 +213,16 @@ public class LoginController {
         user1.setBirthDay(birthDay);
 
         userRepository.save(user1);
+
+        Manager manager = managerRepository.findByUser(user1).get();
+
+        manager.setStoreName(storeName);
+        manager.setBranchPhoneNumber(branchPhoneNumber);
+        manager.setId(manager.getId());
+        manager.setUser(user1);
+        manager.setSeatCnt(manager.getSeatCnt());
+
+        managerRepository.save(manager);
 
         return "OK";
     }
@@ -231,8 +244,12 @@ public class LoginController {
     }
 
     @PostMapping("/getUserByLoginId")
-    public User getUserByLoginId(@RequestBody String loginId){
-        return userRepository.findByLoginId(loginId).get();
+    public Manager getUserByLoginId(@RequestBody String loginId){
+        Optional<User> optionalUser = userRepository.findByLoginId(loginId);
+
+        if(optionalUser.isEmpty()) throw new NoSuchElementException("존재하지 않는 매니저입니다.");
+
+        return managerRepository.findByUser(optionalUser.get()).get();
     }
 
     @PostMapping("/findLoginId")
