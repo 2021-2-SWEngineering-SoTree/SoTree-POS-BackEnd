@@ -27,6 +27,8 @@ public class StockDetail {
 
     private int finalQuantity; // 변화 이후 해당 재고 총량
 
+    private String memo;  // 변동 사항에 대한 기록(비고)
+
     @ManyToOne
     @JoinColumn(name = "StockId")
     private Stock stock;

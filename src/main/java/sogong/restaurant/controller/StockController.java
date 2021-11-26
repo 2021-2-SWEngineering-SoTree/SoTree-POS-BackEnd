@@ -10,7 +10,8 @@ import sogong.restaurant.domain.Employee;
 import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.Stock;
 import sogong.restaurant.domain.StockDetail;
-import sogong.restaurant.repository.*;
+import sogong.restaurant.repository.EmployeeRepository;
+import sogong.restaurant.repository.StockDetailRepository;
 import sogong.restaurant.service.ManagerService;
 import sogong.restaurant.service.StockDetailService;
 import sogong.restaurant.service.StockService;
@@ -33,7 +34,6 @@ public class StockController {
     private final ManagerService managerService;
     @Autowired
     private final EmployeeRepository employeeRepository;
-
     @Autowired
     private final StockDetailRepository stockDetailRepository;
 
@@ -43,7 +43,6 @@ public class StockController {
     public String addStock(@RequestBody StockVO stockvo) {
 
         Stock stock = new Stock();
-
 
         Manager manager = managerService.getOneManager(stockvo.getManagerId())
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
@@ -79,6 +78,7 @@ public class StockController {
             stockDetail.setStock(stock);
             stockDetail.setEmployee(employee);
             stockDetail.setQuantityChanged(stockdetailVO.getQuantityChanged());
+            stockDetail.setMemo("최초 재고 추가");
             // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
             stockDetailService.addStockDetail(stock, stockDetail);
         }
@@ -112,6 +112,7 @@ public class StockController {
             stockDetail.setStock(stock);
             stockDetail.setEmployee(employee);
             stockDetail.setQuantityChanged(stockdetailVO.getQuantityChanged());
+            stockDetail.setMemo("재고 업데이트");
             // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
             stockDetailService.addStockDetail(stock, stockDetail);
         }
@@ -147,6 +148,7 @@ public class StockController {
         StockDetail stockDetail = new StockDetail();
         stockDetail.setStock(stock);
         stockDetail.setQuantityChanged(stock.getQuantity() * (-1));
+        stockDetail.setMemo("재고 삭제");
 
         // 비활성화 & 양 0으로 초기화
         stock.setActive(Boolean.FALSE);
@@ -258,8 +260,8 @@ public class StockController {
         String stockName = stockInfo.get("stockName");
 
         Manager manager = managerService.getOneManager(Long.parseLong(managerId))
-                .orElseThrow(()-> new NoSuchElementException("해당 지점이 없습니다."));
-        Stock stock = stockService.getOneStock(manager,stockName)
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
+        Stock stock = stockService.getOneStock(manager, stockName)
                 .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
         List<StockDetailSummary> stockdetailInfos = stockDetailRepository.findAllByStock(stock);
 

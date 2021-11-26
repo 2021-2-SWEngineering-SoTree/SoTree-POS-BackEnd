@@ -121,6 +121,7 @@ public class OrderService {
                     stockDetail.setStock(stock);
                     stockDetail.setEmployee(employee);
                     stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1));
+                    stockDetail.setMemo("주문");
                     // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
                     stockDetailService.addStockDetail(stock, stockDetail);
                 }
@@ -193,6 +194,7 @@ public class OrderService {
                     stockDetail.setStock(stock);
                     stockDetail.setEmployee(employee);
                     stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1));
+                    stockDetail.setMemo("주문");
                     // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
                     stockDetailService.addStockDetail(stock, stockDetail);
                 }
@@ -245,6 +247,7 @@ public class OrderService {
                     stockDetail.setStock(stock);
                     stockDetail.setEmployee(employee);
                     stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1));
+                    stockDetail.setMemo("주문");
                     // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
                     stockDetailService.addStockDetail(stock, stockDetail);
                 }
@@ -317,6 +320,7 @@ public class OrderService {
                     stockDetail.setStock(stock);
                     stockDetail.setEmployee(employee);
                     stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1));
+                    stockDetail.setMemo("주문");
                     // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
                     stockDetailService.addStockDetail(stock, stockDetail);
                 }
