@@ -16,7 +16,7 @@ public class EventVO {
 
     private Integer eventDiscountValue; // 할인 가격 (정수)
     private Double eventDiscountRate; // 할인 비율 (0~1 사이)
-
+    private int criticalPoint;
     private Long managerId;
 
 }

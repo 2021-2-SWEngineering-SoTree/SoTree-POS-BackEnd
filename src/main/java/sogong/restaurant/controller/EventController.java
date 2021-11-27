@@ -37,18 +37,20 @@ public class EventController {
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
 
 
-        if ((eventVO.getEventDiscountRate() == null && eventVO.getEventDiscountValue() == null)
-                || (eventVO.getEventDiscountRate() != null && eventVO.getEventDiscountValue() != null)) {
+        if ((eventVO.getEventDiscountRate() != null && eventVO.getEventDiscountValue() != null)) {
             return "Wrong input";
         }
 
         // 할인율, 할인가격 입력된 값 예외처리
+        //checkEventValues(Double.parseDouble(eventVO.getEventDiscountRate()), eventVO.getEventDiscountValue());
         checkEventValues(eventVO.getEventDiscountRate(), eventVO.getEventDiscountValue());
 
+        //event.setEventDiscountRate(Double.parseDouble(eventVO.getEventDiscountRate()));
         event.setEventDiscountRate(eventVO.getEventDiscountRate());
         event.setEventDiscountValue(eventVO.getEventDiscountValue());
         event.setEventName(eventVO.getEventName());
         event.setManager(manager);
+        event.setCriticalPoint(eventVO.getCriticalPoint());
 
         return Long.toString(eventService.saveEvent(event));
     }
@@ -69,12 +71,13 @@ public class EventController {
 
         for (Event event : eventList) {
             EventVO eventVO = new EventVO();
+            //eventVO.setEventDiscountRate(Double.toString(event.getEventDiscountRate()));
             eventVO.setEventDiscountRate(event.getEventDiscountRate());
             eventVO.setEventDiscountValue(event.getEventDiscountValue());
             eventVO.setEventName(event.getEventName());
             eventVO.setManagerId(manager.getId());
             eventVO.setId(event.getId());
-
+            eventVO.setCriticalPoint(event.getCriticalPoint());
             eventVOList.add(eventVO);
         }
 
@@ -94,11 +97,14 @@ public class EventController {
 
 
         // 할인율, 할인가격 입력된 값 예외처리
+        //checkEventValues(Double.parseDouble(eventVO.getEventDiscountRate()), eventVO.getEventDiscountValue());
         checkEventValues(eventVO.getEventDiscountRate(), eventVO.getEventDiscountValue());
 
+        //event.setEventDiscountRate(Double.parseDouble(eventVO.getEventDiscountRate()));
         event.setEventDiscountRate(eventVO.getEventDiscountRate());
         event.setEventDiscountValue(eventVO.getEventDiscountValue());
         event.setEventName(eventVO.getEventName());
+        event.setCriticalPoint(eventVO.getCriticalPoint());
         // event.setManager(manager);
 
         return Long.toString(eventService.saveEvent(event));
