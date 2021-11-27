@@ -34,7 +34,7 @@ public class PaymentService {
         return totalPrice;
     }
 
-    public Long makeMenu(Long orderId, Long employeeId,String payTime,String method,Long managerId){
+    public Long makeMenu(Long orderId, Long employeeId,String payTime,String method,Long managerId, int finalPrice){
         Optional<Manager> optionalManager = managerRepository.findById(managerId);
         if(optionalManager.isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
 
@@ -56,15 +56,30 @@ public class PaymentService {
         payment.setMenuOrder(menuOrder.get());
         payment.setPayTime(payTime);
         payment.setMethod(method);
-        payment.setFinalPrice(getFinalPrice(menuOrder.get().getTotalPrice()));
+        payment.setFinalPrice(finalPrice);
 
         paymentRepository.save(payment);
 
         if(!method.equals("복합")){
-            combinePay(payTime,method,menuOrder.get().getTotalPrice(),managerId);
+            combinePay(payTime,method,finalPrice,managerId);
         }
 
         return payment.getId();
+    }
+
+    public String combinePay(String payTime, String method, int price, Long branchId){
+
+        if(managerRepository.findById(branchId).isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
+
+        PayStatistic payStatistic = new PayStatistic();
+
+        payStatistic.setPayTime(payTime);
+        payStatistic.setPrice(price);
+        payStatistic.setManager(managerRepository.findById(branchId).get());
+        payStatistic.setMethod(method);
+
+        payStatisticRepository.save(payStatistic);
+        return "OK";
     }
 
     public String sendToCompany(Long paymentId,Long branchId){
@@ -171,21 +186,6 @@ public class PaymentService {
         return paymentRepository.findByManagerAndPayTimeFROMRecent7Days(branchId);
     }
 
-    public String combinePay(String payTime, String method, int price, Long branchId){
-
-        if(managerRepository.findById(branchId).isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
-
-        PayStatistic payStatistic = new PayStatistic();
-
-        payStatistic.setPayTime(payTime);
-        payStatistic.setPrice(price);
-        payStatistic.setManager(managerRepository.findById(branchId).get());
-        payStatistic.setMethod(method);
-
-        payStatisticRepository.save(payStatistic);
-        return "OK";
-    }
-
     public List<PaymentDaySummary> getSortedByDayOfWeekSaleSummary(Long branchId, String start, String end) {
 
         Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
@@ -281,24 +281,25 @@ public class PaymentService {
 
         Map<String,String> info = new HashMap<>();
 
-        info.put("결제일시",payment.getPayTime());
-        info.put("결제 금액",String.valueOf(payment.getFinalPrice()));
+        info.put("PayTime",payment.getPayTime());
+        info.put("FinalPrice",String.valueOf(payment.getFinalPrice()));
+        info.put("OrderPrice",String.valueOf(optionalMenu.get().getTotalPrice()));
         if(menuOrder.getEmployee()==null)
-            info.put("담당자","null");
+            info.put("Employee","null");
         else
-            info.put("담당자",menuOrder.getEmployee().getUser().getPersonName());
-        info.put("결제 방법",payment.getMethod());
-        info.put("매장 전화번호",manager.getBranchPhoneNumber());
-        info.put("매장 이름",manager.getStoreName());
-        info.put("대표",manager.getUser().getPersonName());
+            info.put("Employee",menuOrder.getEmployee().getUser().getPersonName());
+        info.put("PayMethod",payment.getMethod());
+        info.put("StorePhoneNumber",manager.getBranchPhoneNumber());
+        info.put("StoreName",manager.getStoreName());
+        info.put("Manager",manager.getUser().getPersonName());
         ret.add(info);
 
         for(OrderDetail orderDetail : menuOrder.getOrderDetailList()){
             Map<String,String> one = new HashMap<>();
 
-            one.put("메뉴 이름",orderDetail.getMenu().getMenuName());
-            one.put("수량",String.valueOf(orderDetail.getQuantity()));
-            one.put("금액",String.valueOf(orderDetail.getQuantity() * orderDetail.getMenu().getPrice()));
+            one.put("MenuName",orderDetail.getMenu().getMenuName());
+            one.put("Quantity",String.valueOf(orderDetail.getQuantity()));
+            one.put("Price",String.valueOf(orderDetail.getQuantity() * orderDetail.getMenu().getPrice()));
 
             ret.add(one);
         }

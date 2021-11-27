@@ -33,8 +33,9 @@ public class PaymentController {
         String payTime = param.get("payTime");
         String method = param.get("method");
         Long managerId = Long.parseLong(param.get("branchId"));
+        int finalPrice = Integer.parseInt(param.get("finalPrice"));
 
-        return paymentService.makeMenu(orderId,employeeId,payTime,method,managerId);
+        return paymentService.makeMenu(orderId,employeeId,payTime,method,managerId, finalPrice);
     }
 
 
