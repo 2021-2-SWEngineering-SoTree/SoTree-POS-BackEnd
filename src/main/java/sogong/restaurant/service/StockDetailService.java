@@ -33,7 +33,7 @@ public class StockDetailService {
         }
 
         stockDetail.setFinalQuantity(finalQuantity); // 처음 재고 설정이므로 변화 이후 양도 동일함
-        stockDetail.setMemo("기본");
+        //stockDetail.setMemo("기본");
         stock.setQuantity(finalQuantity);
 
         stockRepository.save(stock);

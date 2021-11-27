@@ -78,7 +78,7 @@ public class StockController {
             stockDetail.setStock(stock);
             stockDetail.setEmployee(employee);
             stockDetail.setQuantityChanged(stockdetailVO.getQuantityChanged());
-            stockDetail.setMemo("최초 재고 추가");
+            stockDetail.setMemo(stockdetailVO.getMemo());
             // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
             stockDetailService.addStockDetail(stock, stockDetail);
         }
@@ -112,7 +112,7 @@ public class StockController {
             stockDetail.setStock(stock);
             stockDetail.setEmployee(employee);
             stockDetail.setQuantityChanged(stockdetailVO.getQuantityChanged());
-            stockDetail.setMemo("재고 업데이트");
+            stockDetail.setMemo(stockdetailVO.getMemo());
             // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
             stockDetailService.addStockDetail(stock, stockDetail);
         }
@@ -148,8 +148,8 @@ public class StockController {
         StockDetail stockDetail = new StockDetail();
         stockDetail.setStock(stock);
         stockDetail.setQuantityChanged(stock.getQuantity() * (-1));
-        stockDetail.setMemo("재고 삭제");
-
+        stockDetail.setMemo(stockvo.getStockDetailList().get(0).getMemo());
+        System.out.println("MemoTest" + stockvo.getStockDetailList().get(0).getMemo());
         // 비활성화 & 양 0으로 초기화
         stock.setActive(Boolean.FALSE);
 

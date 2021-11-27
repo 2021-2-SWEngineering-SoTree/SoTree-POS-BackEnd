@@ -14,4 +14,5 @@ public class StockdetailVO {
     private String time;
     private int quantityChanged; // 변화량
     private Long employeeId;
+    private String memo;
 }
