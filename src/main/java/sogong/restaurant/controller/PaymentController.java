@@ -141,6 +141,7 @@ public class PaymentController {
         response.put("dayOfWeekSaleSummary", paymentService.getSortedByDayOfWeekSaleSummary(Long.parseLong(branchId), start, end));
         response.put("daySaleSummary", paymentService.getDaySaleSummary(Long.parseLong(branchId), start, end));
         response.put("orderTypeSummary", paymentService.getDayOrderTypeSummary(Long.parseLong(branchId), start, end));
+        response.put("sumSummary", paymentService.getSumSaleSummary(Long.parseLong(branchId), start, end));
 
         return response;
     }
