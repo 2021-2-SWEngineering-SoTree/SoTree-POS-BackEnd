@@ -94,7 +94,7 @@ public class StockController {
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
 
         Stock stock = stockService.getOneStock(managerService.getOneManager(stockvo.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
-                stockvo.getStockName())
+                        stockvo.getStockName())
                 .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
 
         // 재고 양만 수정 가능(임의로)
@@ -141,7 +141,7 @@ public class StockController {
 //        }
 
         Stock stock = stockService.getOneStock(managerService.getOneManager(stockvo.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
-                stockvo.getStockName())
+                        stockvo.getStockName())
                 .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
 
 
@@ -193,7 +193,7 @@ public class StockController {
     public List<Map<String, String>> getByName(@RequestBody StockVO stockVO) {
 
         Stock stock = stockService.getOneStock(managerService.getOneManager(stockVO.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
-                stockVO.getStockName())
+                        stockVO.getStockName())
                 .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
 
         System.out.println("stock.get().getStockName() = " + stock.getStockName());
@@ -265,7 +265,8 @@ public class StockController {
                 .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
         List<StockDetailSummary> stockdetailInfos = stockDetailRepository.findAllByStock(stock);
 
-        System.out.println(stockdetailInfos.get(0).getQuantityChanged());
+        System.out.println("이름");
+        System.out.println(stockdetailInfos.get(0).getEmployee().getUser().getPersonName());
 
         return stockdetailInfos;
     }

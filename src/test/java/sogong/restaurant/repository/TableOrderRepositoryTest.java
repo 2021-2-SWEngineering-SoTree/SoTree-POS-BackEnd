@@ -8,16 +8,23 @@ import sogong.restaurant.domain.*;
 
 @SpringBootTest
 class TableOrderRepositoryTest {
-    @Autowired private UserRepository userRepository;
-    @Autowired private ManagerRepository managerRepository;
-    @Autowired private EmployeeRepository employeeRepository;
-    @Autowired private TableOrderRepository tableOrderRepository;
-    @Autowired private MenuRepository menuRepository;
-    @Autowired private MenuIngredientRepository menuIngredientRepository;
-    @Autowired private OrderDetailRepository orderDetailRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ManagerRepository managerRepository;
+    @Autowired
+    private EmployeeRepository employeeRepository;
+    @Autowired
+    private TableOrderRepository tableOrderRepository;
+    @Autowired
+    private MenuRepository menuRepository;
+    @Autowired
+    private MenuIngredientRepository menuIngredientRepository;
+    @Autowired
+    private OrderDetailRepository orderDetailRepository;
 
     @BeforeEach
-    public void makeManagerAndEmployeeAndMenu(){
+    public void makeManagerAndEmployeeAndMenu() {
 
         User user = new User();
         user.setUserName("박서진");
@@ -49,7 +56,7 @@ class TableOrderRepositoryTest {
 
         employeeRepository.save(employee);
 
-        Menu menu= new Menu();
+        Menu menu = new Menu();
 
         menu.setMenuName("된장찌개");
         menu.setPrice(12000);
@@ -71,11 +78,12 @@ class TableOrderRepositoryTest {
     }
 
     @Test
-    void testMakingTableOrder(){
+    void testMakingTableOrder() {
 
         Manager manager = managerRepository.findByStoreName("테스트가게").get();
         User user = userRepository.findByLoginId("testEmployee").get();
-        Employee employee = employeeRepository.findEmployeeByUser(user).get();
+        Employee employee = employeeRepository.findEmployeeByUserAndIsActive(user, true).get();
+
 
         TableOrder order = new TableOrder();
         order.setManager(manager);
