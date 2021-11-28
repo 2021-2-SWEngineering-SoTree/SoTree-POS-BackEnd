@@ -78,7 +78,10 @@ public interface PaymentRepository extends JpaRepository<Payment,Long> {
     @Query(value = "SELECT day(payTime) as date, sum(finalPrice) as totalSale, count(finalPrice) as totalCount FROM pos.payment where BranchId=:bid and week(payTime)=week(now()) group by date order by date", nativeQuery = true)
     public List<PaymentWeeklySummary> findByManagerAAndPayTimeFromWeekly(@Param(value = "bid") Long branchId);
 
-    @Query(value = "select day(payTime) as date, count(finalPrice) as totalCount, sum(finalPrice) as totalSale from pos.payment where BranchId =:bid AND DATE(payTime) between CURDATE()-7 AND CURDATE() group by date order by date", nativeQuery = true)
+
+
+    //select Date(payTime) as date, count(finalPrice) as totalCount, sum(finalPrice) as totalSale from pos.payment where BranchId =1 AND DATE(payTime) between  DATE_ADD(DATE("2021-12-01"),INTERVAL -10 DAY ) AND DATE("2021-12-01") group by date order by date;
+    @Query(value = "select Day(payTime) as date, count(finalPrice) as totalCount, sum(finalPrice) as totalSale from pos.payment where BranchId =:bid AND DATE(payTime) between  DATE_ADD(DATE(now()),INTERVAL -7 DAY ) AND DATE(now()) group by date order by date", nativeQuery = true)
     public List<PaymentWeeklySummary> findByManagerAndPayTimeFROMRecent7Days(@Param(value = "bid") Long branchId);
 
     @Query(value = "SELECT DAYOFWEEK(payTime) AS DateRange, count(finalPrice) AS total, sum(finalPrice) AS totalSale FROM pos.payment" +
