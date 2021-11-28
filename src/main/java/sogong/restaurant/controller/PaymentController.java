@@ -26,7 +26,7 @@ public class PaymentController {
     private MenuStatisticService menuStatisticService;
 
     @PostMapping("/makePayment")
-    public Long makePayment(@RequestBody Map<String,String> param){
+    public Long makePayment(@RequestBody Map<String, String> param) {
 
         Long orderId = Long.parseLong(param.get("orderId"));
         Long employeeId = Long.parseLong(param.get("employeeId"));
@@ -35,32 +35,32 @@ public class PaymentController {
         Long managerId = Long.parseLong(param.get("branchId"));
         int finalPrice = Integer.parseInt(param.get("finalPrice"));
 
-        return paymentService.makeMenu(orderId,employeeId,payTime,method,managerId, finalPrice);
+        return paymentService.makeMenu(orderId, employeeId, payTime, method, managerId, finalPrice);
     }
 
 
     @PostMapping("/sendToCompany")
-    public String sendToCompany(@RequestBody Map<String,String> param){
+    public String sendToCompany(@RequestBody Map<String, String> param) {
 
         Long paymentId = Long.parseLong(param.get("paymentId"));
         Long branchId = Long.parseLong(param.get("branchId"));
 
-        return paymentService.sendToCompany(paymentId,branchId);
+        return paymentService.sendToCompany(paymentId, branchId);
     }
 
     @PostMapping("/getALLPaymentResults")
-    public List<PaymentSummary> getALLPaymentResults(@RequestBody String branchId){
+    public List<PaymentSummary> getALLPaymentResults(@RequestBody String branchId) {
         return paymentService.getAllByManagerId(Long.parseLong(branchId));
     }
 
     @PostMapping("/getALLSortedBYDAYFORTOTAL")
-    public List<PaymentDaySummary> getALLSortedBYDAYFORTOTAL(@RequestBody String branchId){
+    public List<PaymentDaySummary> getALLSortedBYDAYFORTOTAL(@RequestBody String branchId) {
 
         return paymentService.getSortedBYDAYFORTOTAL(Long.parseLong(branchId));
     }
 
     @PostMapping("/getALLSortedBYWEEK")
-    public List<PaymentWeekSummary> getALLSortedBYWEEK(@RequestBody Map<String,String> param){
+    public List<PaymentWeekSummary> getALLSortedBYWEEK(@RequestBody Map<String, String> param) {
 
         String start = param.get("start");
         String end = param.get("end");
@@ -74,7 +74,7 @@ public class PaymentController {
     }
 
     @PostMapping("/getALLSortedByMonth")
-    public List<PaymentMonthSummary> getALLSortedByMonth(@RequestBody Map<String,String> param){
+    public List<PaymentMonthSummary> getALLSortedByMonth(@RequestBody Map<String, String> param) {
 
         String start = param.get("start");
         String end = param.get("end");
@@ -88,7 +88,7 @@ public class PaymentController {
     }
 
     @PostMapping("/getTodaySummarySale")
-    public Map<String, Object>  getTodaySummarySale(@RequestBody Map<String,String> param){
+    public Map<String, Object> getTodaySummarySale(@RequestBody Map<String, String> param) {
 
         String start = param.get("start");
         String end = param.get("end");
@@ -106,17 +106,17 @@ public class PaymentController {
     }
 
     @PostMapping("/getWeeklySaleInfo")
-    public List<PaymentWeeklySummary> getWeeklySaleInfo(@RequestBody String branchId){
+    public List<PaymentWeeklySummary> getWeeklySaleInfo(@RequestBody String branchId) {
         return paymentService.getWeeklySaleSummary(Long.parseLong(branchId));
     }
 
     @PostMapping("/getRecent7DaysSaleInfo")
-    public List<PaymentWeeklySummary> getRecent7DaysSaleInfo(@RequestBody String branchId){
+    public List<PaymentWeeklySummary> getRecent7DaysSaleInfo(@RequestBody String branchId) {
         return paymentService.getRecent7DaysSaleSummary(Long.parseLong(branchId));
     }
 
     @PostMapping("/combinePay")
-    public String combinePay(@RequestBody Map<String,String> param){
+    public String combinePay(@RequestBody Map<String, String> param) {
 
         //여기서 실제로 카드회사와의 결제가 진행되어야 함. 지금은 그냥 다 되었다고 가정
 
@@ -126,12 +126,11 @@ public class PaymentController {
         Long branchId = Long.parseLong(param.get("branchId"));
 
 
-
-        return paymentService.combinePay(payTime,method,Integer.parseInt(price),branchId);
+        return paymentService.combinePay(payTime, method, Integer.parseInt(price), branchId);
     }
 
     @PostMapping("/getDaySaleInfo")
-    public Map<String, Object> getDaySaleInfo(@RequestBody Map<String,String> param){
+    public Map<String, Object> getDaySaleInfo(@RequestBody Map<String, String> param) {
 
         String start = param.get("start");
         String end = param.get("end");
@@ -148,7 +147,7 @@ public class PaymentController {
     }
 
     @PostMapping("/getSaleInfoBetween")
-    public Map<String, Object> getSaleInfoBetween(@RequestBody Map<String,String> param){
+    public Map<String, Object> getSaleInfoBetween(@RequestBody Map<String, String> param) {
 
         String start = param.get("start");
         String end = param.get("end");
@@ -164,12 +163,12 @@ public class PaymentController {
     }
 
     @PostMapping("/getReceipt")
-    List<Map<String,String>>getReceipt(@RequestBody Map<String,String> param){
+    List<Map<String, String>> getReceipt(@RequestBody Map<String, String> param) {
         Long branchId = Long.parseLong(param.get("branchId"));
         Long orderId = Long.parseLong(param.get("orderId"));
         Long paymentId = Long.parseLong(param.get("paymentId"));
 
-        return paymentService.getReceipt(branchId,orderId,paymentId);
+        return paymentService.getReceipt(branchId, orderId, paymentId);
     }
 
     @PostMapping("/getCustomerAvgTime")

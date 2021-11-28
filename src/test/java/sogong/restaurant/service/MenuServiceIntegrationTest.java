@@ -230,7 +230,7 @@ public class MenuServiceIntegrationTest {
 
         menuService.saveMenu(menu);
 
-        List<Menu> menuList = menuService.getAllMenu(managerRepository.findByStoreName("테스트가게").get());
+        List<Menu> menuList = menuService.getAllActiveMenu(managerRepository.findByStoreName("테스트가게").get());
 
         assertThat(1).isEqualTo(menuList.size());
 

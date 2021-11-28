@@ -8,6 +8,7 @@ import sogong.restaurant.domain.*;
 import sogong.restaurant.repository.*;
 import sogong.restaurant.service.LoginService;
 import sogong.restaurant.service.MenuService;
+import sogong.restaurant.service.UserService;
 import sogong.restaurant.util.GenerateAlphaNumericString;
 import sogong.restaurant.util.JwtTokenProvider;
 
@@ -27,7 +28,7 @@ public class LoginController {
     private final StockRepository stockRepository;
     private final MenuRepository menuRepository;
     private final MenuService menuService;
-    //private final UserService userService;
+    private final UserService userService;
 
     @RequestMapping("/login")
     public String login(@RequestBody HashMap<String, String> map) {
@@ -103,7 +104,7 @@ public class LoginController {
 
     @RequestMapping("/findBranchName")
     public Long findBranchName(@RequestBody String storeName) {
-        Long ret = -1l;
+        Long ret = -1L;
         System.out.println(storeName);
         Optional<Manager> manager = managerRepository.findByStoreName(storeName);
         if (manager.isPresent()) {
@@ -146,6 +147,7 @@ public class LoginController {
         employee.setManager(manager.get());
         employee.setUser(user1);
         employee.setCommuteState(false);
+        employee.setActive(true);
 
         employeeRepository.save(employee);
 
@@ -163,26 +165,28 @@ public class LoginController {
     }
 
     @RequestMapping("/getAllPersonName")
-    public List<Map<String,String>> findAllPersonName(@RequestBody String branchId){
+    public List<Map<String, String>> findAllPersonName(@RequestBody String branchId) {
         //요청 파라미터 없음
         //List<User> all = userRepository.findAll();
         Optional<Manager> managers = managerRepository.findById(Long.valueOf(branchId));
-        if(managers.isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
+        if (managers.isEmpty()) {
+            throw new NoSuchElementException("존재하지 않는 가게입니다.");
+        }
 
         Manager manager = managers.get();
 
-        List<Employee> employees = employeeRepository.findEmployeesByManager(manager);
-        List<Map<String,String>> ret=new ArrayList<>();
-            Map<String,String> one = new HashMap<>();
-            one.put("ManagerId",String.valueOf(manager.getId()));
-            one.put("personName",manager.getUser().getPersonName());
-            ret.add(one);
+        List<Employee> employees = employeeRepository.findEmployeesByManagerAndIsActive(manager, true);
+        List<Map<String, String>> ret = new ArrayList<>();
+        Map<String, String> one = new HashMap<>();
+        one.put("ManagerId", String.valueOf(manager.getId()));
+        one.put("personName", manager.getUser().getPersonName());
+        ret.add(one);
 
 
-        for(int i=0;i<employees.size();i++){
-            Map<String,String> ones = new HashMap<>();
-            ones.put("EmployeeId",String.valueOf(employees.get(i).getId()));
-            ones.put("personName",employees.get(i).getUser().getPersonName());
+        for (int i = 0; i < employees.size(); i++) {
+            Map<String, String> ones = new HashMap<>();
+            ones.put("EmployeeId", String.valueOf(employees.get(i).getId()));
+            ones.put("personName", employees.get(i).getUser().getPersonName());
             ret.add(ones);
         }
 
@@ -269,10 +273,12 @@ public class LoginController {
     }
 
     @PostMapping("/getUserByLoginId")
-    public Manager getUserByLoginId(@RequestBody String loginId){
+    public Manager getUserByLoginId(@RequestBody String loginId) {
         Optional<User> optionalUser = userRepository.findByLoginId(loginId);
 
-        if(optionalUser.isEmpty()) throw new NoSuchElementException("존재하지 않는 매니저입니다.");
+        if (optionalUser.isEmpty()) {
+            throw new NoSuchElementException("존재하지 않는 매니저입니다.");
+        }
 
         return managerRepository.findByUser(optionalUser.get()).get();
     }
@@ -334,7 +340,7 @@ public class LoginController {
 
         ret.add(man);
 
-        for (Employee employee : employeeRepository.findEmployeesByManager(manager.get())) {
+        for (Employee employee : employeeRepository.findEmployeesByManagerAndIsActive(manager.get(), true)) {
             Map<String, String> one = new HashMap<>();
 
             one.put("loginId", employee.getUser().getLoginId());
@@ -358,6 +364,12 @@ public class LoginController {
 
     }
 
+    /**
+     * 직원 추가(승인)
+     *
+     * @param param
+     * @return
+     */
     @PostMapping("/allowEmployee")
     public String allowEmployee(@RequestBody Map<String, String> param) {
         Long branchId = Long.parseLong(param.get("branchId"));
@@ -392,6 +404,7 @@ public class LoginController {
         addEmployee.setId(employeeId);
         addEmployee.setCommuteState(false);
         addEmployee.setWorkSchedule(workSchedule);
+        addEmployee.setActive(true);
 
         employeeRepository.save(addEmployee);
 
@@ -422,7 +435,7 @@ public class LoginController {
     }
 
     @PostMapping("/getComingEmployee")
-    public List<Map<String,String>> getComingEmployee(@RequestBody String branchId){
+    public List<Map<String, String>> getComingEmployee(@RequestBody String branchId) {
 
         Long bId = Long.parseLong(branchId);
 
@@ -432,27 +445,80 @@ public class LoginController {
         }
 
         Manager manager = optionalManager.get();
-        List<Employee> all = employeeRepository.findAllByManagerAndCommuteState(manager, true);
-        List<Map<String,String>> ret=new ArrayList<>();
+        List<Employee> all = employeeRepository.findAllByManagerAndCommuteStateAndIsActive(manager, true, true);
+        List<Map<String, String>> ret = new ArrayList<>();
 
-        Map<String,String> man = new HashMap<>();
+        Map<String, String> man = new HashMap<>();
 
-        man.put("personName",manager.getUser().getPersonName());
-        man.put("ManagerId",String.valueOf(manager.getId()));
-        man.put("level","사장");
+        man.put("personName", manager.getUser().getPersonName());
+        man.put("ManagerId", String.valueOf(manager.getId()));
+        man.put("level", "사장");
 
         ret.add(man);
 
-        for(Employee e : all){
-            Map<String,String> one = new HashMap<>();
+        for (Employee e : all) {
+            Map<String, String> one = new HashMap<>();
 
-            one.put("personName",e.getUser().getPersonName());
-            one.put("EmployeeId",String.valueOf(e.getId()));
-            one.put("level","직원");
+            one.put("personName", e.getUser().getPersonName());
+            one.put("EmployeeId", String.valueOf(e.getId()));
+            one.put("level", "직원");
 
             ret.add(one);
         }
         return ret;
+    }
+
+    /**
+     * 직원삭제
+     * user는 삭제 & employee는 active false
+     */
+    @PutMapping("/deleteEmployee")
+    public String deleteEmployee(@RequestBody Map<String, String> param) {
+        Long branchId = Long.parseLong(param.get("branchId"));
+        Long employeeId = Long.parseLong(param.get("employeeId"));
+        String workSchedule = param.get("workSchedule");
+        Employee employeeByIdAndManager = employeeRepository.findEmployeeByIdAndManager(employeeId, branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 직원 or 가게입니다."));
+
+        // 유저에서 삭제
+        User user = employeeByIdAndManager.getUser();
+        userService.deleteUser(user.getId());
+
+        // 직원 비활성화
+        employeeByIdAndManager.setActive(false);
+
+        return "OK";
+    }
+
+    /**
+     * 직원 수정
+     */
+    @PutMapping("/updateEmployee")
+    public String updateEmployee(@RequestBody Map<String, String> param) {
+        Long branchId = Long.parseLong(param.get("branchId"));
+        Long employeeId = Long.parseLong(param.get("employeeId"));
+        String workSchedule = param.get("workSchedule");
+        Employee employeeByIdAndManager = employeeRepository.findEmployeeByIdAndManager(employeeId, branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 직원 or 가게입니다."));
+
+        User user = employeeByIdAndManager.getUser();
+
+        User addUser = new User();
+        Employee addEmployee = new Employee();
+
+        addUser.setRoles(Collections.singletonList("ROLE_USER"));
+        addUser.setUserName(user.getPersonName());
+        addUser.setLoginId(user.getLoginId());
+        addUser.setPassword(user.getPassword());
+        //asdfas
+        addUser.setEmail(user.getEmail());
+        addUser.setBirthDay(user.getBirthDay());
+        addUser.setId(user.getId());
+        addUser.setPhoneNumber(user.getPhoneNumber());
+
+        userRepository.save(addUser);
+
+        return "OK";
     }
 
 }

@@ -103,14 +103,16 @@ public class CommuteService {
         return commuteRecordRepository.findAllByEmployeeId(employee);
     }
 
-    public List<Map<String,String>> getAllCommuteDay(Long branchId, String month) throws Exception{
-        List<Map<String,String>> ret = new ArrayList<>();
+    public List<Map<String, String>> getAllCommuteDay(Long branchId, String month) throws Exception {
+        List<Map<String, String>> ret = new ArrayList<>();
 
         Optional<Manager> optionalManager = managerRepository.findById(branchId);
-        if(optionalManager.isEmpty())throw new NoSuchElementException("존재하지 않는 가게입니다.");
+        if (optionalManager.isEmpty()) {
+            throw new NoSuchElementException("존재하지 않는 가게입니다.");
+        }
         Manager manager = optionalManager.get();
         String startTime = month + "-01";
-        String endTime = month+ "-32";
+        String endTime = month + "-32";
 
         Date st = new SimpleDateFormat("yyyy-MM-dd").parse(startTime);
         Date en = new SimpleDateFormat("yyyy-MM-dd").parse(endTime);
@@ -119,63 +121,61 @@ public class CommuteService {
 
         List<CommuteRecord> all = commuteRecordRepository.findAllByManagerAndTimeBetween(branchId, startTime, endTime);
 
-        Map<Long,String> startMap = new HashMap<>();
-        Map<Long,String> endMap = new HashMap<>();
+        Map<Long, String> startMap = new HashMap<>();
+        Map<Long, String> endMap = new HashMap<>();
 
 
-        for(CommuteRecord commuteRecord : all){
-            if(startMap.containsKey(commuteRecord.getEmployee().getId()) && commuteRecord.getIsComing().booleanValue()==false){
+        for (CommuteRecord commuteRecord : all) {
+            if (startMap.containsKey(commuteRecord.getEmployee().getId()) && commuteRecord.getIsComing().booleanValue() == false) {
                 String dateStr = startMap.get(commuteRecord.getEmployee().getId());
                 Date comingTime = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(startMap.get(commuteRecord.getEmployee().getId()));
                 Date goingTime = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(commuteRecord.getTime());
 
-                Map<String,String> one = new HashMap<>();
+                Map<String, String> one = new HashMap<>();
 
-                one.put("employeeName",commuteRecord.getEmployee().getUser().getPersonName());
-                one.put("date",commuteRecord.getTime());
+                one.put("employeeName", commuteRecord.getEmployee().getUser().getPersonName());
+                one.put("date", commuteRecord.getTime());
 
-                Date morning = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateStr.substring(0,10)+" 09:49");
-                Date morning2 = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateStr.substring(0,10)+" 10:11");
-                Date mid = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateStr.substring(0,10)+" 15:49");
-                Date mid2 = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateStr.substring(0,10)+" 16:11");
-                Date night = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateStr.substring(0,10)+" 21:49");
-                Date night2 = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateStr.substring(0,10)+" 22:11");
+                Date morning = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateStr.substring(0, 10) + " 09:49");
+                Date morning2 = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateStr.substring(0, 10) + " 10:11");
+                Date mid = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateStr.substring(0, 10) + " 15:49");
+                Date mid2 = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateStr.substring(0, 10) + " 16:11");
+                Date night = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateStr.substring(0, 10) + " 21:49");
+                Date night2 = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateStr.substring(0, 10) + " 22:11");
 
-                if(morning2.after(comingTime) && morning.before(comingTime) && mid2.after(goingTime) && mid.before(goingTime)){
-                    one.put("working","L");
-                }
-                else if(mid2.after(comingTime) && mid.before(comingTime) && night2.after(goingTime) && night.before(goingTime)){
-                    one.put("working","D");
-                }
-                else if(morning2.after(comingTime) && morning.before(comingTime)&&night2.after(goingTime) && night.before(goingTime)){
-                    one.put("working","F");
-                }
-                else{
-                    one.put("working","N");
+                if (morning2.after(comingTime) && morning.before(comingTime) && mid2.after(goingTime) && mid.before(goingTime)) {
+                    one.put("working", "L");
+                } else if (mid2.after(comingTime) && mid.before(comingTime) && night2.after(goingTime) && night.before(goingTime)) {
+                    one.put("working", "D");
+                } else if (morning2.after(comingTime) && morning.before(comingTime) && night2.after(goingTime) && night.before(goingTime)) {
+                    one.put("working", "F");
+                } else {
+                    one.put("working", "N");
                 }
 
 
                 ret.add(one);
-            }
-            else if(commuteRecord.getIsComing().booleanValue()){
-                startMap.put(commuteRecord.getEmployee().getId(),commuteRecord.getTime());
+            } else if (commuteRecord.getIsComing().booleanValue()) {
+                startMap.put(commuteRecord.getEmployee().getId(), commuteRecord.getTime());
             }
         }
 
         return ret;
     }
 
-    public Map<String,String> findCommuteByManager(Long branchId){
-        Map<String,String> ret = new HashMap<>();
+    public Map<String, String> findCommuteByManager(Long branchId) {
+        Map<String, String> ret = new HashMap<>();
         Optional<Manager> optionalManager = managerRepository.findById(branchId);
-        if(optionalManager.isEmpty())throw new NoSuchElementException("존재하지 않는 가게입니다.");
+        if (optionalManager.isEmpty()) {
+            throw new NoSuchElementException("존재하지 않는 가게입니다.");
+        }
         Manager manager = optionalManager.get();
 
-        List<Employee> all = employeeRepository.findEmployeesByManager(manager);
+        List<Employee> all = employeeRepository.findEmployeesByManagerAndIsActive(manager, true);
 
-        for(Employee employee : all){
-            if(employee.getWorkSchedule()!=null){
-                ret.put(employee.getUser().getPersonName(),employee.getWorkSchedule());
+        for (Employee employee : all) {
+            if (employee.getWorkSchedule() != null) {
+                ret.put(employee.getUser().getPersonName(), employee.getWorkSchedule());
             }
         }
 

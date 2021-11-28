@@ -13,6 +13,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class orderVO {
+    public orderVO(Long orderId, int seatNumber, int takeoutTicketNumber, int totalPrice, List<OrderDetailSummary> orderDetailSummaries) {
+        this.orderId = orderId;
+        this.seatNumber = seatNumber;
+        this.takeoutTicketNumber = takeoutTicketNumber;
+        this.totalPrice = totalPrice;
+        this.orderDetailSummaries = orderDetailSummaries;
+    }
 
     private Long orderId;
     private int seatNumber = -1;
@@ -21,4 +28,5 @@ public class orderVO {
     private List<OrderDetailSummary> orderDetailSummaries;
 
 
+    private int finalPrice; // takeoutorder 결제 이후 가격
 }

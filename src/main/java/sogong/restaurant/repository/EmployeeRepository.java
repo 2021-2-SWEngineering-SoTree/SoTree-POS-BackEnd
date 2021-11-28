@@ -8,17 +8,18 @@ import sogong.restaurant.domain.Employee;
 import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.User;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface EmployeeRepository extends JpaRepository<Employee,Long>{
-    public Optional<Employee> findEmployeeByUser(User user);
-    public List<Employee> findEmployeesByManager(Manager manager);
-    @Query(value = "select EmployeeId,commuteState,BranchId,UserId,workSchedule from Employee where EmployeeId = :id and BranchId = :branchId", nativeQuery = true)
-    public Optional<Employee>findEmployeeByIdAndManager(@Param(value = "id")Long id, @Param(value = "branchId") Long branchId);
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+    Optional<Employee> findEmployeeByUserAndIsActive(User user, boolean isActive);
 
-    public List<Employee> findAllByManagerAndCommuteState(Manager manager,boolean commuteState);
+    List<Employee> findEmployeesByManagerAndIsActive(Manager manager, boolean isActive);
+
+    @Query(value = "select EmployeeId,commuteState,BranchId,UserId,workSchedule,isActive from Employee where EmployeeId = :id and BranchId = :branchId and isActive=b'1'", nativeQuery = true)
+    Optional<Employee> findEmployeeByIdAndManager(@Param(value = "id") Long id, @Param(value = "branchId") Long branchId);
+
+    List<Employee> findAllByManagerAndCommuteStateAndIsActive(Manager manager, boolean commuteState, boolean isActive);
 
 }
