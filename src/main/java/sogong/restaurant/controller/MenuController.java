@@ -29,28 +29,25 @@ public class MenuController {
         this.managerService = managerService;
     }
 
+    /*
+       {
 
+           "menuName": "김치찌개232",
+           "price":15000,
+           "menuCategory":"식사",
+           "managerId":1,
+           "menuIngredientLists":[{
+               "ingredientName":"김치",
+               "count":3
+           },
+           {
+               "ingredientName":"두부",
+               "count":7
+           }]
+       }
+       */
     @PostMapping("/add")
     public String addMenu(@RequestBody menuVO mvo) {
-
-        /*
-    {
-
-        "menuName": "김치찌개232",
-        "price":15000,
-        "menuCategory":"식사",
-        "managerId":1,
-        "menuIngredientLists":[{
-            "ingredientName":"김치",
-            "count":3
-        },
-        {
-            "ingredientName":"두부",
-            "count":7
-        }]
-    }
-    */
-        //System.out.println("menu = " + menu.getMenuName());
 
         // Menu Refactoring
         Menu menu = new Menu();
@@ -67,13 +64,27 @@ public class MenuController {
         Manager manager = managerService.getOneManager(mvo.getManagerId())
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
 
-        menu.setMenuName(mvo.getMenuName());
-        menu.setMenuCategory(mvo.getMenuCategory());
-        menu.setPrice(mvo.getPrice());
-        menu.setManager(manager);
-        menu.setActive(Boolean.TRUE);
-        menuService.saveMenu(menu);
+        Optional<Menu> menu1 = menuService.getOneMenu(manager, mvo.getMenuName());
 
+        if (menu1.isPresent()) {   // 비활성화된 stock이 있는 경우
+            // 활성화된 stock인데 추가하는 것이므로 에러
+            if (menu1.get().getActive()) {
+                throw new IllegalStateException("이미 존재하는 메뉴입니다.");
+            } else {
+                menu = menu1.get();
+                menu.setActive(Boolean.TRUE);
+            }
+            menuService.updateMenuWithoutName(menu);
+        } else { // 기존 stock 없는 경우 stock 처음부터 지정
+            menu.setMenuName(mvo.getMenuName());
+            menu.setMenuCategory(mvo.getMenuCategory());
+            menu.setPrice(mvo.getPrice());
+            menu.setManager(manager);
+            menu.setActive(Boolean.TRUE);
+            menuService.saveMenu(menu);
+        }
+
+        // menu의 재료 추가
         for (MenuIngredient menuIngredient : mvo.getMenuIngredientLists()) {
             menuIngredient.setMenu(menu);
             menuIngredientService.addMenuIngredient(menuIngredient);
@@ -89,7 +100,7 @@ public class MenuController {
         Manager manager = managerService.getOneManager(mvo.getManagerId())
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
 
-        Menu menu = menuService.getOneMenu(mvo.getMenuName(), manager)
+        Menu menu = menuService.getOneMenu(manager, mvo.getMenuName())
                 .orElseThrow(() -> new NoSuchElementException("해당 메뉴가 없습니다."));
 
         // 메뉴 예외 처리
@@ -112,7 +123,7 @@ public class MenuController {
     }
 
     @PutMapping("/delete")
-    public String delete(@RequestBody menuVO mvo) {
+    public String deleteMenu(@RequestBody menuVO mvo) {
         // MenuIngredient 먼저 삭제
 //        for (MenuIngredient menuIngredient : mvo.getMenuIngredientLists()) {
 //            menuIngredientService.deleteMenuIngredient(menuIngredient.getId());
@@ -122,8 +133,14 @@ public class MenuController {
         Manager manager = managerService.getOneManager(mvo.getManagerId())
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
 
-        Menu menu = menuService.getOneMenu(mvo.getMenuName(), manager)
+        Menu menu = menuService.getOneMenu(manager, mvo.getMenuName())
                 .orElseThrow(() -> new NoSuchElementException("해당 메뉴가 없습니다."));
+
+        // menuIngredient 없애기 
+        List<MenuIngredient> menuIngredientList = menuIngredientService.getMenuIngredientByMenu(menu);
+        for (MenuIngredient menuIngredient : menuIngredientList) {
+            menuIngredientService.deleteMenuIngredient(menuIngredient.getId());
+        }
 
         menu.setActive(Boolean.FALSE);
         menuService.updateMenuWithoutName(menu);
@@ -139,7 +156,7 @@ public class MenuController {
         Manager manager = managerService.getOneManager(Long.parseLong(managerId))
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
 
-        return menuService.getAllMenu(manager);
+        return menuService.getAllActiveMenu(manager);
     }
 
 //    @PostMapping("/isPresent")
@@ -174,7 +191,7 @@ public class MenuController {
         Manager manager = managerService.getOneManager(managerId)
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다."));
 
-        Menu menu = menuService.getOneMenu(menuName, manager)
+        Menu menu = menuService.getOneMenu(manager, menuName)
                 .orElseThrow(() -> new NoSuchElementException("해당 메뉴가 없습니다."));
 
 
@@ -207,11 +224,11 @@ public class MenuController {
     }
 
     @PostMapping("/getMeanTimeByCategory")
-    public Map<String,Integer> getMeanTimeByCategory(@RequestBody Map<String,String> param){
+    public Map<String, Integer> getMeanTimeByCategory(@RequestBody Map<String, String> param) {
         Long branchId = Long.parseLong(param.get("branchId"));
         String category = param.get("category");
 
-        return menuService.getMeanTimeByCategory(branchId,category);
+        return menuService.getMeanTimeByCategory(branchId, category);
     }
 
 }

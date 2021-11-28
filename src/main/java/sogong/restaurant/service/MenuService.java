@@ -2,8 +2,6 @@ package sogong.restaurant.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import sogong.restaurant.domain.Manager;
 import sogong.restaurant.domain.Menu;
 import sogong.restaurant.repository.ManagerRepository;
@@ -41,11 +39,11 @@ public class MenuService {
     }
 
     // Active한 메뉴만 뽑기
-    public List<Menu> getAllMenu(Manager manager) {
+    public List<Menu> getAllActiveMenu(Manager manager) {
         return menuRepository.findAllByManagerAndActive(manager, Boolean.TRUE);
     }
 
-    public Optional<Menu> getOneMenu(String menuName, Manager manager) {
+    public Optional<Menu> getOneMenu(Manager manager, String menuName) {
         return menuRepository.findMenuByMenuNameAndManager(menuName, manager);
     }
 
@@ -54,21 +52,24 @@ public class MenuService {
         menuRepository.deleteById(id);
     }
 
-    public Map<String,Integer> getMeanTimeByCategory(Long branchId, String category){
-        Map<String,Integer> ret = new HashMap<>();
+    public Map<String, Integer> getMeanTimeByCategory(Long branchId, String category) {
+        Map<String, Integer> ret = new HashMap<>();
 
         Optional<Manager> optionalManager = managerRepository.findById(branchId);
-        if(optionalManager.isEmpty()) throw new NoSuchElementException("가게가 존재하지 않습니다.");
+        if (optionalManager.isEmpty()) {
+            throw new NoSuchElementException("가게가 존재하지 않습니다.");
+        }
 
         Manager manager = optionalManager.get();
 
         List<Menu> all = menuRepository.findAllByManagerAndMenuCategory(manager, category);
 
-        for(Menu menu : all){
+        for (Menu menu : all) {
             int meanTime = -1;
-            if(menu.getTotalQuantity()!=0)
-                meanTime=(int)(menu.getTotalTime()/menu.getTotalQuantity());
-            ret.put(menu.getMenuName(),meanTime);
+            if (menu.getTotalQuantity() != 0) {
+                meanTime = (int) (menu.getTotalTime() / menu.getTotalQuantity());
+            }
+            ret.put(menu.getMenuName(), meanTime);
         }
 
         return ret;
