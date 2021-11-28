@@ -437,18 +437,18 @@ public class LoginController {
 
         Map<String,String> man = new HashMap<>();
 
-        man.put("이름",manager.getUser().getPersonName());
-        man.put("아이디",manager.getUser().getUsername());
-        man.put("직급","사장");
+        man.put("personName",manager.getUser().getPersonName());
+        man.put("ManagerId",String.valueOf(manager.getId()));
+        man.put("level","사장");
 
         ret.add(man);
 
         for(Employee e : all){
             Map<String,String> one = new HashMap<>();
 
-            one.put("이름",e.getUser().getPersonName());
-            one.put("아이디",e.getUser().getUsername());
-            one.put("직급","직원");
+            one.put("personName",e.getUser().getPersonName());
+            one.put("EmployeeId",String.valueOf(e.getId()));
+            one.put("level","직원");
 
             ret.add(one);
         }
