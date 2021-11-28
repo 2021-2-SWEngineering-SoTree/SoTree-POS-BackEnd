@@ -8,6 +8,7 @@ import sogong.restaurant.domain.*;
 import sogong.restaurant.repository.*;
 import sogong.restaurant.service.LoginService;
 import sogong.restaurant.service.MenuService;
+import sogong.restaurant.service.UserService;
 import sogong.restaurant.util.GenerateAlphaNumericString;
 import sogong.restaurant.util.JwtTokenProvider;
 
@@ -27,7 +28,7 @@ public class LoginController {
     private final StockRepository stockRepository;
     private final MenuRepository menuRepository;
     private final MenuService menuService;
-    //private final UserService userService;
+    private final UserService userService;
 
     @RequestMapping("/login")
     public String login(@RequestBody HashMap<String, String> map) {
@@ -363,8 +364,14 @@ public class LoginController {
 
     }
 
+    /**
+     * 직원 추가(승인)
+     *
+     * @param param
+     * @return
+     */
     @PostMapping("/allowEmployee")
-    public String updateEmployee(@RequestBody Map<String, String> param) {
+    public String allowEmployee(@RequestBody Map<String, String> param) {
         Long branchId = Long.parseLong(param.get("branchId"));
         Long employeeId = Long.parseLong(param.get("employeeId"));
         String workSchedule = param.get("workSchedule");
@@ -459,6 +466,59 @@ public class LoginController {
             ret.add(one);
         }
         return ret;
+    }
+
+    /**
+     * 직원삭제
+     * user는 삭제 & employee는 active false
+     */
+    @PutMapping("/deleteEmployee")
+    public String deleteEmployee(@RequestBody Map<String, String> param) {
+        Long branchId = Long.parseLong(param.get("branchId"));
+        Long employeeId = Long.parseLong(param.get("employeeId"));
+        String workSchedule = param.get("workSchedule");
+        Employee employeeByIdAndManager = employeeRepository.findEmployeeByIdAndManager(employeeId, branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 직원 or 가게입니다."));
+
+        // 유저에서 삭제
+        User user = employeeByIdAndManager.getUser();
+        userService.deleteUser(user.getId());
+
+        // 직원 비활성화
+        employeeByIdAndManager.setActive(false);
+
+        return "OK";
+    }
+
+    /**
+     * 직원 수정
+     */
+    @PutMapping("/updateEmployee")
+    public String updateEmployee(@RequestBody Map<String, String> param) {
+        Long branchId = Long.parseLong(param.get("branchId"));
+        Long employeeId = Long.parseLong(param.get("employeeId"));
+        String workSchedule = param.get("workSchedule");
+        Employee employeeByIdAndManager = employeeRepository.findEmployeeByIdAndManager(employeeId, branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 직원 or 가게입니다."));
+
+        User user = employeeByIdAndManager.getUser();
+
+        User addUser = new User();
+        Employee addEmployee = new Employee();
+
+        addUser.setRoles(Collections.singletonList("ROLE_USER"));
+        addUser.setUserName(user.getPersonName());
+        addUser.setLoginId(user.getLoginId());
+        addUser.setPassword(user.getPassword());
+        //asdfas
+        addUser.setEmail(user.getEmail());
+        addUser.setBirthDay(user.getBirthDay());
+        addUser.setId(user.getId());
+        addUser.setPhoneNumber(user.getPhoneNumber());
+
+        userRepository.save(addUser);
+
+        return "OK";
     }
 
 }

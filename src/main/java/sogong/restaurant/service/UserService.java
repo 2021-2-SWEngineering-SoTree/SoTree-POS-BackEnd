@@ -14,9 +14,13 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public Long saveUser(User user){
+    public Long saveUser(User user) {
         userRepository.save(user);
         return user.getId();
     }
 
+    @Transactional
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
 }
