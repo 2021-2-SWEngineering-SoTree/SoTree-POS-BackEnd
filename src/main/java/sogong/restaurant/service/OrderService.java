@@ -3,7 +3,6 @@ package sogong.restaurant.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 import sogong.restaurant.VO.orderVO;
 import sogong.restaurant.domain.*;
 import sogong.restaurant.repository.*;
@@ -29,6 +28,8 @@ public class OrderService {
     private final StockService stockService;
     private final StockDetailService stockDetailService;
     private final MenuOrderRepository menuOrderRepository;
+    private final PaymentService paymentService;
+
     /***
      * BranchId & SeatNumber로 TableOrder 받기
      */
@@ -80,9 +81,16 @@ public class OrderService {
 
         for (TakeoutOrder takeoutOrder : takeoutOrders) {
             List<OrderDetailSummary> orderDetailSummary = orderDetailRepository.findAllByMenuOrder(takeoutOrder);
+            Optional<Payment> paymentByOrder = paymentService.getPaymentByOrder(takeoutOrder);
 
-            ret.add(new orderVO(takeoutOrder.getId(), -1,
-                    takeoutOrder.getTakeoutTicketNumber(), takeoutOrder.getTotalPrice(), orderDetailSummary));
+            if (paymentByOrder.isPresent()) {  // 결제 내역 있으면 finalPrice도 보냄
+                ret.add(new orderVO(takeoutOrder.getId(), -1,
+                        takeoutOrder.getTakeoutTicketNumber(), takeoutOrder.getTotalPrice(), orderDetailSummary, paymentByOrder.get().getFinalPrice()));
+            } else {
+                ret.add(new orderVO(takeoutOrder.getId(), -1,
+                        takeoutOrder.getTakeoutTicketNumber(), takeoutOrder.getTotalPrice(), orderDetailSummary));
+            }
+
         }
 
         return ret;
@@ -106,7 +114,7 @@ public class OrderService {
             // orderdetail 안에 여러 메뉴들 순회
             for (String key : orderDetailMap.keySet()) {
 
-                Menu menu = menuRepository.findByManagerAndMenuName(tableOrder.getManager(),key).
+                Menu menu = menuRepository.findByManagerAndMenuName(tableOrder.getManager(), key).
                         orElseThrow(() ->
                                 new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
 
@@ -159,7 +167,7 @@ public class OrderService {
             outerloop:
             for (String key : orderDetailMap.keySet()) {
 
-                Menu menu = menuRepository.findMenuByMenuNameAndManager(key,tableOrder.getManager()).
+                Menu menu = menuRepository.findMenuByMenuNameAndManager(key, tableOrder.getManager()).
                         orElseThrow(() ->
                                 new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
 
@@ -232,7 +240,7 @@ public class OrderService {
 
             for (String key : orderDetailMap.keySet()) {
 
-                Menu menu = menuRepository.findMenuByMenuNameAndManager(key,takeoutOrder.getManager()).
+                Menu menu = menuRepository.findMenuByMenuNameAndManager(key, takeoutOrder.getManager()).
                         orElseThrow(() ->
                                 new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
 
@@ -285,7 +293,7 @@ public class OrderService {
             outerloop:
             for (String key : orderDetailMap.keySet()) {
 
-                Menu menu = menuRepository.findMenuByMenuNameAndManager(key,takeoutOrder.getManager()).
+                Menu menu = menuRepository.findMenuByMenuNameAndManager(key, takeoutOrder.getManager()).
                         orElseThrow(() ->
                                 new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
 
@@ -383,50 +391,59 @@ public class OrderService {
                 });
     }
 
-    public List<Map<String,String>> getTakeOutTicketInfo(Long branchId, Long orderId){
-        List<Map<String,String>> ret= new ArrayList<>();
+    public List<Map<String, String>> getTakeOutTicketInfo(Long branchId, Long orderId) {
+        List<Map<String, String>> ret = new ArrayList<>();
 
         Optional<Manager> optionalManager = managerRepository.findById(branchId);
-        if(optionalManager.isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
+        if (optionalManager.isEmpty()) {
+            throw new NoSuchElementException("존재하지 않는 가게입니다.");
+        }
 
         Manager manager = optionalManager.get();
 
         Optional<TakeoutOrder> optionalTakeoutOrder = takeoutOrderRepository.findTakeoutOrderByManagerAndId(manager, orderId);
-        if(optionalTakeoutOrder.isEmpty()) throw new NoSuchElementException("존재하지 않는 주문정보입니다.");
+        if (optionalTakeoutOrder.isEmpty()) {
+            throw new NoSuchElementException("존재하지 않는 주문정보입니다.");
+        }
 
         TakeoutOrder takeoutOrder = optionalTakeoutOrder.get();
 
-        Map<String,String> info = new HashMap<>();
-        info.put("startTime",takeoutOrder.getStartTime());
-        info.put("totalPrice",String.valueOf(takeoutOrder.getTotalPrice()));
-        info.put("takeoutTicketNumber",String.valueOf(takeoutOrder.getTakeoutTicketNumber()));
-        info.put("branchName",manager.getUser().getPersonName());
+        Map<String, String> info = new HashMap<>();
+        info.put("startTime", takeoutOrder.getStartTime());
+        info.put("totalPrice", String.valueOf(takeoutOrder.getTotalPrice()));
+        info.put("takeoutTicketNumber", String.valueOf(takeoutOrder.getTakeoutTicketNumber()));
+        info.put("branchName", manager.getUser().getPersonName());
         ret.add(info);
 
         return ret;
     }
 
-    public String finishAlarm(Long branchId, Long orderId, String finishTime) throws Exception{
+    public String finishAlarm(Long branchId, Long orderId, String finishTime) throws Exception {
 
         System.out.println("OrderService.finishAlarm");
 
 
-
         Optional<Manager> optionalManager = managerRepository.findById(branchId);
-        if(optionalManager.isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
+        if (optionalManager.isEmpty()) {
+            throw new NoSuchElementException("존재하지 않는 가게입니다.");
+        }
 
         Manager manager = optionalManager.get();
 
         Optional<MenuOrder> optionalMenuOrder = menuOrderRepository.findByIdAndAndManager(orderId, manager);
-        if(optionalMenuOrder.isEmpty()) throw new NoSuchElementException("존재하지 않는 주문정보입니다.");
+        if (optionalMenuOrder.isEmpty()) {
+            throw new NoSuchElementException("존재하지 않는 주문정보입니다.");
+        }
 
         MenuOrder menuOrder = optionalMenuOrder.get();
 
-        if(menuOrder.getEndTime()!=null) throw new IllegalStateException("이미 기록되었습니다.");
+        if (menuOrder.getEndTime() != null) {
+            throw new IllegalStateException("이미 기록되었습니다.");
+        }
 
         menuOrder.setEndTime(finishTime);
         //menuOrderRepository.save(menuOrder);
-        if(menuOrder.getOrderType().equals(MenuOrder.OrderType.TAKEOUT_ORDER)){
+        if (menuOrder.getOrderType().equals(MenuOrder.OrderType.TAKEOUT_ORDER)) {
             menuOrder.setIsSeated(false);
         }
 
@@ -440,15 +457,16 @@ public class OrderService {
 
         //System.out.println("diffMin = " + diffMin);
 
-        for(OrderDetail orderDetail: menuOrder.getOrderDetailList()){
+        for (OrderDetail orderDetail : menuOrder.getOrderDetailList()) {
             int prevQuantity = orderDetail.getMenu().getTotalQuantity();
             int curQuantity = orderDetail.getQuantity();
             int prevTime = orderDetail.getMenu().getTotalTime();
             orderDetail.getMenu().setTotalQuantity(prevQuantity + curQuantity);
-            if(curQuantity==1)
-                orderDetail.getMenu().setTotalTime(prevTime + (int)diffMin);
-            else
-                orderDetail.getMenu().setTotalTime(prevTime + (int)(diffMin*(int)(curQuantity/2)));
+            if (curQuantity == 1) {
+                orderDetail.getMenu().setTotalTime(prevTime + (int) diffMin);
+            } else {
+                orderDetail.getMenu().setTotalTime(prevTime + (int) (diffMin * (int) (curQuantity / 2)));
+            }
         }
 
         return "OK";

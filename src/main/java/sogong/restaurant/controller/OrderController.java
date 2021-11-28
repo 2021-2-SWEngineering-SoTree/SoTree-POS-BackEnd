@@ -87,6 +87,7 @@ public class OrderController {
 
     /**
      * TakeoutOrder 목록
+     * 결제 내역 있으면 finalPrice도 같이 보냄
      */
 
     @PostMapping("/getTakeoutOrder/{branchId}")
@@ -323,19 +324,19 @@ public class OrderController {
     }
 
     @PostMapping("/getTakeOutTicketInfo")
-    List<Map<String,String>>getTakeOutTicketInfo(@RequestBody Map<String,String> param){
+    List<Map<String, String>> getTakeOutTicketInfo(@RequestBody Map<String, String> param) {
         Long branchId = Long.parseLong(param.get("branchId"));
         Long orderId = Long.parseLong(param.get("orderId"));
 
-        return orderService.getTakeOutTicketInfo(branchId,orderId);
+        return orderService.getTakeOutTicketInfo(branchId, orderId);
     }
 
     @PostMapping("/finishAlarm")
-    String finishAlarm(@RequestBody Map<String,String>param) throws Exception{
+    String finishAlarm(@RequestBody Map<String, String> param) throws Exception {
         Long branchId = Long.parseLong(param.get("branchId"));
         Long orderId = Long.parseLong(param.get("orderId"));
         String finishTime = param.get("finishTime");
-        return orderService.finishAlarm(branchId,orderId,finishTime);
+        return orderService.finishAlarm(branchId, orderId, finishTime);
     }
 
 }
