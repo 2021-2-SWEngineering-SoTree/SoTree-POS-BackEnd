@@ -421,4 +421,38 @@ public class LoginController {
         return "OK";
     }
 
+    @PostMapping("/getComingEmployee")
+    public List<Map<String,String>> getComingEmployee(@RequestBody String branchId){
+
+        Long bId = Long.parseLong(branchId);
+
+        Optional<Manager> optionalManager = managerRepository.findById(bId);
+        if (optionalManager.isEmpty()) {
+            throw new NoSuchElementException("존재하지 않는 가게입니다.");
+        }
+
+        Manager manager = optionalManager.get();
+        List<Employee> all = employeeRepository.findAllByManagerAndCommuteState(manager, true);
+        List<Map<String,String>> ret=new ArrayList<>();
+
+        Map<String,String> man = new HashMap<>();
+
+        man.put("이름",manager.getUser().getPersonName());
+        man.put("아이디",manager.getUser().getUsername());
+        man.put("직급","사장");
+
+        ret.add(man);
+
+        for(Employee e : all){
+            Map<String,String> one = new HashMap<>();
+
+            one.put("이름",e.getUser().getPersonName());
+            one.put("아이디",e.getUser().getUsername());
+            one.put("직급","직원");
+
+            ret.add(one);
+        }
+        return ret;
+    }
+
 }
