@@ -141,4 +141,53 @@ public interface PaymentRepository extends JpaRepository<Payment,Long> {
     public List<PaymentTodayOrderTypeSummary> findByManagerAndOrderIdAndPayTimeAndOrderTypeBetweenInputSumSummary(@Param(value = "bid") Long branchId, @Param(value = "st") String start, @Param(value = "end") String end);
 
 
+    //select avg(TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime)) AS TIMESTAMPDIFF , DAYOFWEEK(p.payTime) as day from pos.payment as p join pos.menuorder as m on p.OrderId=m.orderId group by day;
+    @Query(value="select avg(TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime)) AS TIMESTAMPDIFF , DAYOFWEEK(p.payTime) as day from pos.payment as p join pos.menuorder as m on p.OrderId=m.orderId where p.branchId=:bid group by day",nativeQuery = true)
+    public List<CustomerAvgTimeTotalTimeDay> findAllByTimeDiffANDDAYALLDAY(@Param(value = "bid") Long branchId);
+    //select avg(TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime)) AS TIMESTAMPDIFF , DAYOFWEEK(p.payTime) as day from pos.payment as p join pos.menuorder as m on p.OrderId=m.orderId
+    //where p.branchId=:bid ANDHour(payTime) =0 OR Hour(payTime)>=16 AND Hour(payTime) <=23 group by day;
+    @Query(value = "select avg(TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime)) AS TIMESTAMPDIFF , DAYOFWEEK(p.payTime) as day from pos.payment as p join pos.menuorder as m on p.OrderId=m.orderId\n" +
+            "where p.branchId=:bid AND Hour(payTime) =0 OR Hour(payTime)>=16 AND Hour(payTime) <=23 group by day", nativeQuery = true)
+    public List<CustomerAvgTimeTotalTimeDay> findAllByTimeDiffANDDAYDinner(@Param(value = "bid") Long branchId);
+
+    //select avg(TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime)) AS TIMESTAMPDIFF , DAYOFWEEK(p.payTime) as day, p.payTime  from pos.payment as p join pos.menuorder as m on p.OrderId=m.orderId
+    //where p.branchId=:bid AND Hour(payTime)>=1 AND Hour(payTime) <=15 group by day;
+    @Query(value = "select avg(TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime)) AS TIMESTAMPDIFF , DAYOFWEEK(p.payTime) as day from pos.payment as p join pos.menuorder as m on p.OrderId=m.orderId\n" +
+            "where p.branchId=:bid AND Hour(payTime)>=1 AND Hour(payTime) <=15 group by day",nativeQuery = true)
+    public List<CustomerAvgTimeTotalTimeDay> findAllByTimeDiffANDDAYLunch(@Param(value = "bid") Long branchId);
+
+//    select avg(TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime)) AS totalAvg,
+//    avg(Case When Hour(p.payTime) >=16 AND Hour(p.payTime) <=23 OR Hour(p.payTime)=0 Then TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime) end) as dinnerAvg,
+//    avg(Case When Hour(p.payTime) >=1 AND Hour(p.payTime) <=15 Then TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime) end) as lunchAvg
+//    from pos.payment as p join pos.menuorder as m on p.OrderId=m.orderId;
+    @Query(value = "select avg(TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime)) AS totalAvg,\n" +
+            "avg(Case When Hour(p.payTime) >=16 AND Hour(p.payTime) <=23 OR Hour(p.payTime)=0 Then TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime) end) as dinnerAvg,\n" +
+            "avg(Case When Hour(p.payTime) >=1 AND Hour(p.payTime) <=15 Then TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime) end) as lunchAvg\n" +
+            "from pos.payment as p join pos.menuorder as m on p.OrderId=m.orderId where p.branchId=:bid", nativeQuery = true)
+    public List<CustomerAvgTimeALL> findAllByTimeDiffALL(@Param(value = "bid") Long branchId);
+
+
+/*    select avg(TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime)) AS totalAvgWeekend,
+    avg(Case When Hour(p.payTime) >=16 AND Hour(p.payTime) <=23 OR Hour(p.payTime)=0 Then TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime) end) as dinnerAvgWeekend,
+    avg(Case When Hour(p.payTime) >=1 AND Hour(p.payTime) <=15 Then TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime) end) as lunchAvgWeekend
+    from pos.payment as p join pos.menuorder as m on p.OrderId=m.orderId where dayofweek(p.payTime)=1 OR dayofweek(p.payTime)=7;*/
+
+    @Query(value="select avg(TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime)) AS totalAvgWeekend,\n" +
+            "avg(Case When Hour(p.payTime) >=16 AND Hour(p.payTime) <=23 OR Hour(p.payTime)=0 Then TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime) end) as dinnerAvgWeekend,\n" +
+            "avg(Case When Hour(p.payTime) >=1 AND Hour(p.payTime) <=15 Then TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime) end) as lunchAvgWeekend\n" +
+            "from pos.payment as p join pos.menuorder as m on p.OrderId=m.orderId where p.branchId=:bid AND dayofweek(p.payTime)=1 OR dayofweek(p.payTime)=7", nativeQuery = true)
+    public List<CustomerAvgTimeWeekend> findAllByTimeDiffWeekend(@Param(value = "bid") Long branchId);
+
+
+
+    /*    select avg(TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime)) AS totalAvgWeekday,
+    avg(Case When Hour(p.payTime) >=16 AND Hour(p.payTime) <=23 OR Hour(p.payTime)=0 Then TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime) end) as dinnerAvgWeekday,
+    avg(Case When Hour(p.payTime) >=1 AND Hour(p.payTime) <=15 Then TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime) end) as lunchAvgWeekday
+    from pos.payment as p join pos.menuorder as m on p.OrderId=m.orderId where dayofweek(p.payTime)>=2 AND dayofweek(p.payTime)<=6;*/
+
+    @Query(value = "select avg(TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime)) AS totalAvgWeekday,\n" +
+            "avg(Case When Hour(p.payTime) >=16 AND Hour(p.payTime) <=23 OR Hour(p.payTime)=0 Then TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime) end) as dinnerAvgWeekday,\n" +
+            "avg(Case When Hour(p.payTime) >=1 AND Hour(p.payTime) <=15 Then TIMESTAMPDIFF(MINUTE, m.startTime, p.payTime) end) as lunchAvgWeekday\n" +
+            "from pos.payment as p join pos.menuorder as m on p.OrderId=m.orderId where p.branchId =:bid AND dayofweek(p.payTime)>=2 AND dayofweek(p.payTime)<=6",nativeQuery = true)
+    public List<CustomerAvgTimeWeekday> findAllByTimeDiffWeekday (@Param(value = "bid") Long branchId);
 }
