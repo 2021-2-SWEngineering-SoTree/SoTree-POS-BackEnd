@@ -159,7 +159,7 @@ public class OrderService {
             outerloop:
             for (String key : orderDetailMap.keySet()) {
 
-                Menu menu = menuRepository.findMenuByMenuName(key).
+                Menu menu = menuRepository.findMenuByMenuNameAndManager(key,tableOrder.getManager()).
                         orElseThrow(() ->
                                 new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
 
@@ -232,7 +232,7 @@ public class OrderService {
 
             for (String key : orderDetailMap.keySet()) {
 
-                Menu menu = menuRepository.findMenuByMenuName(key).
+                Menu menu = menuRepository.findMenuByMenuNameAndManager(key,takeoutOrder.getManager()).
                         orElseThrow(() ->
                                 new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
 
@@ -285,7 +285,7 @@ public class OrderService {
             outerloop:
             for (String key : orderDetailMap.keySet()) {
 
-                Menu menu = menuRepository.findMenuByMenuName(key).
+                Menu menu = menuRepository.findMenuByMenuNameAndManager(key,takeoutOrder.getManager()).
                         orElseThrow(() ->
                                 new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
 
