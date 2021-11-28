@@ -476,15 +476,16 @@ public class LoginController {
     public String deleteEmployee(@RequestBody Map<String, String> param) {
         Long branchId = Long.parseLong(param.get("branchId"));
         Long employeeId = Long.parseLong(param.get("employeeId"));
-        String workSchedule = param.get("workSchedule");
         Employee employeeByIdAndManager = employeeRepository.findEmployeeByIdAndManager(employeeId, branchId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 직원 or 가게입니다."));
 
-        // 유저에서 삭제
+        // User 삭제
+        // 더이상 Employee는 user를 가르키지 않음
         User user = employeeByIdAndManager.getUser();
+        employeeByIdAndManager.setUser(null);         // Foreign key 때문에 Employee에서 user 삭제
         userService.deleteUser(user.getId());
 
-        // 직원 비활성화
+        // Employee 비활성화
         employeeByIdAndManager.setActive(false);
 
         return "OK";
@@ -495,28 +496,28 @@ public class LoginController {
      */
     @PutMapping("/updateEmployee")
     public String updateEmployee(@RequestBody Map<String, String> param) {
+        String loginId = param.get("loginId");
+        String userName = param.get("userName");
+        String birthday = param.get("birthDay");
+        String phoneNumber = param.get("phoneNumber");
+        String email = param.get("email");
+
         Long branchId = Long.parseLong(param.get("branchId"));
         Long employeeId = Long.parseLong(param.get("employeeId"));
-        String workSchedule = param.get("workSchedule");
         Employee employeeByIdAndManager = employeeRepository.findEmployeeByIdAndManager(employeeId, branchId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 직원 or 가게입니다."));
 
+        // 직원으로 user 찾기
         User user = employeeByIdAndManager.getUser();
 
-        User addUser = new User();
-        Employee addEmployee = new Employee();
+        // 직원에 매칭되는 user 정보 수정
+        user.setLoginId(loginId);
+        user.setUserName(userName);
+        user.setBirthDay(birthday);
+        user.setPhoneNumber(phoneNumber);
+        user.setEmail(email);
 
-        addUser.setRoles(Collections.singletonList("ROLE_USER"));
-        addUser.setUserName(user.getPersonName());
-        addUser.setLoginId(user.getLoginId());
-        addUser.setPassword(user.getPassword());
-        //asdfas
-        addUser.setEmail(user.getEmail());
-        addUser.setBirthDay(user.getBirthDay());
-        addUser.setId(user.getId());
-        addUser.setPhoneNumber(user.getPhoneNumber());
-
-        userRepository.save(addUser);
+        userRepository.save(user);
 
         return "OK";
     }
