@@ -426,6 +426,9 @@ public class OrderService {
 
         menuOrder.setEndTime(finishTime);
         //menuOrderRepository.save(menuOrder);
+        if(menuOrder.getOrderType().equals(MenuOrder.OrderType.TAKEOUT_ORDER)){
+            menuOrder.setIsSeated(false);
+        }
 
         String startTime = menuOrder.getStartTime();
         String endTime = menuOrder.getEndTime();
