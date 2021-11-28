@@ -23,7 +23,7 @@ public class MenuStatisticService {
     @Autowired
     private MenuRepository menuRepository;
 
-    private List<Map<String,String>> makeRet(List<MenuStatistic> all) {
+    private List<Map<String,String>> makeRet(List<MenuStatistic> all,Manager manager) {
         List<Map<String, String>> ret = new ArrayList<>();
         Map<String, Long> totalCnt = new HashMap<>();
         for (MenuStatistic ms : all) {
@@ -39,7 +39,7 @@ public class MenuStatisticService {
             Map<String, String> one = new HashMap<>();
             one.put("menuName", k);
             one.put("orderQuantity", String.valueOf(v));
-            Long price = menuRepository.findMenuByMenuName(k).get().getPrice() * v;
+            Long price = menuRepository.findMenuByMenuNameAndManager(k,manager).get().getPrice() * v;
             one.put("price", String.valueOf(price));
             ret.add(one);
         });
@@ -53,7 +53,7 @@ public class MenuStatisticService {
         if(optionalManager.isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
 
         List<MenuStatistic> all = menuStatisticRepository.findByMenuIdAndBranchIdAndDateBetween(branchId, stDate, enDate);
-        return makeRet(all);
+        return makeRet(all, optionalManager.get());
     }
 
 
@@ -64,7 +64,7 @@ public class MenuStatisticService {
         if(optionalManager.isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
 
         List<MenuStatistic> all = menuStatisticRepository.findByMenuIdAndBranchIdAndMenuCategoryAndDateBetween(branchId, stDate, enDate,menuCategory);
-        return makeRet(all);
+        return makeRet(all, optionalManager.get());
     }
 
 
@@ -75,7 +75,7 @@ public class MenuStatisticService {
         if(optionalManager.isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
 
         List<MenuStatistic> all = menuStatisticRepository.findByBranchIdAndDay(branchId, day);
-        return makeRet(all);
+        return makeRet(all, optionalManager.get());
     }
 
     public List<Map<String,String>> getAllByDayAndCategory(Long branchId, Long day,String menuCategory){
@@ -85,7 +85,7 @@ public class MenuStatisticService {
         if(optionalManager.isEmpty()) throw new NoSuchElementException("존재하지 않는 가게입니다.");
 
         List<MenuStatistic> all = menuStatisticRepository.findByBranchIdAndCategoryAndDay(branchId, day,menuCategory);
-        return makeRet(all);
+        return makeRet(all, optionalManager.get());
     }
 
     public List<MenuStatisticWeeklySummary> getWeeklyTopFiveMenu(Long branchId){
