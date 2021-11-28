@@ -170,4 +170,19 @@ public class PaymentController {
 
         return paymentService.getReceipt(branchId, orderId, paymentId);
     }
+
+    @PostMapping("/getCustomerAvgTime")
+    public Map<String, Object>  getTodaySummarySale(@RequestBody String branchId){
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("allDay", paymentService.getCustomerAvgTimeALLTime(Long.parseLong(branchId)));
+        response.put("weekend", paymentService.getCustomerAvgTimeWeekend(Long.parseLong(branchId)));
+        response.put("weekday", paymentService.getCustomerAvgTimeWeekday(Long.parseLong(branchId)));
+        response.put("dayAllTime", paymentService.getSortedByDayAllTime(Long.parseLong(branchId)));
+        response.put("dayDinner", paymentService.getSortedByDayDinner(Long.parseLong(branchId)));
+        response.put("dayLunch", paymentService.getSortedByDayLunch(Long.parseLong(branchId)));
+
+        return response;
+    }
 }

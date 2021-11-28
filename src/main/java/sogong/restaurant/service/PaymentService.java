@@ -326,6 +326,57 @@ public class PaymentService {
         return ret;
     }
 
+
+    public List<CustomerAvgTimeTotalTimeDay> getSortedByDayAllTime(Long branchId) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findAllByTimeDiffANDDAYALLDAY(branchId);
+    }
+
+    public List<CustomerAvgTimeTotalTimeDay> getSortedByDayDinner(Long branchId) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findAllByTimeDiffANDDAYDinner(branchId);
+    }
+
+    public List<CustomerAvgTimeTotalTimeDay> getSortedByDayLunch(Long branchId) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findAllByTimeDiffANDDAYLunch(branchId);
+    }
+
+    public List<CustomerAvgTimeALL> getCustomerAvgTimeALLTime(Long branchId) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findAllByTimeDiffALL(branchId);
+    }
+
+
+    public List<CustomerAvgTimeWeekend> getCustomerAvgTimeWeekend(Long branchId) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findAllByTimeDiffWeekend(branchId);
+    }
+
+
+    public List<CustomerAvgTimeWeekday> getCustomerAvgTimeWeekday(Long branchId) {
+
+        Optional<Manager> optionalManager = Optional.ofNullable(managerRepository.findById(branchId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 가게입니다.")));
+
+        return paymentRepository.findAllByTimeDiffWeekday(branchId);
+    }
+
     public Optional<Payment> getPaymentByOrder(MenuOrder menuOrder) {
         return paymentRepository.findByMenuOrder(menuOrder);
     }
