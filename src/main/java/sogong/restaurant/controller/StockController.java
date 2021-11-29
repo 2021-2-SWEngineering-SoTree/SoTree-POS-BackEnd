@@ -266,7 +266,6 @@ public class StockController {
         List<StockDetailSummary> stockdetailInfos = stockDetailRepository.findAllByStock(stock);
 
         System.out.println("이름");
-        System.out.println(stockdetailInfos.get(0).getEmployee().getUser().getPersonName());
 
         return stockdetailInfos;
     }
