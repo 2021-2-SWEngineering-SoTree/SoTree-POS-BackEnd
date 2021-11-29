@@ -22,7 +22,7 @@ public class StockDetail {
     private Long id;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Seoul")
-    private Date time;
+    private String time;
     private int quantityChanged; // 변화량
 
     private int finalQuantity; // 변화 이후 해당 재고 총량
@@ -38,9 +38,5 @@ public class StockDetail {
     @JoinColumn(name = "EmployeeId")
     private Employee employee;
 
-    @PrePersist
-    protected void onCreate() {
-        time = new Date();
-    }
 
 }
