@@ -135,8 +135,7 @@ public class EmployeeManagementService {
                     stockRec.put("재고이름",all4.get(i).getStock().getStockName());
                     stockRec.put("변화량",String.valueOf(all4.get(i).getQuantityChanged()));
                     stockRec.put("변경후수량",String.valueOf(all4.get(i).getFinalQuantity()));
-                    SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                    stockRec.put("수정일자", transFormat.format(all4.get(i).getTime()));
+                    stockRec.put("수정일자", all4.get(i).getTime());
                     stockRec.put("메모",all4.get(i).getMemo());
 
                     ret.add(stockRec);
