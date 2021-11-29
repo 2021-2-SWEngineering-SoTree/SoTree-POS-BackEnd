@@ -487,6 +487,7 @@ public class LoginController {
 
         // Employee 비활성화
         employeeByIdAndManager.setActive(false);
+        employeeRepository.save(employeeByIdAndManager);
 
         return "OK";
     }
