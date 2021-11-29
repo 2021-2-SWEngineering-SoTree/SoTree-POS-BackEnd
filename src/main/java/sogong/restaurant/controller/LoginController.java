@@ -522,4 +522,18 @@ public class LoginController {
         return "OK";
     }
 
+    @PostMapping("/getSeatCnt")
+    public int getSeatCnt(@RequestBody String branchId){
+        Long bId = Long.parseLong(branchId);
+        Optional<Manager> optionalManager = managerRepository.findById(bId);
+        if (optionalManager.isEmpty()) {
+            throw new NoSuchElementException("존재하지 않는 가게입니다.");
+        }
+
+        Manager manager = optionalManager.get();
+
+        return manager.getSeatCnt();
+    }
+
+
 }
