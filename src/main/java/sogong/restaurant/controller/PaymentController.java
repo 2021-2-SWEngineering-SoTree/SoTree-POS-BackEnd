@@ -6,13 +6,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import sogong.restaurant.domain.Manager;
+import sogong.restaurant.domain.TakeoutOrder;
+import sogong.restaurant.repository.TakeoutOrderRepository;
+import sogong.restaurant.service.ManagerService;
 import sogong.restaurant.service.MenuStatisticService;
 import sogong.restaurant.service.PaymentService;
 import sogong.restaurant.summary.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @Slf4j
@@ -25,17 +27,38 @@ public class PaymentController {
     @Autowired
     private MenuStatisticService menuStatisticService;
 
+    @Autowired
+    private TakeoutOrderRepository takeoutOrderRepository;
+
+    @Autowired
+    private ManagerService managerService;
+
     @PostMapping("/makePayment")
-    public Long makePayment(@RequestBody Map<String, String> param) {
+    public Long makePayment(@RequestBody List<Map<String, String>> param) {
 
-        Long orderId = Long.parseLong(param.get("orderId"));
-        Long employeeId = Long.parseLong(param.get("employeeId"));
-        String payTime = param.get("payTime");
-        String method = param.get("method");
-        Long managerId = Long.parseLong(param.get("branchId"));
-        int finalPrice = Integer.parseInt(param.get("finalPrice"));
+        for (Map<String, String> map : param) {
 
-        return paymentService.makeMenu(orderId, employeeId, payTime, method, managerId, finalPrice);
+            Long orderId = Long.parseLong(map.get("orderId"));
+            Long employeeId = Long.parseLong(map.get("employeeId"));
+            String payTime = map.get("payTime");
+            String method = map.get("method");
+            Long managerId = Long.parseLong(map.get("branchId"));
+            int finalPrice = Integer.parseInt(map.get("finalPrice"));
+
+            // 포장 주문이면, 주문 가격 변경 
+            Manager manager = managerService.getOneManager(managerId)
+                    .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
+            Optional<TakeoutOrder> takeoutOrderOptional = takeoutOrderRepository.findTakeoutOrderByManagerAndId(manager, orderId);
+            if (takeoutOrderOptional.isPresent()) {
+                TakeoutOrder takeoutOrder = takeoutOrderOptional.get();
+                takeoutOrder.setTotalPrice(finalPrice);
+                takeoutOrderRepository.save(takeoutOrder);
+            }
+            
+            paymentService.makeMenu(orderId, employeeId, payTime, method, managerId, finalPrice);
+        }
+
+        return 1L;
     }
 
 
@@ -172,7 +195,7 @@ public class PaymentController {
     }
 
     @PostMapping("/getCustomerAvgTime")
-    public Map<String, Object>  getTodaySummarySale(@RequestBody String branchId){
+    public Map<String, Object> getTodaySummarySale(@RequestBody String branchId) {
 
         Map<String, Object> response = new HashMap<>();
 
