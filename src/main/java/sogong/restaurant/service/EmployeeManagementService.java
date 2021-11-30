@@ -133,12 +133,23 @@ public class EmployeeManagementService {
                 Date endateFormatted = Date.valueOf(LocalDate.parse(endate, formatter));
                 System.out.println(stdateFormatted);
                 System.out.println(endateFormatted);
+
 //                java.sql.Date stSqlDate = java.sql.Date.valueOf(stdate);
 //                java.sql.Date enSqlDate = java.sql.Date.valueOf(endate);
 //                System.out.println(stSqlDate);
-                    
-                List<StockDetail> all4 = stockDetailRepository.findAllByDateAndBranchId(branchId, stdateFormatted, endateFormatted);
 
+                String a = stdateFormatted.toString();
+                String b = endateFormatted.toString();
+
+                if(a.equals(b)){
+                    a+=" 00:00";
+                    b+=" 23:59";
+                }
+                    
+                List<StockDetail> all4 = stockDetailRepository.findAllByDateAndBranchId(branchId, a,b);
+
+                System.out.println("all4.size() = " + all4.size());
+                
                 for (int i = 0; i < all4.size(); i++) {
                     Map<String, String> stockRec = new HashMap<>();
                     Employee employee = all4.get(i).getEmployee();
