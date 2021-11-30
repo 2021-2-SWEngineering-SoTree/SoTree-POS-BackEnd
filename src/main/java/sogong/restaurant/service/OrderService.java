@@ -85,7 +85,7 @@ public class OrderService {
 
             if (paymentByOrder.isPresent()) {  // 결제 내역 있으면 finalPrice도 보냄
                 ret.add(new orderVO(takeoutOrder.getId(), -1,
-                        takeoutOrder.getTakeoutTicketNumber(), takeoutOrder.getTotalPrice(), orderDetailSummary, paymentByOrder.get().getFinalPrice()));
+                        takeoutOrder.getTakeoutTicketNumber(), takeoutOrder.getTotalPrice() -paymentByOrder.get().getFinalPrice(), orderDetailSummary ));
             } else {
                 ret.add(new orderVO(takeoutOrder.getId(), -1,
                         takeoutOrder.getTakeoutTicketNumber(), takeoutOrder.getTotalPrice(), orderDetailSummary));
