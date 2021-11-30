@@ -18,7 +18,7 @@ public interface StockDetailRepository extends JpaRepository<StockDetail, Long> 
 
     //List<StockDetail> findStockDetailsByStock(Stock stock);
     @Query(value = "select StockDetailId, quantityChanged, time,EmployeeId,StockId,finalQuantity, memo from stockdetail where time between :st and :en and stockId IN (select stockId from stock where branchId=:bid)", nativeQuery = true)
-    List<StockDetail> findAllByDateAndBranchId(@Param(value = "bid") Long bid, @Param("st") Date stdate, @Param("en") Date endate);
+    List<StockDetail> findAllByDateAndBranchId(@Param(value = "bid") Long bid, @Param("st") String stdate, @Param("en") String endate);
 
     List<StockDetailSummary> findAllByStock(Stock stock);
 }

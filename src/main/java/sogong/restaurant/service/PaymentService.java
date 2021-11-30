@@ -289,25 +289,32 @@ public class PaymentService {
         if (optionalMenu.isEmpty()) {
             throw new NoSuchElementException("존재하지 않는 주문정보입니다.");
         }
+
         MenuOrder menuOrder = optionalMenu.get();
 
-        Optional<Payment> optionalPayment = paymentRepository.findByIdAndManager(paymentId, branchId);
-        if (optionalPayment.isEmpty()) {
-            throw new NoSuchElementException("존재하지 않는 결제정보입니다.");
-        }
-        Payment payment = optionalPayment.get();
-
         Map<String, String> info = new HashMap<>();
+        if(paymentId!=-1) {
+            Optional<Payment> optionalPayment = paymentRepository.findByIdAndManager(paymentId, branchId);
+            if (optionalPayment.isEmpty()) {
+                throw new NoSuchElementException("존재하지 않는 결제정보입니다.");
+            }
+            Payment payment = optionalPayment.get();
+            info.put("PayTime", payment.getPayTime());
+            info.put("FinalPrice", String.valueOf(payment.getFinalPrice()));
+            info.put("PayMethod", payment.getMethod());
+        }
+        else{
+            info.put("PayTime", "-1");
+            info.put("FinalPrice", "-1");
+            info.put("PayMethod", "-1");
+        }
 
-        info.put("PayTime", payment.getPayTime());
-        info.put("FinalPrice", String.valueOf(payment.getFinalPrice()));
         info.put("OrderPrice", String.valueOf(optionalMenu.get().getTotalPrice()));
         if (menuOrder.getEmployee() == null) {
             info.put("Employee", "null");
         } else {
             info.put("Employee", menuOrder.getEmployee().getUser().getPersonName());
         }
-        info.put("PayMethod", payment.getMethod());
         info.put("StorePhoneNumber", manager.getBranchPhoneNumber());
         info.put("StoreName", manager.getStoreName());
         info.put("Manager", manager.getUser().getPersonName());
