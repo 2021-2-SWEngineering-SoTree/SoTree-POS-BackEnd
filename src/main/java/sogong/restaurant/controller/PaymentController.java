@@ -40,6 +40,7 @@ public class PaymentController {
         Long employeeId = Long.parseLong(map.get("employeeId"));
         String payTime = map.get("payTime");
         String method = map.get("method");
+        
         Long managerId = Long.parseLong(map.get("branchId"));
         int finalPrice = Integer.parseInt(map.get("finalPrice"));
 
