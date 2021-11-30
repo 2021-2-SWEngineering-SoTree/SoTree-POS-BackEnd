@@ -276,7 +276,7 @@ public class PaymentService {
         return paymentRepository.findByManagerAndOrderIdAndPayTimeAndOrderTypeBetweenInputSumSummary(branchId, start, end);
     }
 
-    public List<Map<String, String>> getReceipt(Long branchId, Long orderId, Long paymentId) {
+    public List<Map<String, String>> getReceipt(Long branchId, Long orderId) {
         List<Map<String, String>> ret = new ArrayList<>();
         Optional<Manager> optionalManager = managerRepository.findById(branchId);
         if (optionalManager.isEmpty()) {
@@ -293,11 +293,12 @@ public class PaymentService {
         MenuOrder menuOrder = optionalMenu.get();
 
         Map<String, String> info = new HashMap<>();
-        if(paymentId!=-1) {
-            Optional<Payment> optionalPayment = paymentRepository.findByIdAndManager(paymentId, branchId);
-            if (optionalPayment.isEmpty()) {
-                throw new NoSuchElementException("존재하지 않는 결제정보입니다.");
-            }
+
+        Long paymentId = new Long(-1);
+        Optional<Payment> optionalPayment = paymentRepository.findByManagerAndMenuOrder(branchId,orderId);
+
+
+        if(optionalPayment.isPresent()) {
             Payment payment = optionalPayment.get();
             info.put("PayTime", payment.getPayTime());
             info.put("FinalPrice", String.valueOf(payment.getFinalPrice()));

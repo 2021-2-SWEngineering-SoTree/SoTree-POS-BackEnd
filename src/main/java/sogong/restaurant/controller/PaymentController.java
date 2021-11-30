@@ -186,9 +186,8 @@ public class PaymentController {
     List<Map<String, String>> getReceipt(@RequestBody Map<String, String> param) {
         Long branchId = Long.parseLong(param.get("branchId"));
         Long orderId = Long.parseLong(param.get("orderId"));
-        Long paymentId = Long.parseLong(param.get("paymentId"));
 
-        return paymentService.getReceipt(branchId, orderId, paymentId);
+        return paymentService.getReceipt(branchId, orderId);
     }
 
     @PostMapping("/getCustomerAvgTime")
