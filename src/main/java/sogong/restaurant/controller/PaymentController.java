@@ -34,31 +34,27 @@ public class PaymentController {
     private ManagerService managerService;
 
     @PostMapping("/makePayment")
-    public Long makePayment(@RequestBody List<Map<String, String>> param) {
+    public Long makePayment(@RequestBody Map<String, String> map) {
 
-        for (Map<String, String> map : param) {
+        Long orderId = Long.parseLong(map.get("orderId"));
+        Long employeeId = Long.parseLong(map.get("employeeId"));
+        String payTime = map.get("payTime");
+        String method = map.get("method");
+        Long managerId = Long.parseLong(map.get("branchId"));
+        int finalPrice = Integer.parseInt(map.get("finalPrice"));
 
-            Long orderId = Long.parseLong(map.get("orderId"));
-            Long employeeId = Long.parseLong(map.get("employeeId"));
-            String payTime = map.get("payTime");
-            String method = map.get("method");
-            Long managerId = Long.parseLong(map.get("branchId"));
-            int finalPrice = Integer.parseInt(map.get("finalPrice"));
-
-            // 포장 주문이면, 주문 가격 변경 
-            Manager manager = managerService.getOneManager(managerId)
-                    .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
-            Optional<TakeoutOrder> takeoutOrderOptional = takeoutOrderRepository.findTakeoutOrderByManagerAndId(manager, orderId);
-            if (takeoutOrderOptional.isPresent()) {
-                TakeoutOrder takeoutOrder = takeoutOrderOptional.get();
-                takeoutOrder.setTotalPrice(finalPrice);
-                takeoutOrderRepository.save(takeoutOrder);
-            }
-            
-            paymentService.makeMenu(orderId, employeeId, payTime, method, managerId, finalPrice);
+        // 포장 주문이면, 주문 가격 변경
+        Manager manager = managerService.getOneManager(managerId)
+                .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
+        Optional<TakeoutOrder> takeoutOrderOptional = takeoutOrderRepository.findTakeoutOrderByManagerAndId(manager, orderId);
+        if (takeoutOrderOptional.isPresent()) {
+            TakeoutOrder takeoutOrder = takeoutOrderOptional.get();
+            takeoutOrder.setTotalPrice(finalPrice);
+            takeoutOrderRepository.save(takeoutOrder);
         }
 
-        return 1L;
+        return paymentService.makeMenu(orderId, employeeId, payTime, method, managerId, finalPrice);
+
     }
 
 
