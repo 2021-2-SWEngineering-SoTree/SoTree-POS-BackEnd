@@ -29,6 +29,7 @@ public class OrderService {
     private final StockDetailService stockDetailService;
     private final MenuOrderRepository menuOrderRepository;
     private final PaymentService paymentService;
+    private final EmployeeRepository employeeRepository;
 
     /***
      * BranchId & SeatNumber로 TableOrder 받기
@@ -85,7 +86,7 @@ public class OrderService {
 
             if (paymentByOrder.isPresent()) {  // 결제 내역 있으면 finalPrice도 보냄
                 ret.add(new orderVO(takeoutOrder.getId(), -1,
-                        takeoutOrder.getTakeoutTicketNumber(), takeoutOrder.getTotalPrice() -paymentByOrder.get().getFinalPrice(), orderDetailSummary ));
+                        takeoutOrder.getTakeoutTicketNumber(), takeoutOrder.getTotalPrice() - paymentByOrder.get().getFinalPrice(), orderDetailSummary));
             } else {
                 ret.add(new orderVO(takeoutOrder.getId(), -1,
                         takeoutOrder.getTakeoutTicketNumber(), takeoutOrder.getTotalPrice(), orderDetailSummary));
@@ -179,32 +180,37 @@ public class OrderService {
                 List<OrderDetail> orderDetailByMenuOrder = orderDetailService.getOrderDetailByMenuOrder(tableOrder);
                 for (OrderDetail orderDetail : orderDetailByMenuOrder) {
                     int prevQuantity = orderDetail.getQuantity();
-
                     // 기존 orderDetail 과 수량도 같으면 재고처리 안하고 다음 메뉴에 대한 주문으로 넘어감
                     if (orderDetail.getMenu().equals(menu)) {
+                        orderDetail.setQuantity(currentQuantity);
                         if (currentQuantity == 0) {   // 수량이 0일 때 orderDetail 삭제
+                            // orderDetail 삭제
                             orderDetailService.deleteOrderDetail(orderDetail.getId());
-
+                            // 재고 롤백
+                            deleteStockDetailWithOrder(menu, tableOrder, employee, currentQuantity - prevQuantity);
                         } else {
-                            orderDetail.setQuantity(orderDetailMap.get(key));
-                            orderDetailService.addOrderDetail(orderDetail);
+                            if (currentQuantity == prevQuantity) {  // 주문 수량 동일할 때 변화 X
 
-                            if (currentQuantity > prevQuantity) {  // 주문 수량이 증가할 때
+                            } else if (currentQuantity > prevQuantity) {  // 주문 수량이 증가할 때, 재고 더 줄어듦
+                                orderDetailService.addOrderDetail(orderDetail);
                                 updateStockDetailWithOrder(menu, tableOrder, employee, currentQuantity - prevQuantity);
-                            } else { // 주문 수량이 감소할 때
+                            } else { // 주문 수량이 감소할 때, 재고 롤백
+                                orderDetailService.addOrderDetail(orderDetail);
                                 deleteStockDetailWithOrder(menu, tableOrder, employee, currentQuantity - prevQuantity);
                             }
                         }
                         continue outerloop;
+
                     }
+
                 }
 
-
+                // 기존에 없던 주문이면 새로운 orderdetail 생성
                 // addStockDetail 에서 재고 확인 후 이상 없으면 orderdetail 생성
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setMenuOrder(tableOrder);
                 orderDetail.setMenu(menu);
-                orderDetail.setQuantity(orderDetailMap.get(key));
+                orderDetail.setQuantity(currentQuantity);
                 orderDetailService.addOrderDetail(orderDetail);
                 System.out.println("orderDetail");
                 System.out.println("Menu Name =" + orderDetail.getMenu().getMenuName());
@@ -278,12 +284,10 @@ public class OrderService {
         takeoutOrderRepository.save(takeoutOrder);
 
         Employee employee = takeoutOrder.getEmployee();
-
         for (Map<String, Integer> orderDetailMap : orderDetailList) {
 
             // orderdetail 안에 여러 메뉴들 순회
             outerloop:
-            // orderdetail 안에 여러 메뉴들 순회
             for (String key : orderDetailMap.keySet()) {
                 // 현재 양
                 int currentQuantity = orderDetailMap.get(key);
@@ -297,34 +301,41 @@ public class OrderService {
                 List<OrderDetail> orderDetailByMenuOrder = orderDetailService.getOrderDetailByMenuOrder(takeoutOrder);
                 for (OrderDetail orderDetail : orderDetailByMenuOrder) {
                     int prevQuantity = orderDetail.getQuantity();
-
                     // 기존 orderDetail 과 수량도 같으면 재고처리 안하고 다음 메뉴에 대한 주문으로 넘어감
                     if (orderDetail.getMenu().equals(menu)) {
+                        orderDetail.setQuantity(currentQuantity);
                         if (currentQuantity == 0) {   // 수량이 0일 때 orderDetail 삭제
+                            // orderDetail 삭제
                             orderDetailService.deleteOrderDetail(orderDetail.getId());
-
+                            // 재고 롤백
+                            deleteStockDetailWithOrder(menu, takeoutOrder, employee, currentQuantity - prevQuantity);
                         } else {
-                            orderDetail.setQuantity(orderDetailMap.get(key));
-                            orderDetailService.addOrderDetail(orderDetail);
+                            if (currentQuantity == prevQuantity) {  // 주문 수량 동일할 때 변화 X
 
-                            if (currentQuantity > prevQuantity) {  // 주문 수량이 증가할 때
+                            } else if (currentQuantity > prevQuantity) {  // 주문 수량이 증가할 때, 재고 더 줄어듦
+                                orderDetailService.addOrderDetail(orderDetail);
                                 updateStockDetailWithOrder(menu, takeoutOrder, employee, currentQuantity - prevQuantity);
-                            } else { // 주문 수량이 감소할 때
+                            } else { // 주문 수량이 감소할 때, 재고 롤백
+                                orderDetailService.addOrderDetail(orderDetail);
                                 deleteStockDetailWithOrder(menu, takeoutOrder, employee, currentQuantity - prevQuantity);
                             }
                         }
                         continue outerloop;
+
                     }
+
                 }
 
+                // 기존에 없던 주문이면 새로운 orderdetail 생성
                 // addStockDetail 에서 재고 확인 후 이상 없으면 orderdetail 생성
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setMenuOrder(takeoutOrder);
                 orderDetail.setMenu(menu);
-                orderDetail.setQuantity(orderDetailMap.get(key));
+                orderDetail.setQuantity(currentQuantity);
                 orderDetailService.addOrderDetail(orderDetail);
                 System.out.println("orderDetail");
                 System.out.println("Menu Name =" + orderDetail.getMenu().getMenuName());
+
 
             }
         }
@@ -332,12 +343,32 @@ public class OrderService {
         return takeoutOrder.getId();
     }
 
-    public void deleteTableOrder(Long id) {
-        tableOrderRepository.deleteById(id);
+    public void deleteTableOrder(Long managerId, Long orderId, Long employeeId) {
+        TableOrder tableOrder = getOneTableOrder(managerRepository.getById(managerId), orderId);
+        Employee employee = employeeRepository.getById(employeeId);
+
+        // stock 되돌리기
+        List<OrderDetail> orderDetailByMenuOrder = orderDetailService.getOrderDetailByMenuOrder(tableOrder);
+        for (OrderDetail orderDetail : orderDetailByMenuOrder) {
+            Menu menu = orderDetail.getMenu();
+            deleteStockDetailWithOrder(menu, tableOrder, employee, orderDetail.getQuantity());
+        }
+
+        tableOrderRepository.deleteById(orderId);
     }
 
-    public void deleteTakeoutOrder(Long id) {
-        takeoutOrderRepository.deleteById(id);
+    public void deleteTakeoutOrder(Long managerId, Long orderId, Long employeeId) {
+        TakeoutOrder takeoutOrder = getOneTakeoutOrder(managerRepository.getById(managerId), orderId);
+        Employee employee = employeeRepository.getById(employeeId);
+
+        // stock 되돌리기
+        List<OrderDetail> orderDetailByMenuOrder = orderDetailService.getOrderDetailByMenuOrder(takeoutOrder);
+        for (OrderDetail orderDetail : orderDetailByMenuOrder) {
+            Menu menu = orderDetail.getMenu();
+            deleteStockDetailWithOrder(menu, takeoutOrder, employee, orderDetail.getQuantity());
+        }
+
+        tableOrderRepository.deleteById(orderId);
     }
 
 

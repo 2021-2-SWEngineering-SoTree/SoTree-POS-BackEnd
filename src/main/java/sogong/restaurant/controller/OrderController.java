@@ -208,7 +208,7 @@ public class OrderController {
             orderDetailService.deleteOrderDetail(orderDetail.getId());
         }
 
-        orderService.deleteTableOrder(tableOrder.getId());
+        orderService.deleteTableOrder(oVO.getManagerId(), tableOrder.getId(), oVO.getEmployeeId());
         return "redirect:/";
 
     }
@@ -318,7 +318,7 @@ public class OrderController {
             orderDetailService.deleteOrderDetail(orderDetail.getId());
         }
 
-        orderService.deleteTakeoutOrder(takeoutOrder.getId());
+        orderService.deleteTakeoutOrder(oVO.getManagerId(), takeoutOrder.getId(), oVO.getEmployeeId());
         return "redirect:/";
 
     }
