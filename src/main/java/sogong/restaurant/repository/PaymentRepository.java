@@ -16,6 +16,9 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     @Query(value = "select PaymentId,finalPrice,method,payTime,EmployeeId,BranchId,orderId from Payment where PaymentId = :id and BranchId = :branchId", nativeQuery = true)
     Optional<Payment> findByIdAndManager(@Param(value = "id") Long id, @Param(value = "branchId") Long branchId);
 
+    @Query(value = "select PaymentId,finalPrice,method,payTime,EmployeeId,BranchId,orderId from Payment where MenuOrderId = :oid and BranchId = :bid", nativeQuery = true)
+    Optional<Payment> findByManagerAndMenuOrder(@Param(value ="bid")Long mid, @Param(value="oid") Long oid);
+
     @Query(value = "select PaymentId,finalPrice,method,payTime,EmployeeId,BranchId,orderId from Payment where BranchId = :bid and payTime between :st and :en", nativeQuery = true)
     List<Payment> findByManagerAndDateBetween(@Param(value = "bid") Long bid, @Param("st") String stdate, @Param("en") String endate);
 
