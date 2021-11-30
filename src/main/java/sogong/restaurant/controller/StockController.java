@@ -18,6 +18,8 @@ import sogong.restaurant.service.StockService;
 import sogong.restaurant.summary.StockDetailSummary;
 import sogong.restaurant.summary.StockSummary;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @AllArgsConstructor
@@ -79,6 +81,9 @@ public class StockController {
             stockDetail.setEmployee(employee);
             stockDetail.setQuantityChanged(stockdetailVO.getQuantityChanged());
             stockDetail.setMemo(stockdetailVO.getMemo());
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            stockDetail.setTime(LocalDateTime.now().format(formatter));
             // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
             stockDetailService.addStockDetail(stock, stockDetail);
         }
@@ -94,7 +99,7 @@ public class StockController {
                 .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다."));
 
         Stock stock = stockService.getOneStock(managerService.getOneManager(stockvo.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
-                        stockvo.getStockName())
+                stockvo.getStockName())
                 .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
 
         // 재고 양만 수정 가능(임의로)
@@ -113,6 +118,9 @@ public class StockController {
             stockDetail.setEmployee(employee);
             stockDetail.setQuantityChanged(stockdetailVO.getQuantityChanged());
             stockDetail.setMemo(stockdetailVO.getMemo());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            stockDetail.setTime(LocalDateTime.now().format(formatter));
+
             // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
             stockDetailService.addStockDetail(stock, stockDetail);
         }
@@ -141,7 +149,7 @@ public class StockController {
 //        }
 
         Stock stock = stockService.getOneStock(managerService.getOneManager(stockvo.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
-                        stockvo.getStockName())
+                stockvo.getStockName())
                 .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
 
 
@@ -149,6 +157,9 @@ public class StockController {
         stockDetail.setStock(stock);
         stockDetail.setQuantityChanged(stock.getQuantity() * (-1));
         stockDetail.setMemo(stockvo.getStockDetailList().get(0).getMemo());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        stockDetail.setTime(LocalDateTime.now().format(formatter));
+
         System.out.println("MemoTest" + stockvo.getStockDetailList().get(0).getMemo());
         // 비활성화 & 양 0으로 초기화
         stock.setActive(Boolean.FALSE);
@@ -193,7 +204,7 @@ public class StockController {
     public List<Map<String, String>> getByName(@RequestBody StockVO stockVO) {
 
         Stock stock = stockService.getOneStock(managerService.getOneManager(stockVO.getManagerId()).orElseThrow(() -> new NoSuchElementException("해당 지점이 없습니다.")),
-                        stockVO.getStockName())
+                stockVO.getStockName())
                 .orElseThrow(() -> new NoSuchElementException("해당 재고가 없습니다."));
 
         System.out.println("stock.get().getStockName() = " + stock.getStockName());
