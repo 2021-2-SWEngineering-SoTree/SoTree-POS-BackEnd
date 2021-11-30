@@ -204,4 +204,19 @@ public class PaymentController {
 
         return response;
     }
+
+    @PostMapping("/getTodayCloseSale")
+    public Map<String, Object> getTodayCloseSale(@RequestBody Map<String, String> param) {
+
+        String start = param.get("start");
+        String end = param.get("end");
+        String branchId = param.get("branchId");
+
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("saleSummary", paymentService.getTodaySummarySale(Long.parseLong(branchId), start, end));
+        response.put("OrderTypeSummary", paymentService.getTodayOrderTypeSummary(Long.parseLong(branchId)));
+
+        return response;
+    }
 }

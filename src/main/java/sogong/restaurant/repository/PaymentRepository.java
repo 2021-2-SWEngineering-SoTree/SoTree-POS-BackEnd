@@ -16,7 +16,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     @Query(value = "select PaymentId,finalPrice,method,payTime,EmployeeId,BranchId,orderId from Payment where PaymentId = :id and BranchId = :branchId", nativeQuery = true)
     Optional<Payment> findByIdAndManager(@Param(value = "id") Long id, @Param(value = "branchId") Long branchId);
 
-    @Query(value = "select PaymentId,finalPrice,method,payTime,EmployeeId,BranchId,orderId from Payment where MenuOrderId = :oid and BranchId = :bid", nativeQuery = true)
+    @Query(value = "select PaymentId,finalPrice,method,payTime,EmployeeId,BranchId,orderId from Payment where OrderId = :oid and BranchId = :bid", nativeQuery = true)
     Optional<Payment> findByManagerAndMenuOrder(@Param(value ="bid")Long mid, @Param(value="oid") Long oid);
 
     @Query(value = "select PaymentId,finalPrice,method,payTime,EmployeeId,BranchId,orderId from Payment where BranchId = :bid and payTime between :st and :en", nativeQuery = true)
@@ -67,6 +67,10 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     @Query(value = "SELECT sum(price) as yearSale, count(price) as yearCount, \n" +
             "count(CASE WHEN WEEK(payTime) =  WEEK(now()) THEN price END) AS weekCount,\n" +
             "sum(CASE WHEN WEEK(payTime) =  WEEK(now()) THEN price END) AS weekSale,\n" +
+            "count(CASE WHEN WEEK(payTime) =  WEEK(now()) AND method ='현금' THEN price END) AS weekCashTotal,\n" +
+            "sum(CASE WHEN WEEK(payTime) =  WEEK(now()) AND method ='현금' THEN price END) AS weekCashTotalSale,\n" +
+            "count(CASE WHEN WEEK(payTime) =  WEEK(now()) AND method = '카드' THEN price END) AS weekCardTotal,\n" +
+            "sum(CASE WHEN WEEK(payTime) =  WEEK(now()) AND method ='카드' THEN price END) AS weekCardTotalSale,\n" +
             "count(CASE WHEN Month(payTime) = Month(now()) THEN price END) AS monthCount,\n" +
             "sum(CASE WHEN Month(payTime) = Month(now()) THEN price END) AS monthSale,\n" +
             "count(CASE WHEN date(payTime)=date(now()) THEN price END) AS todayCount,\n" +
