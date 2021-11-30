@@ -133,6 +133,7 @@ public class OrderService {
                     stockDetail.setEmployee(employee);
                     stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1));
                     stockDetail.setMemo("주문");
+                    stockDetail.setTime(tableOrder.getStartTime());
                     // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
                     stockDetailService.addStockDetail(stock, stockDetail);
                 }
@@ -248,6 +249,8 @@ public class OrderService {
                     stockDetail.setEmployee(employee);
                     stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1));
                     stockDetail.setMemo("주문");
+                    stockDetail.setTime(takeoutOrder.getStartTime());
+
                     // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
                     stockDetailService.addStockDetail(stock, stockDetail);
                 }
@@ -469,6 +472,7 @@ public class OrderService {
             stockDetail.setEmployee(employee);
             stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1) * quantityChanged);
             stockDetail.setMemo("주문");
+            stockDetail.setTime(order.getStartTime());
             System.out.println("주문");
 
             stockDetailService.addStockDetail(stock, stockDetail);
@@ -494,6 +498,7 @@ public class OrderService {
             stockDetail.setEmployee(employee);
             stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1) * quantityChanged);
             stockDetail.setMemo("주문 취소");
+            stockDetail.setTime(order.getStartTime());
             System.out.println("주문 취소");
             stockDetailService.addStockDetail(stock, stockDetail);
         }
