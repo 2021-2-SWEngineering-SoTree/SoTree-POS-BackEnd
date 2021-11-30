@@ -132,7 +132,8 @@ public class OrderService {
                     StockDetail stockDetail = new StockDetail();
                     stockDetail.setStock(stock);
                     stockDetail.setEmployee(employee);
-                    stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1));
+                    // 현준 체킹 지점
+                    stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1) *orderDetailMap.get(key));
                     stockDetail.setMemo("주문");
                     stockDetail.setTime(tableOrder.getStartTime());
                     // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
@@ -253,7 +254,8 @@ public class OrderService {
                     StockDetail stockDetail = new StockDetail();
                     stockDetail.setStock(stock);
                     stockDetail.setEmployee(employee);
-                    stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1));
+                    // 현준 체크
+                    stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1) * orderDetailMap.get(key));
                     stockDetail.setMemo("주문");
                     stockDetail.setTime(takeoutOrder.getStartTime());
 
