@@ -1,9 +1,22 @@
-# SoTree-POS-BackEnd
-
-2021-02 소프트웨어공학개론_01 SoTree 팀 BackEnd
-
 ![GitHub weekly commit](https://img.shields.io/github/commit-activity/w/2021-2-SWEngineering-SoTree/SoTree-POS-BackEnd)
 ![GitHub last commit](https://img.shields.io/github/last-commit/2021-2-SWEngineering-SoTree/SoTree-POS-BackEnd)
+# SoTree-POS-BackEnd
+<h4>2021-2 Software Engineering project <h4/>
+<h4>2021-02 소프트웨어공학개론_01 SoTree 팀 BackEnd <h4/>
+
+
+
+  * Scrum Master/Full </br>
+  [이호준](https://github.com/hojunlee-hj) [![](https://img.shields.io/badge/Github-hojunlee_hj-blue?style=flat-square&logo=Github)](https://github.com/hojunlee-hj)
+  
+  * FrontEnd </br>
+  [서혜민](https://github.com/tommy16102) [![](https://img.shields.io/badge/Github-tommy1610-blue?style=flat-square&logo=Github)](https://github.com/tommy16102)</br>
+  [최지환](https://github.com/Choe-Ji-Hwan) [![](https://img.shields.io/badge/Github-Choe_Ji_Hwan-blue?style=flat-square&logo=Github)](https://github.com/Choe-Ji-Hwan) </br>
+  
+  * BackEnd </br>
+  [박서진](https://github.com/werad12) [![](https://img.shields.io/badge/Github-werad12-blue?style=flat-square&logo=Github)](https://github.com/werad12) </br>
+  [조현준](https://github.com/chohj1111) [![](https://img.shields.io/badge/Github-chohj1111-blue?style=flat-square&logo=Github)](https://github.com/chohj1111) </br></br>
+
 
 ## 목차
 * [Get Started](#get-started)
