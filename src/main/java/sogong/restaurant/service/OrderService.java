@@ -43,7 +43,7 @@ public class OrderService {
         List<TableOrder> tableOrderList = tableOrderRepository
                 .findAllByManager(managerRepository.findById(BranchId)
                         .orElseThrow(() -> new NoSuchElementException("해당 지점이 존재하지 않습니다.")));
-        System.out.println(tableOrderList);
+        // System.out.println(tableOrderList);
 
         // list 중 파라미터의 seatnumber와 동일한 좌석 번호를 가진 order 찾기
         // 없으면 error
@@ -119,26 +119,7 @@ public class OrderService {
                         orElseThrow(() ->
                                 new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
 
-                // 주문 들어온 메뉴의 재료랑 재고 비교
-                List<MenuIngredient> menuIngredientList = menuIngredientService.getMenuIngredientByMenu(menu);
-
-                // 메뉴 재료와 같은 이름을 가진 재고에 대한 수정
-                // stockdetail 직원은 주문 받은 직원
-                for (MenuIngredient menuIngredient : menuIngredientList) {
-                    Stock stock = stockService.getOneStock(tableOrder.getManager(), menuIngredient.getIngredientName())
-                            .orElseThrow(() ->
-                                    new NoSuchElementException("해당 재고가 존재하지 않습니다."));
-
-                    StockDetail stockDetail = new StockDetail();
-                    stockDetail.setStock(stock);
-                    stockDetail.setEmployee(employee);
-                    // 현준 체킹 지점
-                    stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1) *orderDetailMap.get(key));
-                    stockDetail.setMemo("주문");
-                    stockDetail.setTime(tableOrder.getStartTime());
-                    // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
-                    stockDetailService.addStockDetail(stock, stockDetail);
-                }
+                updateStockDetailWithOrder(menu, tableOrder, employee, orderDetailMap.get(key));
 
                 // addStockDetail 에서 재고 확인 후 이상 없으면 orderdetail 생성
                 OrderDetail orderDetail = new OrderDetail();
@@ -241,27 +222,7 @@ public class OrderService {
                         orElseThrow(() ->
                                 new NoSuchElementException("해당 메뉴가 존재하지 않습니다."));
 
-                // 주문 들어온 메뉴의 재료랑 재고 비교
-                List<MenuIngredient> menuIngredientList = menuIngredientService.getMenuIngredientByMenu(menu);
-
-                // 메뉴 재료와 같은 이름을 가진 재고에 대한 수정
-                // stockdetail 직원은 주문 받은 직원
-                for (MenuIngredient menuIngredient : menuIngredientList) {
-                    Stock stock = stockService.getOneStock(takeoutOrder.getManager(), menuIngredient.getIngredientName())
-                            .orElseThrow(() ->
-                                    new NoSuchElementException("해당 재고가 존재하지 않습니다."));
-
-                    StockDetail stockDetail = new StockDetail();
-                    stockDetail.setStock(stock);
-                    stockDetail.setEmployee(employee);
-                    // 현준 체크
-                    stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1) * orderDetailMap.get(key));
-                    stockDetail.setMemo("주문");
-                    stockDetail.setTime(takeoutOrder.getStartTime());
-
-                    // stockDetail.setFinalQuantity(stockdetailVO.getQuantityChanged()); // 처음 재고 설정이므로 변화 이후 양도 동일함
-                    stockDetailService.addStockDetail(stock, stockDetail);
-                }
+                updateStockDetailWithOrder(menu, takeoutOrder, employee, orderDetailMap.get(key));
 
                 OrderDetail orderDetail = new OrderDetail();
                 orderDetail.setMenuOrder(takeoutOrder);
@@ -345,32 +306,22 @@ public class OrderService {
         return takeoutOrder.getId();
     }
 
-    public void deleteTableOrder(Long managerId, Long orderId, Long employeeId) {
-        TableOrder tableOrder = getOneTableOrder(managerRepository.getById(managerId), orderId);
-        Employee employee = employeeRepository.getById(employeeId);
+
+    public void deleteMenuOrder(Long managerId, MenuOrder order, Employee employee) {
 
         // stock 되돌리기
-        List<OrderDetail> orderDetailByMenuOrder = orderDetailService.getOrderDetailByMenuOrder(tableOrder);
+        List<OrderDetail> orderDetailByMenuOrder = orderDetailService.getOrderDetailByMenuOrder(order);
         for (OrderDetail orderDetail : orderDetailByMenuOrder) {
             Menu menu = orderDetail.getMenu();
-            deleteStockDetailWithOrder(menu, tableOrder, employee, orderDetail.getQuantity());
+            deleteStockDetailWithOrder(menu, order, employee, orderDetail.getQuantity());
+            orderDetailService.deleteOrderDetail(orderDetail.getId());
         }
 
-        tableOrderRepository.deleteById(orderId);
-    }
-
-    public void deleteTakeoutOrder(Long managerId, Long orderId, Long employeeId) {
-        TakeoutOrder takeoutOrder = getOneTakeoutOrder(managerRepository.getById(managerId), orderId);
-        Employee employee = employeeRepository.getById(employeeId);
-
-        // stock 되돌리기
-        List<OrderDetail> orderDetailByMenuOrder = orderDetailService.getOrderDetailByMenuOrder(takeoutOrder);
-        for (OrderDetail orderDetail : orderDetailByMenuOrder) {
-            Menu menu = orderDetail.getMenu();
-            deleteStockDetailWithOrder(menu, takeoutOrder, employee, orderDetail.getQuantity());
+        if (order.getOrderType() == MenuOrder.OrderType.TABLE_ORDER) {
+            tableOrderRepository.deleteById(order.getId());
+        } else {
+            takeoutOrderRepository.deleteById(order.getId());
         }
-
-        tableOrderRepository.deleteById(orderId);
     }
 
 
@@ -529,7 +480,7 @@ public class OrderService {
             StockDetail stockDetail = new StockDetail();
             stockDetail.setStock(stock);
             stockDetail.setEmployee(employee);
-            stockDetail.setQuantityChanged(menuIngredient.getCount() * (-1) * quantityChanged);
+            stockDetail.setQuantityChanged(menuIngredient.getCount() * quantityChanged);
             stockDetail.setMemo("주문 취소");
             stockDetail.setTime(order.getStartTime());
             System.out.println("주문 취소");

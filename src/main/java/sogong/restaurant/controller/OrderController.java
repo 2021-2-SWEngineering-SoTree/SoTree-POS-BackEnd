@@ -202,14 +202,14 @@ public class OrderController {
 
         TableOrder tableOrder = orderService.getOneTableOrder(manager, oVO.getOrderId());
 
-        // 해당 Order에 딸린 orderDetail 삭제
-        List<OrderDetail> orderDetailList = orderDetailService.getOrderDetailByMenuOrder(tableOrder);
-        for (OrderDetail orderDetail : orderDetailList) {
-            orderDetailService.deleteOrderDetail(orderDetail.getId());
+        Employee employee = null;
+        if (oVO.getEmployeeId() != -1) {  // -1이면 null 임
+            employee = employeeRepository.findById(oVO.getEmployeeId())
+                    .orElseThrow(() -> new NoSuchElementException("해당 직원이 존재하지 않습니다."));
         }
 
-        orderService.deleteTableOrder(oVO.getManagerId(), tableOrder.getId(), oVO.getEmployeeId());
-        return "redirect:/";
+        orderService.deleteMenuOrder(oVO.getManagerId(), tableOrder, employee);
+        return "redirect:/  ";
 
     }
 
@@ -312,14 +312,14 @@ public class OrderController {
 
         TakeoutOrder takeoutOrder = orderService.getOneTakeoutOrder(manager, oVO.getOrderId());
 
-        // 해당 Order에 딸린 orderDetail 삭제
-        List<OrderDetail> orderDetailList = orderDetailService.getOrderDetailByMenuOrder(takeoutOrder);
-        for (OrderDetail orderDetail : orderDetailList) {
-            orderDetailService.deleteOrderDetail(orderDetail.getId());
+        Employee employee = null;
+        if (oVO.getEmployeeId() != -1) {  // -1이면 null 임
+            employee = employeeRepository.findById(oVO.getEmployeeId())
+                    .orElseThrow(() -> new NoSuchElementException("해당 직원이 존재하지 않습니다."));
         }
 
-        orderService.deleteTakeoutOrder(oVO.getManagerId(), takeoutOrder.getId(), oVO.getEmployeeId());
-        return "redirect:/";
+        orderService.deleteMenuOrder(oVO.getManagerId(), takeoutOrder, employee);
+        return "Order Deleted!";
 
     }
 
