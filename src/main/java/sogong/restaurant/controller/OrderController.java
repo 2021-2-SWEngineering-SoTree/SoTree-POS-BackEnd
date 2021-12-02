@@ -142,7 +142,7 @@ public class OrderController {
         order.setEmployee(employee);
         order.setManager(manager);
 
-        orderService.addTableOrder(order, orderDetails);
+        orderService.addMenuOrder(order, orderDetails);
 
         return Long.toString(order.getId());
     }
@@ -190,7 +190,7 @@ public class OrderController {
         tableOrder.setEmployee(employee);
         // order.setManager(manager);
 
-        orderService.updateTableOrder(tableOrder, orderDetails);
+        orderService.updateMenuOrder(tableOrder, orderDetails);
 
         return Long.toString(tableOrder.getId());
     }
@@ -256,7 +256,7 @@ public class OrderController {
         order.setManager(manager);
         order.setIsSeated(Boolean.TRUE);
 
-        orderService.addTakeoutOrder(order, orderDetails);
+        orderService.addMenuOrder(order, orderDetails);
 
         return String.valueOf(order.getId());
 
@@ -300,7 +300,7 @@ public class OrderController {
         takeoutOrder.setEmployee(employee);
         // takeoutOrder.setIsSeated(Boolean.TRUE);
 
-        orderService.updateTakeoutOrder(takeoutOrder, orderDetails);
+        orderService.updateMenuOrder(takeoutOrder, orderDetails);
 
         return Long.toString(takeoutOrder.getId());
     }

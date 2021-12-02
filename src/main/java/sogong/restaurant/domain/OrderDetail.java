@@ -19,10 +19,10 @@ public class OrderDetail {
 
     private int quantity;
 
-    // 낙관적 lock
-    @Version
-    private Integer version;
-    
+//    // 낙관적 lock
+//    @Version
+//    private Integer version;
+
     @ManyToOne
     @JoinColumn(name = "MenuId")
     private Menu menu;

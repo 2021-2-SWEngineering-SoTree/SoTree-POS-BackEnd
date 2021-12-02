@@ -62,7 +62,7 @@ public class MenuService {
 
         Manager manager = optionalManager.get();
 
-        List<Menu> all = menuRepository.findAllByManagerAndMenuCategory(manager, category);
+        List<Menu> all = menuRepository.findAllByManagerAndMenuCategoryAndActive(manager, category, true);
 
         for (Menu menu : all) {
             int meanTime = -1;
