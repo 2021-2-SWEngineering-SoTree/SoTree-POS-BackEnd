@@ -6,7 +6,7 @@
 
 
 
-  * Scrum Master/Full </br>
+  * Scrum Master/Full Stack </br>
   [이호준](https://github.com/hojunlee-hj) [![](https://img.shields.io/badge/Github-hojunlee_hj-blue?style=flat-square&logo=Github)](https://github.com/hojunlee-hj)
   
   * FrontEnd </br>
@@ -39,7 +39,7 @@
 |------|---|
 |ID|root|
 |PW|tjwlsdl1!|
-|DB Name|pos|
+|DB Name|pos_export|
 
 
 
