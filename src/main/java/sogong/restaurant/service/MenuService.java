@@ -62,12 +62,12 @@ public class MenuService {
 
         Manager manager = optionalManager.get();
 
-        List<Menu> all = menuRepository.findAllByManagerAndMenuCategoryAndActive(manager, category, true);
+        List<Menu> all = menuRepository.findAllByManagerAndMenuCategory(manager, category);
 
         for (Menu menu : all) {
             int meanTime = -1;
             if (menu.getTotalQuantity() != 0) {
-                meanTime = (int) (menu.getTotalTime() / menu.getTotalQuantity());
+                meanTime = menu.getTotalTime() / menu.getTotalQuantity();
             }
             ret.put(menu.getMenuName(), meanTime);
         }
